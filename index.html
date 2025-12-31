@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شغلني - بوابة التوظيف السودانية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            overflow-x: hidden;
+            color: #374151;
+        }
+
+        /* تحسين شكل البطاقات */
+        .job-card, .employee-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f3f4f6;
+        }
+        .job-card:hover, .employee-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #3b82f6;
+        }
+
+        /* خلفية متدرجة عصرية */
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .gradient-bg::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 80%);
+            pointer-events: none;
+        }
+
+        /* تحسين السلايدر الخاص بالدورات */
+        .course-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 1.5rem;
+            padding: 1rem 0.5rem;
+            scrollbar-width: none;
+        }
+        .course-slider::-webkit-scrollbar {
+            display: none;
+        }
+        .course-card {
+            min-width: 280px;
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3b82f6;
+            transition: transform 0.3s ease;
+        }
+        .course-card:hover {
+            transform: scale(1.02);
+        }
+
+        /* تصغير الشعار وضبط الهيدر */
+        .nav-logo {
+            height: 50px; /* تم تصغير الارتفاع من 14/20 إلى 50px */
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        /* قائمة الجوال */
+        .mobile-menu-container {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+        }
+        .mobile-menu {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80%;
+            max-width: 300px;
+            height: 100%;
+            background-color: #fff;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 2rem 1.5rem;
+            box-shadow: -10px 0 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="index.html">
+                        <img src="shagelnie.png.png" alt="شعار موقع شغلني" class="nav-logo hover:scale-105">
+                    </a>
+                </div>
+
+                <div class="hidden md:flex flex-grow justify-center">
+                    <div class="flex space-x-1 space-x-reverse">
+                        <a href="index.html" class="px-3 py-2 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition">الرئيسية</a>
+                        <a href="job_listing_page.html" class="px-3 py-2 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition">الوظائف</a>
+                        <a href="company_employee_list.html" class="px-3 py-2 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition">الموظفون</a>
+                        <a href="jop_posting_page.html" class="px-3 py-2 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition">أضف وظيفة</a>
+                        <a href="employee_registration.html" class="px-3 py-2 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition">تسجيل موظف</a>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                    <div class="hidden md:flex items-center space-x-2 rtl:space-x-reverse">
+                        <a href="employee_login.html" class="px-4 py-2 text-blue-600 font-medium border border-blue-200 rounded-lg hover:bg-blue-50 transition">دخول موظف</a>
+                        <a href="company_login.html" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 shadow-md transition">دخول شركة</a>
+                    </div>
+                    <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div id="mobile-menu-container" class="mobile-menu-container">
+        <div id="mobile-menu" class="mobile-menu">
+            <div class="flex justify-between items-center mb-8">
+                <span class="text-2xl font-black text-blue-600">شغلني</span>
+                <button id="close-mobile-menu-button" class="p-2 text-gray-400 hover:text-red-500">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <nav class="space-y-2">
+                <a href="index.html" class="block px-4 py-3 bg-blue-50 text-blue-700 font-bold rounded-xl">الرئيسية</a>
+                <a href="job_listing_page.html" class="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">الوظائف المتاحة</a>
+                <a href="company_employee_list.html" class="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">الموظفون المتاحون</a>
+                <a href="employee_inbox.html" class="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl">رسائلي</a>
+                <hr class="my-4">
+                <a href="employee_login.html" class="block px-4 py-3 text-center border-2 border-blue-600 text-blue-600 font-bold rounded-xl">دخول موظف</a>
+                <a href="company_login.html" class="block px-4 py-3 text-center bg-blue-600 text-white font-bold rounded-xl mt-3">دخول شركة</a>
+            </nav>
+        </div>
+    </div>
+
+    <section class="gradient-bg text-white py-24 relative">
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight">ابحث عن مستقبل أفضل</h1>
+            <p class="text-lg md:text-xl mb-10 text-blue-100 max-w-2xl mx-auto">منصة شغلني هي حلقة الوصل الأسرع والأكثر أماناً بين الكفاءات السودانية وأصحاب العمل.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="job_listing_page.html" class="bg-white text-blue-700 px-10 py-4 rounded-full font-bold shadow-xl hover:bg-blue-50 transition transform hover:scale-105">أبحث عن وظيفة</a>
+                <a href="company_employee_list.html" class="bg-blue-500/30 backdrop-blur-md border border-white/40 text-white px-10 py-4 rounded-full font-bold hover:bg-white/20 transition">أبحث عن موظف</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 border-r-4 border-blue-600 pr-4">طور مهاراتك مجاناً</h2>
+                    <p class="text-gray-500 mt-2">دورات تدريبية مختارة لرفع كفاءتك المهنية</p>
+                </div>
+            </div>
+            <div class="course-slider">
+                <div class="course-card">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4 text-xl">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">تطوير الويب</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">تعلم HTML, CSS, JavaScript وبناء مواقع متكاملة.</p>
+                    <a href="#" class="mt-4 inline-flex items-center text-blue-600 font-bold hover:gap-2 transition-all">ابدأ الآن <i class="fas fa-arrow-left mr-2 text-xs"></i></a>
+                </div>
+                <div class="course-card" style="border-top-color: #10b981;">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-4 text-xl">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">التسويق الرقمي</h3>
+                    <p class="text-gray-500 text-sm">أتقن أساسيات SEO والتسويق عبر منصات التواصل.</p>
+                    <a href="#" class="mt-4 inline-flex items-center text-green-600 font-bold hover:gap-2 transition-all">ابدأ الآن <i class="fas fa-arrow-left mr-2 text-xs"></i></a>
+                </div>
+                </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-bold">أحدث الوظائف</h2>
+                <a href="job_listing_page.html" class="text-blue-600 font-bold hover:underline">عرض جميع الوظائف</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="job-card bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5509bbd7-bc4c-41ae-ad92-c25c0e247e15.png" alt="logo" class="object-cover">
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">مطور واجهات</h3>
+                            <p class="text-gray-400 text-sm">شركة التقنية الحديثة</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mb-6">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-md">دوام كامل</span>
+                        <span class="px-3 py-1 bg-purple-50 text-purple-600 text-xs font-bold rounded-md">عن بعد</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-50">
+                        <span class="text-gray-500 text-sm"><i class="fas fa-map-marker-alt ml-1"></i> الرياض</span>
+                        <span class="text-blue-600 font-bold">8,000 ر.س</span>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-white pt-20 pb-10">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                <div class="col-span-1 md:col-span-1">
+                    <img src="shagelnie.png.png" alt="شعار شغلني" class="h-12 mb-6 grayscale brightness-200">
+                    <p class="text-gray-400 leading-relaxed">المنصة الرائدة لتوظيف الكفاءات في السودان والوطن العربي، نجمع بين الطموح والفرص.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-6">روابط سريعة</h4>
+                    <ul class="space-y-4 text-gray-400">
+                        <li><a href="index.html" class="hover:text-blue-400 transition">الرئيسية</a></li>
+                        <li><a href="job_listing_page.html" class="hover:text-blue-400 transition">تصفح الوظائف</a></li>
+                        <li><a href="employee_registration.html" class="hover:text-blue-400 transition">سجل كموظف</a></li>
+                        <li><a href="about.us.html" class="hover:text-blue-400 transition">من نحن</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-6">تواصل معنا</h4>
+                    <ul class="space-y-4 text-gray-400">
+                        <li class="flex items-center gap-3"><i class="fas fa-envelope text-blue-500"></i> info@shagelnie.com</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-phone text-blue-500"></i> +249 123 456 789</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-blue-500"></i> الخرطوم، السودان</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-6">تابعنا</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-400 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+                <p>&copy; 2025 شغلني. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const closeMobileMenuButton = document.getElementById('close-mobile-menu-button');
+            const mobileMenuContainer = document.getElementById('mobile-menu-container');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function toggleMenu(isOpen) {
+                if (isOpen) {
+                    mobileMenuContainer.style.display = 'block';
+                    setTimeout(() => mobileMenu.classList.add('active'), 10);
+                } else {
+                    mobileMenu.classList.remove('active');
+                    setTimeout(() => mobileMenuContainer.style.display = 'none', 400);
+                }
+            }
+
+            mobileMenuButton.addEventListener('click', () => toggleMenu(true));
+            closeMobileMenuButton.addEventListener('click', () => toggleMenu(false));
+            mobileMenuContainer.addEventListener('click', (e) => {
+                if (e.target === mobileMenuContainer) toggleMenu(false);
+            });
+        });
+    </script>
+</body>
+</html>
