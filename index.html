@@ -10,20 +10,24 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
         body { font-family: 'Tajawal', sans-serif; overflow-x: hidden; }
+
         .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
 
-        /* حاوية التمرير */
+        /* التعديل الجديد: حاوية التمرير الأفقي */
         #home-employees-container {
             display: flex;
             gap: 1.5rem;
             overflow-x: auto;
-            scroll-behavior: auto; /* تغيير لـ auto لدعم التمرير السلس برمجياً */
+            scroll-behavior: smooth;
             padding: 1rem 0.5rem 2rem 0.5rem;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
+            scrollbar-width: none; /* إخفاء شريط التمرير في Firefox */
         }
-        #home-employees-container::-webkit-scrollbar { display: none; }
+        #home-employees-container::-webkit-scrollbar {
+            display: none; /* إخفاء شريط التمرير في Chrome/Safari */
+        }
 
+        /* ضبط حجم البطاقة داخل التمرير الأفقي */
         .employee-card {
             background: white;
             border-radius: 1rem;
@@ -32,34 +36,35 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            min-width: 280px;
+            min-width: 280px; /* عرض البطاقة الواحدة */
             max-width: 280px;
             height: auto;
             flex-shrink: 0;
-            user-select: none;
         }
         .employee-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
 
-        /* سهم عرض الكل في نهاية التمرير */
-        .view-all-card {
-            min-width: 180px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #f0f7ff;
-            border: 2px dashed #2563eb;
-            border-radius: 1rem;
-            color: #2563eb;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: all 0.3s;
+        .skill-tag {
+            background-color: #f3f4f6; color: #374151;
+            padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px;
         }
-        .view-all-card:hover { background: #2563eb; color: white; }
 
-        .skill-tag { background-color: #f3f4f6; color: #374151; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px; }
-        .portfolio-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
-        .portfolio-img { width: 100%; height: 60px; object-fit: cover; border-radius: 8px; background-color: #f3f4f6; }
+        .portfolio-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .portfolio-img {
+            width: 100%;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            background-color: #f3f4f6;
+        }
+        .portfolio-img:hover { opacity: 0.8; }
+
         .status-available { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
         .status-not-looking { background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
     </style>
@@ -98,6 +103,7 @@
                 <h2 class="text-2xl font-bold text-gray-800">كفاءات سودانية منضمة حديثاً</h2>
                 <p class="text-gray-500 mt-1">اكتشف المبدعين وأعمالهم السابقة</p>
             </div>
+            <a href="employee_listing_page.html" class="text-blue-600 font-bold hover:underline">عرض الكل <i class="fas fa-chevron-left text-xs"></i></a>
         </div>
 
         <div id="home-employees-container">
@@ -107,6 +113,49 @@
             </div>
         </div>
     </section>
+
+    <section class="py-20 bg-white border-y border-gray-100">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 flex justify-center">
+                <img src="shagelnie.png.png" alt="حول منصة شغلني" class="max-w-[280px] w-full filter drop-shadow-xl">
+            </div>
+            <div class="md:w-1/2 text-right">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">ما هي منصة شغلني؟</h2>
+                <p class="text-gray-600 text-lg leading-relaxed mb-6">
+                    انطلقت شغلني في عام 2025 لتكون الجسر التقني الأقوى في السودان، حيث نوفر مساحة آمنة واحترافية لعرض الكفاءات السودانية وتسهيل وصول الشركات المحلية والعالمية إليها.
+                </p>
+                <a href="about.us.html" class="bg-blue-50 text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition">اقرأ قصتنا كاملة</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-gray-800 pb-12">
+            <div>
+                <img src="shagelnie.png.png" class="h-16 mb-6">
+                <p class="text-gray-400 leading-relaxed">بوابتك الذكية للعمل والتوظيف في السودان. نسعى لتمكين الشباب السوداني تقنياً ووظيفياً.</p>
+                <div class="flex gap-4 mt-6">
+                    <a href="https://www.facebook.com/profile.php?id=61585800242730" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/shagelnie/" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold mb-6">تواصل معنا</h3>
+                <ul class="space-y-4 text-gray-400">
+                    <li><i class="fas fa-envelope text-blue-500 ml-2"></i> shageline@gamil.com</li>
+                    <li><i class="fas fa-location-dot text-blue-500 ml-2"></i> الخرطوم، السودان</li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold mb-6">النشرة الإخبارية</h3>
+                <div class="flex gap-2">
+                    <input type="email" placeholder="بريدك الإلكتروني" class="bg-gray-800 border-none rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-blue-600">
+                    <button class="bg-blue-600 px-6 rounded-lg hover:bg-blue-700 transition"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        <p class="text-center text-gray-500 mt-8 text-sm">© 2025 شغلني - جميع الحقوق محفوظة.</p>
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -125,40 +174,26 @@
         const db = getFirestore(app);
         const container = document.getElementById('home-employees-container');
 
-        let isPaused = false;
-        let pauseTimer;
+        // دالة التمرير التلقائي البسيط
+        function startAutoScroll() {
+            let isHovered = false;
+            container.addEventListener('mouseenter', () => isHovered = true);
+            container.addEventListener('mouseleave', () => isHovered = false);
 
-        function startInfiniteScroll() {
-            const scrollSpeed = 2; // سرعة التمرير
-            
-            function step() {
-                if (!isPaused) {
-                    container.scrollLeft += scrollSpeed;
-                    // إذا وصل للنهاية (تقريباً)، يعود للبداية لخلق تأثير الحلقة
-                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
-                        container.scrollLeft = 0;
+            setInterval(() => {
+                if (!isHovered) {
+                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
+                        container.scrollLeft = 0; // العودة للبداية
+                    } else {
+                        container.scrollLeft += 1; // تمرير هادئ
                     }
                 }
-                requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
-
-            // إيقاف عند اللمس أو السحب لـ 3 ثواني
-            const pauseAction = () => {
-                isPaused = true;
-                clearTimeout(pauseTimer);
-                pauseTimer = setTimeout(() => { isPaused = false; }, 3000);
-            };
-
-            container.addEventListener('touchstart', pauseAction);
-            container.addEventListener('mousedown', pauseAction);
-            container.addEventListener('wheel', pauseAction);
+            }, 30);
         }
 
         async function fetchLatestEmployees() {
             try {
-                // جلب 9 موظفين كما طلبت
-                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(9));
+                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(8));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
@@ -170,13 +205,15 @@
                 querySnapshot.forEach((doc) => {
                     const emp = doc.data();
                     const id = doc.id;
+                    const profileImg = emp.profileImageUrl || 'https://via.placeholder.com/150';
+                    const statusClass = emp.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
                     const works = emp.previousWorksUrls || [];
 
                     let portfolioHtml = '';
                     if (works.length > 0) {
                         portfolioHtml = `<div class="portfolio-mini-grid">`;
                         works.slice(0, 3).forEach(url => {
-                            portfolioHtml += `<img src="${url}" class="portfolio-img" loading="lazy">`;
+                            portfolioHtml += `<img src="${url}" class="portfolio-img" loading="lazy" onerror="this.src='https://via.placeholder.com/60?text=Work'">`;
                         });
                         portfolioHtml += `</div>`;
                     }
@@ -184,10 +221,10 @@
                     const card = `
                         <div class="employee-card">
                             <div class="text-center flex-grow">
-                                <img src="${emp.profileImageUrl || 'https://via.placeholder.com/150'}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-50">
+                                <img src="${profileImg}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-50">
                                 <h3 class="font-bold text-gray-800 truncate">${emp.name || 'مستخدم'}</h3>
                                 <p class="text-blue-600 text-xs font-medium mb-2">${emp.headline || 'مبدع مستقل'}</p>
-                                <span class="${emp.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking'}">${emp.jobStatus || 'متاح'}</span>
+                                <span class="${statusClass}">${emp.jobStatus || 'متاح'}</span>
                                 <div class="mt-4 flex flex-wrap justify-center">
                                     ${Array.isArray(emp.skills) ? emp.skills.slice(0, 2).map(s => `<span class="skill-tag">${s}</span>`).join('') : ''}
                                 </div>
@@ -197,7 +234,7 @@
                                 <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600">
                                     <i class="far fa-comment-dots text-lg"></i>
                                 </a>
-                                <a href="employee_listing_page.html?viewId=${id}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition shadow-sm">
+                                <a href="employee_listing_page.html?search=${encodeURIComponent(emp.name)}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
                                     <i class="fas fa-eye text-sm"></i>
                                 </a>
                             </div>
@@ -205,16 +242,7 @@
                     `;
                     container.innerHTML += card;
                 });
-
-                // إضافة سهم عرض الكل في النهاية
-                container.innerHTML += `
-                    <div class="view-all-card" onclick="window.location.href='employee_listing_page.html'">
-                        <i class="fas fa-arrow-left text-2xl mb-2"></i>
-                        <span class="font-bold">عرض الكل</span>
-                    </div>
-                `;
-
-                startInfiniteScroll();
+                startAutoScroll();
             } catch (err) {
                 console.error(err);
                 container.innerHTML = '<p class="text-red-500 w-full text-center">تعذر تحميل البيانات.</p>';
