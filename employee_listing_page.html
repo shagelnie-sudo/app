@@ -286,6 +286,15 @@
                 const querySnapshot = await getDocs(collection(db, "employees"));
                 allEmployees = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 allEmployees.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)); 
+                
+                // --- التعديل المدمج: التحقق من وجود بحث في الرابط ---
+                const urlParams = new URLSearchParams(window.location.search);
+                const searchParam = urlParams.get('search');
+                if (searchParam) {
+                    searchInput.value = decodeURIComponent(searchParam);
+                }
+                // ---------------------------------------------------
+
                 filterAndRenderEmployees();
             } catch (error) {
                 console.error("خطأ في جلب الموظفين:", error);
@@ -390,8 +399,10 @@
                 const employeeState = employee.contact?.location?.state || '';
 
                 const matchesSearch = searchTerms.every(term => {
+                    const employeeName = (employee.name || '').toLowerCase();
                     const employeeText = `${employee.name || ''} ${employee.headline || ''} ${employeeState || ''} ${employeeCity || ''} ${employee.experience || ''} ${employee.skills?.join(' ') || ''}`.toLowerCase();
-                    if (employeeText.includes(term)) return true;
+                    // التعديل هنا لضمان التطابق الدقيق مع اسم الموظف إذا جاء من الرابط
+                    if (employeeText.includes(term) || employeeName.includes(term)) return true;
                     return false;
                 });
 
