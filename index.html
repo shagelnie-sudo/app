@@ -10,28 +10,20 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
         body { font-family: 'Tajawal', sans-serif; overflow-x: hidden; }
-        
         .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
-        
-        /* حاوية التمرير */
-        #scroll-wrapper {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
 
+        /* حاوية التمرير */
         #home-employees-container {
             display: flex;
             gap: 1.5rem;
             overflow-x: auto;
-            scroll-behavior: smooth;
+            scroll-behavior: auto; /* تغيير لـ auto لدعم التمرير السلس برمجياً */
             padding: 1rem 0.5rem 2rem 0.5rem;
+            -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
-            -ms-overflow-style: none;
         }
-        
         #home-employees-container::-webkit-scrollbar { display: none; }
-        
+
         .employee-card {
             background: white;
             border-radius: 1rem;
@@ -42,26 +34,28 @@
             flex-direction: column;
             min-width: 280px;
             max-width: 280px;
+            height: auto;
             flex-shrink: 0;
             user-select: none;
         }
+        .employee-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
 
         /* سهم عرض الكل في نهاية التمرير */
         .view-all-card {
-            min-width: 150px;
+            min-width: 180px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #eff6ff;
+            background: #f0f7ff;
+            border: 2px dashed #2563eb;
             border-radius: 1rem;
             color: #2563eb;
-            font-weight: bold;
-            flex-shrink: 0;
             cursor: pointer;
-            transition: background 0.3s;
+            flex-shrink: 0;
+            transition: all 0.3s;
         }
-        .view-all-card:hover { background: #dbeafe; }
+        .view-all-card:hover { background: #2563eb; color: white; }
 
         .skill-tag { background-color: #f3f4f6; color: #374151; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px; }
         .portfolio-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
@@ -92,26 +86,27 @@
     <section class="gradient-bg text-white py-16 px-6 text-center">
         <h1 class="text-3xl md:text-5xl font-black mb-4">بوابة التوظيف السودانية الأولى</h1>
         <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">اربط مهاراتك بالفرص المتاحة في السوق السوداني والعربي بكل سهولة.</p>
+        <div class="flex justify-center gap-4">
+            <a href="job_listing_page.html" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold shadow-lg">أنا باحث عن عمل</a>
+            <a href="employee_listing_page.html" class="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-blue-600 transition">أنا صاحب عمل</a>
+        </div>
     </section>
 
-    <section class="py-16 container mx-auto px-6">
+    <section class="py-16 container mx-auto px-6 overflow-hidden">
         <div class="flex justify-between items-end mb-10">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">كفاءات سودانية منضمة حديثاً</h2>
                 <p class="text-gray-500 mt-1">اكتشف المبدعين وأعمالهم السابقة</p>
             </div>
         </div>
-        
-        <div id="scroll-wrapper">
-            <div id="home-employees-container">
-                <div class="w-full text-center py-10">جاري التحميل...</div>
+
+        <div id="home-employees-container">
+            <div class="col-span-full text-center py-20 w-full">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+                <p class="mt-4 text-gray-500">جاري تحميل المبدعين...</p>
             </div>
         </div>
     </section>
-
-    <footer class="bg-gray-900 text-white py-8 text-center text-sm">
-        © 2025 شغلني - جميع الحقوق محفوظة.
-    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -130,51 +125,58 @@
         const db = getFirestore(app);
         const container = document.getElementById('home-employees-container');
 
-        let autoScrollInterval;
-        let pauseTimeout;
         let isPaused = false;
+        let pauseTimer;
 
-        function initLogic() {
-            // التمرير التلقائي اللانهائي
-            autoScrollInterval = setInterval(() => {
-                if (isPaused) return;
-                
-                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 5) {
-                    container.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    container.scrollBy({ left: 2, behavior: 'auto' });
+        function startInfiniteScroll() {
+            const scrollSpeed = 2; // سرعة التمرير
+            
+            function step() {
+                if (!isPaused) {
+                    container.scrollLeft += scrollSpeed;
+                    // إذا وصل للنهاية (تقريباً)، يعود للبداية لخلق تأثير الحلقة
+                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+                        container.scrollLeft = 0;
+                    }
                 }
-            }, 30);
+                requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
 
-            // إيقاف التمرير عند اللمس/السحب
-            container.addEventListener('touchstart', pauseAutoScroll);
-            container.addEventListener('mousedown', pauseAutoScroll);
-        }
+            // إيقاف عند اللمس أو السحب لـ 3 ثواني
+            const pauseAction = () => {
+                isPaused = true;
+                clearTimeout(pauseTimer);
+                pauseTimer = setTimeout(() => { isPaused = false; }, 3000);
+            };
 
-        function pauseAutoScroll() {
-            isPaused = true;
-            clearTimeout(pauseTimeout);
-            pauseTimeout = setTimeout(() => {
-                isPaused = false;
-            }, 3000); // العودة بعد 3 ثواني
+            container.addEventListener('touchstart', pauseAction);
+            container.addEventListener('mousedown', pauseAction);
+            container.addEventListener('wheel', pauseAction);
         }
 
         async function fetchLatestEmployees() {
             try {
+                // جلب 9 موظفين كما طلبت
                 const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(9));
                 const querySnapshot = await getDocs(q);
-                container.innerHTML = '';
 
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<p class="text-gray-500 w-full text-center">لا يوجد مبدعون حالياً.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
                 querySnapshot.forEach((doc) => {
                     const emp = doc.data();
                     const id = doc.id;
                     const works = emp.previousWorksUrls || [];
-                    
+
                     let portfolioHtml = '';
                     if (works.length > 0) {
                         portfolioHtml = `<div class="portfolio-mini-grid">`;
                         works.slice(0, 3).forEach(url => {
-                            portfolioHtml += `<img src="${url}" class="portfolio-img">`;
+                            portfolioHtml += `<img src="${url}" class="portfolio-img" loading="lazy">`;
                         });
                         portfolioHtml += `</div>`;
                     }
@@ -192,8 +194,10 @@
                             </div>
                             ${portfolioHtml}
                             <div class="mt-4 pt-4 flex justify-between items-center border-t border-gray-50">
-                                <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600"><i class="far fa-comment-dots text-lg"></i></a>
-                                <a href="employee_listing_page.html?id=${id}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                                <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600">
+                                    <i class="far fa-comment-dots text-lg"></i>
+                                </a>
+                                <a href="employee_listing_page.html?viewId=${id}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition shadow-sm">
                                     <i class="fas fa-eye text-sm"></i>
                                 </a>
                             </div>
@@ -202,17 +206,18 @@
                     container.innerHTML += card;
                 });
 
-                // إضافة سهم "عرض الكل" في النهاية
+                // إضافة سهم عرض الكل في النهاية
                 container.innerHTML += `
                     <div class="view-all-card" onclick="window.location.href='employee_listing_page.html'">
                         <i class="fas fa-arrow-left text-2xl mb-2"></i>
-                        <span>عرض الكل</span>
+                        <span class="font-bold">عرض الكل</span>
                     </div>
                 `;
 
-                initLogic();
+                startInfiniteScroll();
             } catch (err) {
                 console.error(err);
+                container.innerHTML = '<p class="text-red-500 w-full text-center">تعذر تحميل البيانات.</p>';
             }
         }
         fetchLatestEmployees();
