@@ -90,7 +90,7 @@
 
         /* تنسيقات نافذة المودال */
         .modal {
-            display: none; /* إخفاء المودال بشكل افتراضي */
+            display: none; 
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -138,7 +138,6 @@
             object-fit: contain;
         }
 
-        /* إخفاء أزرار التنقل في Swiper */
         .swiper-button-prev, .swiper-button-next {
             display: none !important;
         }
@@ -164,7 +163,7 @@
                             <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
                         </button>
                     </div>
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="صورة الملف الشخصي" class="w-10 h-10 rounded-full">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="صورة الملف الشخصي" class="w-10 h-10 rounded-full" loading="lazy">
                 </div>
             </div>
         </div>
@@ -286,14 +285,12 @@
                 const querySnapshot = await getDocs(collection(db, "employees"));
                 allEmployees = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 allEmployees.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)); 
-                
-                // --- التعديل المدمج: التحقق من وجود بحث في الرابط ---
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const searchParam = urlParams.get('search');
                 if (searchParam) {
                     searchInput.value = decodeURIComponent(searchParam);
                 }
-                // ---------------------------------------------------
 
                 filterAndRenderEmployees();
             } catch (error) {
@@ -328,7 +325,7 @@
                                 <h4 class="font-semibold text-sm mb-2">أعمال سابقة:</h4>
                                 <div class="previous-works-gallery">
                                     ${employee.previousWorksUrls.map((url, index) => `
-                                        <img src="${url}" alt="صورة عمل سابق" onclick="openModal('${employee.id}', ${index}, 'works')">
+                                        <img src="${url}" alt="صورة عمل سابق" onclick="openModal('${employee.id}', ${index}, 'works')" loading="lazy">
                                     `).join('')}
                                 </div>
                             </div>
@@ -341,7 +338,7 @@
                     employeeCard.innerHTML = `
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between">
                             <div class="flex items-start space-x-4 rtl:space-x-reverse mb-4 md:mb-0">
-                                <img src="${profilePhotoURL}" alt="صورة الموظف" class="w-14 h-14 rounded-full object-cover cursor-pointer" onclick="openModal('${employee.id}', 0, 'profile')">
+                                <img src="${profilePhotoURL}" alt="صورة الموظف" class="w-14 h-14 rounded-full object-cover cursor-pointer" onclick="openModal('${employee.id}', 0, 'profile')" loading="lazy">
                                 <div>
                                     <h3 class="font-bold text-lg">${employee.name || 'موظف غير معروف'}</h3>
                                     <p class="text-gray-600 text-sm mt-1">${employee.headline || 'بدون عنوان وظيفي'}</p>
@@ -394,14 +391,12 @@
 
             const filteredEmployees = allEmployees.filter(employee => {
                 const searchTerms = searchTerm.split(' ');
-
+                const employeeName = (employee.name || '').toLowerCase();
                 const employeeCity = employee.contact?.location?.city || '';
                 const employeeState = employee.contact?.location?.state || '';
 
                 const matchesSearch = searchTerms.every(term => {
-                    const employeeName = (employee.name || '').toLowerCase();
                     const employeeText = `${employee.name || ''} ${employee.headline || ''} ${employeeState || ''} ${employeeCity || ''} ${employee.experience || ''} ${employee.skills?.join(' ') || ''}`.toLowerCase();
-                    // التعديل هنا لضمان التطابق الدقيق مع اسم الموظف إذا جاء من الرابط
                     if (employeeText.includes(term) || employeeName.includes(term)) return true;
                     return false;
                 });
@@ -417,11 +412,9 @@
 
         function getTimeElapsed(timestamp) {
             if (!timestamp) return 'غير محدد';
-
             const now = new Date();
             const employeeDate = new Date(timestamp.seconds * 1000);
             const diffInSeconds = Math.floor((now - employeeDate) / 1000);
-
             if (diffInSeconds < 60) return 'الآن';
             const minutes = Math.floor(diffInSeconds / 60);
             if (minutes < 60) return `منذ ${minutes} دقيقة`;
@@ -443,7 +436,6 @@
                 alert("يجب عليك تسجيل الدخول لتوظيف الموظفين.");
                 return;
             }
-
             try {
                 await addDoc(collection(db, "hiringRequests"), {
                     employerId: user.uid,
@@ -461,7 +453,6 @@
         function openModal(employeeId, index, galleryType) {
             const employee = allEmployees.find(emp => emp.id === employeeId);
             if (!employee) return;
-
             let images = [];
             if (galleryType === 'profile') {
                 images.push(employee.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg');
@@ -470,9 +461,7 @@
             } else {
                 return;
             }
-
             if (!images || images.length === 0) return;
-
             const swiperWrapper = document.querySelector('.swiper-wrapper');
             swiperWrapper.innerHTML = '';
             images.forEach(url => {
@@ -481,25 +470,20 @@
                 const img = document.createElement('img');
                 img.src = url;
                 img.alt = 'صورة مكبرة';
+                img.loading = "lazy";
                 slide.appendChild(img);
                 swiperWrapper.appendChild(slide);
             });
-
             if (swiperInstance) {
                 swiperInstance.destroy(true, true);
             }
             swiperInstance = new Swiper(".mySwiper", {
                 loop: false,
                 initialSlide: index,
-                keyboard: {
-                    enabled: true,
-                },
+                keyboard: { enabled: true },
             });
-
             imageModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-
-            // إضافة حالة جديدة إلى سجل التصفح
             history.pushState({ modalOpen: true }, '');
         }
 
@@ -512,11 +496,8 @@
             document.body.style.overflow = '';
         }
 
-        // الاستماع لحدث الرجوع في المتصفح
         window.addEventListener('popstate', (event) => {
-            // التحقق مما إذا كان المودال مفتوحاً
             if (imageModal.style.display === 'flex') {
-                // إذا كان مفتوحاً، أغلقه باستخدام دالتنا
                 closeModal();
             }
         });
@@ -527,7 +508,6 @@
             const selectedState = stateFilter.value;
             cityFilter.innerHTML = '<option value="">جميع المدن</option>';
             cityFilter.disabled = true;
-
             if (selectedState && citiesByState[selectedState]) {
                 citiesByState[selectedState].forEach(city => {
                     const option = document.createElement('option');
