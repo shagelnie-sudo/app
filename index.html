@@ -12,9 +12,22 @@
         body { font-family: 'Tajawal', sans-serif; overflow-x: hidden; }
         
         .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
-        .scrollable-nav, .course-slider { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .scrollable-nav::-webkit-scrollbar, .course-slider::-webkit-scrollbar { display: none; }
         
+        /* التعديل الجديد: حاوية التمرير الأفقي */
+        #home-employees-container {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 1rem 0.5rem 2rem 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* إخفاء شريط التمرير في Firefox */
+        }
+        #home-employees-container::-webkit-scrollbar {
+            display: none; /* إخفاء شريط التمرير في Chrome/Safari */
+        }
+        
+        /* ضبط حجم البطاقة داخل التمرير الأفقي */
         .employee-card {
             background: white;
             border-radius: 1rem;
@@ -23,7 +36,10 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            min-width: 280px; /* عرض البطاقة الواحدة */
+            max-width: 280px;
+            height: auto;
+            flex-shrink: 0;
         }
         .employee-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
         
@@ -32,7 +48,6 @@
             padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px;
         }
 
-        /* تنسيق معرض الأعمال المصغر */
         .portfolio-mini-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -52,10 +67,6 @@
 
         .status-available { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
         .status-not-looking { background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
-
-        .mobile-menu-container { position: fixed; top: 0; right: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; display: none; }
-        .mobile-menu { position: absolute; top: 0; right: 0; width: 75%; height: 100%; background-color: #fff; transform: translateX(100%); transition: transform 0.3s ease; padding: 1.5rem; }
-        .mobile-menu.active { transform: translateX(0); }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -73,7 +84,6 @@
             </div>
             <div class="flex items-center gap-4">
                 <a href="login.html" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium">دخول</a>
-                <button id="mobile-menu-button" class="md:hidden text-gray-600"><i class="fas fa-bars text-2xl"></i></button>
             </div>
         </nav>
     </header>
@@ -87,7 +97,7 @@
         </div>
     </section>
 
-    <section class="py-16 container mx-auto px-6">
+    <section class="py-16 container mx-auto px-6 overflow-hidden">
         <div class="flex justify-between items-end mb-10">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">كفاءات سودانية منضمة حديثاً</h2>
@@ -96,8 +106,8 @@
             <a href="employee_listing_page.html" class="text-blue-600 font-bold hover:underline">عرض الكل <i class="fas fa-chevron-left text-xs"></i></a>
         </div>
         
-        <div id="home-employees-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="col-span-full text-center py-20">
+        <div id="home-employees-container">
+            <div class="col-span-full text-center py-20 w-full">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
                 <p class="mt-4 text-gray-500">جاري تحميل المبدعين...</p>
             </div>
@@ -164,13 +174,30 @@
         const db = getFirestore(app);
         const container = document.getElementById('home-employees-container');
 
+        // دالة التمرير التلقائي البسيط
+        function startAutoScroll() {
+            let isHovered = false;
+            container.addEventListener('mouseenter', () => isHovered = true);
+            container.addEventListener('mouseleave', () => isHovered = false);
+
+            setInterval(() => {
+                if (!isHovered) {
+                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
+                        container.scrollLeft = 0; // العودة للبداية
+                    } else {
+                        container.scrollLeft += 1; // تمرير هادئ
+                    }
+                }
+            }, 30);
+        }
+
         async function fetchLatestEmployees() {
             try {
-                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(4));
+                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(8));
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p class="col-span-full text-center text-gray-500">لا يوجد مبدعون حالياً.</p>';
+                    container.innerHTML = '<p class="text-gray-500 w-full text-center">لا يوجد مبدعون حالياً.</p>';
                     return;
                 }
 
@@ -178,52 +205,47 @@
                 querySnapshot.forEach((doc) => {
                     const emp = doc.data();
                     const id = doc.id;
-                    
                     const profileImg = emp.profileImageUrl || 'https://via.placeholder.com/150';
                     const statusClass = emp.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
+                    const works = emp.previousWorksUrls || [];
                     
-                    // تم تعديل الحقل هنا ليتوافق مع قاعدة بياناتك (previousWorksUrls)
                     let portfolioHtml = '';
-                    const works = emp.previousWorksUrls || []; 
-                    
-                    if (Array.isArray(works) && works.length > 0) {
+                    if (works.length > 0) {
                         portfolioHtml = `<div class="portfolio-mini-grid">`;
                         works.slice(0, 3).forEach(url => {
-                            portfolioHtml += `<img src="${url}" class="portfolio-img" loading="lazy" onerror="this.src='https://via.placeholder.com/60?text=Work'" alt="عمل سابق">`;
+                            portfolioHtml += `<img src="${url}" class="portfolio-img" loading="lazy" onerror="this.src='https://via.placeholder.com/60?text=Work'">`;
                         });
                         portfolioHtml += `</div>`;
                     }
 
                     const card = `
                         <div class="employee-card">
-                            <div class="text-center">
-                                <img src="${profileImg}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-50 shadow-sm">
+                            <div class="text-center flex-grow">
+                                <img src="${profileImg}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-50">
                                 <h3 class="font-bold text-gray-800 truncate">${emp.name || 'مستخدم'}</h3>
                                 <p class="text-blue-600 text-xs font-medium mb-2">${emp.headline || 'مبدع مستقل'}</p>
                                 <span class="${statusClass}">${emp.jobStatus || 'متاح'}</span>
+                                <div class="mt-4 flex flex-wrap justify-center">
+                                    ${Array.isArray(emp.skills) ? emp.skills.slice(0, 2).map(s => `<span class="skill-tag">${s}</span>`).join('') : ''}
+                                </div>
                             </div>
-
-                            <div class="mt-4 flex flex-wrap justify-center">
-                                ${Array.isArray(emp.skills) ? emp.skills.slice(0, 2).map(s => `<span class="skill-tag">${s}</span>`).join('') : ''}
-                            </div>
-
                             ${portfolioHtml}
-
-                            <div class="mt-auto pt-4 flex justify-between items-center border-t border-gray-50 mt-4">
-                                <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600 transition">
+                            <div class="mt-4 pt-4 flex justify-between items-center border-t border-gray-50">
+                                <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600">
                                     <i class="far fa-comment-dots text-lg"></i>
                                 </a>
-                                <a href="employee_listing_page.html?search=${encodeURIComponent(emp.name)}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition shadow-sm" title="عرض الملف">
-                                    <i class="fas fa-eye"></i>
+                                <a href="employee_listing_page.html?search=${encodeURIComponent(emp.name)}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                                    <i class="fas fa-eye text-sm"></i>
                                 </a>
                             </div>
                         </div>
                     `;
                     container.innerHTML += card;
                 });
+                startAutoScroll();
             } catch (err) {
-                console.error("Firebase Error:", err);
-                container.innerHTML = '<p class="col-span-full text-center text-red-500">تعذر تحميل البيانات.</p>';
+                console.error(err);
+                container.innerHTML = '<p class="text-red-500 w-full text-center">تعذر تحميل البيانات.</p>';
             }
         }
         fetchLatestEmployees();
