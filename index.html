@@ -33,10 +33,10 @@
             transition: transform 0.3s ease;
         }
         
-        /* --- تنسيقات بطاقة الموظف الجديدة (مستوردة من صفحة الموظفين) --- */
+        /* --- تنسيقات بطاقة الموظف الجديدة --- */
         .employee-card {
             background: white;
-            border-radius: 0.75rem; /* rounded-xl */
+            border-radius: 0.75rem; 
             padding: 1.5rem;
             border: 1px solid #e5e7eb;
             transition: all 0.3s ease;
@@ -217,8 +217,8 @@
     <section class="py-16 bg-white">
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row items-center">
-                <div class="md:w-1/2 mb-10 md:mb-0">
-                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/19dd3441-82aa-453d-a023-8aa3ce6235b4.png" alt="فريق عمل شغلني" class="rounded-xl shadow-md w-full">
+                <div class="md:w-1/2 mb-10 md:mb-0 flex justify-center">
+                    <img src="shagelnie.png.png" alt="شعار شغلني" class="max-w-[300px] w-full object-contain">
                 </div>
                 <div class="md:w-1/2 md:mr-10">
                     <h2 class="text-3xl font-bold text-gray-800 mb-6">من نحن</h2>
@@ -241,8 +241,6 @@
                     <img src="shagelnie.png.png" alt="شعار شغلني" class="h-20 mb-4 w-auto">
                     <p class="text-gray-400">منصة التوظيف الأولى في السودان</p>
                     <div class="flex space-x-4 space-x-reverse mt-4">
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-xl"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin text-xl"></i></a>
                         <a href="https://www.facebook.com/profile.php?id=61585800242730" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-xl"></i></a>
                         <a href="https://www.instagram.com/shagelnie/" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-xl"></i></a>
                     </div>
@@ -259,7 +257,7 @@
                 <div>
                     <h3 class="text-lg font-bold mb-4">تواصل معنا</h3>
                     <ul class="space-y-2">
-                        <li class="text-gray-400"><i class="fas fa-envelope ml-2"></i> info@shgholny.com</li>
+                        <li class="text-gray-400"><i class="fas fa-envelope ml-2"></i> shageline@gamil.com</li>
                         <li class="text-gray-400"><i class="fas fa-map-marker-alt ml-2"></i> الخرطوم، السودان</li>
                     </ul>
                 </div>
@@ -309,7 +307,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
           apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
           authDomain: "shaglni-c64c0.firebaseapp.com",
@@ -327,7 +324,6 @@
 
         async function fetchLatestEmployees() {
             try {
-                // جلب أحدث 4 موظفين فقط
                 const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(4));
                 const querySnapshot = await getDocs(q);
                 
@@ -336,25 +332,23 @@
                     return;
                 }
 
-                container.innerHTML = ''; // مسح علامة التحميل
+                container.innerHTML = '';
 
                 querySnapshot.forEach((doc) => {
                     const employee = doc.data();
                     const id = doc.id;
                     
-                    // تجهيز البيانات
                     const profilePhotoURL = employee.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg';
                     const city = employee.contact?.location?.city || '';
                     const state = employee.contact?.location?.state || '';
                     const locationText = (city && state) ? `${city}، ${state}` : 'السودان';
                     
                     const skillsHtml = Array.isArray(employee.skills) && employee.skills.length > 0
-                        ? employee.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('') // عرض أول 3 مهارات فقط
+                        ? employee.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('') 
                         : '';
                         
                     const statusClass = employee.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
 
-                    // إنشاء البطاقة بنفس تصميم الصفحة الأخرى ولكن مبسطة قليلاً للصفحة الرئيسية
                     const cardHtml = `
                         <div class="employee-card">
                             <div class="text-center mb-4">
@@ -381,8 +375,8 @@
                                 <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(employee.name)}" class="text-gray-500 hover:text-blue-600 text-sm">
                                     <i class="far fa-envelope"></i> مراسلة
                                 </a>
-                                <a href="employee_listing_page.html" class="text-blue-600 hover:text-blue-800 text-sm font-bold">
-                                    عرض الملف <i class="fas fa-arrow-left mr-1 text-xs"></i>
+                                <a href="employee_listing_page.html?id=${id}" class="text-blue-600 hover:text-blue-800 text-lg transition-colors p-2 rounded-full hover:bg-blue-50" title="عرض الملف">
+                                    <i class="fas fa-eye"></i>
                                 </a>
                             </div>
                         </div>
@@ -396,7 +390,6 @@
             }
         }
 
-        // تشغيل الدالة عند تحميل الصفحة
         fetchLatestEmployees();
     </script>
 </body>
