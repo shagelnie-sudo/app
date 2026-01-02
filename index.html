@@ -13,21 +13,25 @@
         
         .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
         
-        /* التعديل الجديد: حاوية التمرير الأفقي */
+        /* حاوية التمرير */
+        #scroll-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
         #home-employees-container {
             display: flex;
             gap: 1.5rem;
             overflow-x: auto;
             scroll-behavior: smooth;
             padding: 1rem 0.5rem 2rem 0.5rem;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none; /* إخفاء شريط التمرير في Firefox */
-        }
-        #home-employees-container::-webkit-scrollbar {
-            display: none; /* إخفاء شريط التمرير في Chrome/Safari */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
         
-        /* ضبط حجم البطاقة داخل التمرير الأفقي */
+        #home-employees-container::-webkit-scrollbar { display: none; }
+        
         .employee-card {
             background: white;
             border-radius: 1rem;
@@ -36,35 +40,32 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            min-width: 280px; /* عرض البطاقة الواحدة */
+            min-width: 280px;
             max-width: 280px;
-            height: auto;
             flex-shrink: 0;
-        }
-        .employee-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
-        
-        .skill-tag {
-            background-color: #f3f4f6; color: #374151;
-            padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px;
+            user-select: none;
         }
 
-        .portfolio-mini-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 12px;
-        }
-        .portfolio-img {
-            width: 100%;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
+        /* سهم عرض الكل في نهاية التمرير */
+        .view-all-card {
+            min-width: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            border-radius: 1rem;
+            color: #2563eb;
+            font-weight: bold;
+            flex-shrink: 0;
             cursor: pointer;
-            transition: opacity 0.2s;
-            background-color: #f3f4f6;
+            transition: background 0.3s;
         }
-        .portfolio-img:hover { opacity: 0.8; }
+        .view-all-card:hover { background: #dbeafe; }
 
+        .skill-tag { background-color: #f3f4f6; color: #374151; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px; }
+        .portfolio-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
+        .portfolio-img { width: 100%; height: 60px; object-fit: cover; border-radius: 8px; background-color: #f3f4f6; }
         .status-available { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
         .status-not-looking { background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
     </style>
@@ -91,70 +92,25 @@
     <section class="gradient-bg text-white py-16 px-6 text-center">
         <h1 class="text-3xl md:text-5xl font-black mb-4">بوابة التوظيف السودانية الأولى</h1>
         <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">اربط مهاراتك بالفرص المتاحة في السوق السوداني والعربي بكل سهولة.</p>
-        <div class="flex justify-center gap-4">
-            <a href="job_listing_page.html" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold shadow-lg">أنا باحث عن عمل</a>
-            <a href="employee_listing_page.html" class="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-blue-600 transition">أنا صاحب عمل</a>
-        </div>
     </section>
 
-    <section class="py-16 container mx-auto px-6 overflow-hidden">
+    <section class="py-16 container mx-auto px-6">
         <div class="flex justify-between items-end mb-10">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">كفاءات سودانية منضمة حديثاً</h2>
                 <p class="text-gray-500 mt-1">اكتشف المبدعين وأعمالهم السابقة</p>
             </div>
-            <a href="employee_listing_page.html" class="text-blue-600 font-bold hover:underline">عرض الكل <i class="fas fa-chevron-left text-xs"></i></a>
         </div>
         
-        <div id="home-employees-container">
-            <div class="col-span-full text-center py-20 w-full">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-                <p class="mt-4 text-gray-500">جاري تحميل المبدعين...</p>
+        <div id="scroll-wrapper">
+            <div id="home-employees-container">
+                <div class="w-full text-center py-10">جاري التحميل...</div>
             </div>
         </div>
     </section>
 
-    <section class="py-20 bg-white border-y border-gray-100">
-        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-            <div class="md:w-1/2 flex justify-center">
-                <img src="shagelnie.png.png" alt="حول منصة شغلني" class="max-w-[280px] w-full filter drop-shadow-xl">
-            </div>
-            <div class="md:w-1/2 text-right">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">ما هي منصة شغلني؟</h2>
-                <p class="text-gray-600 text-lg leading-relaxed mb-6">
-                    انطلقت شغلني في عام 2025 لتكون الجسر التقني الأقوى في السودان، حيث نوفر مساحة آمنة واحترافية لعرض الكفاءات السودانية وتسهيل وصول الشركات المحلية والعالمية إليها.
-                </p>
-                <a href="about.us.html" class="bg-blue-50 text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition">اقرأ قصتنا كاملة</a>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-gray-900 text-white pt-16 pb-8">
-        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-gray-800 pb-12">
-            <div>
-                <img src="shagelnie.png.png" class="h-16 mb-6">
-                <p class="text-gray-400 leading-relaxed">بوابتك الذكية للعمل والتوظيف في السودان. نسعى لتمكين الشباب السوداني تقنياً ووظيفياً.</p>
-                <div class="flex gap-4 mt-6">
-                    <a href="https://www.facebook.com/profile.php?id=61585800242730" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.instagram.com/shagelnie/" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-xl font-bold mb-6">تواصل معنا</h3>
-                <ul class="space-y-4 text-gray-400">
-                    <li><i class="fas fa-envelope text-blue-500 ml-2"></i> shageline@gamil.com</li>
-                    <li><i class="fas fa-location-dot text-blue-500 ml-2"></i> الخرطوم، السودان</li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="text-xl font-bold mb-6">النشرة الإخبارية</h3>
-                <div class="flex gap-2">
-                    <input type="email" placeholder="بريدك الإلكتروني" class="bg-gray-800 border-none rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-blue-600">
-                    <button class="bg-blue-600 px-6 rounded-lg hover:bg-blue-700 transition"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </div>
-        <p class="text-center text-gray-500 mt-8 text-sm">© 2025 شغلني - جميع الحقوق محفوظة.</p>
+    <footer class="bg-gray-900 text-white py-8 text-center text-sm">
+        © 2025 شغلني - جميع الحقوق محفوظة.
     </footer>
 
     <script type="module">
@@ -174,46 +130,51 @@
         const db = getFirestore(app);
         const container = document.getElementById('home-employees-container');
 
-        // دالة التمرير التلقائي البسيط
-        function startAutoScroll() {
-            let isHovered = false;
-            container.addEventListener('mouseenter', () => isHovered = true);
-            container.addEventListener('mouseleave', () => isHovered = false);
+        let autoScrollInterval;
+        let pauseTimeout;
+        let isPaused = false;
 
-            setInterval(() => {
-                if (!isHovered) {
-                    if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
-                        container.scrollLeft = 0; // العودة للبداية
-                    } else {
-                        container.scrollLeft += 1; // تمرير هادئ
-                    }
+        function initLogic() {
+            // التمرير التلقائي اللانهائي
+            autoScrollInterval = setInterval(() => {
+                if (isPaused) return;
+                
+                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 5) {
+                    container.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    container.scrollBy({ left: 2, behavior: 'auto' });
                 }
             }, 30);
+
+            // إيقاف التمرير عند اللمس/السحب
+            container.addEventListener('touchstart', pauseAutoScroll);
+            container.addEventListener('mousedown', pauseAutoScroll);
+        }
+
+        function pauseAutoScroll() {
+            isPaused = true;
+            clearTimeout(pauseTimeout);
+            pauseTimeout = setTimeout(() => {
+                isPaused = false;
+            }, 3000); // العودة بعد 3 ثواني
         }
 
         async function fetchLatestEmployees() {
             try {
-                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(8));
+                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(9));
                 const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    container.innerHTML = '<p class="text-gray-500 w-full text-center">لا يوجد مبدعون حالياً.</p>';
-                    return;
-                }
-
                 container.innerHTML = '';
+
                 querySnapshot.forEach((doc) => {
                     const emp = doc.data();
                     const id = doc.id;
-                    const profileImg = emp.profileImageUrl || 'https://via.placeholder.com/150';
-                    const statusClass = emp.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
                     const works = emp.previousWorksUrls || [];
                     
                     let portfolioHtml = '';
                     if (works.length > 0) {
                         portfolioHtml = `<div class="portfolio-mini-grid">`;
                         works.slice(0, 3).forEach(url => {
-                            portfolioHtml += `<img src="${url}" class="portfolio-img" loading="lazy" onerror="this.src='https://via.placeholder.com/60?text=Work'">`;
+                            portfolioHtml += `<img src="${url}" class="portfolio-img">`;
                         });
                         portfolioHtml += `</div>`;
                     }
@@ -221,20 +182,18 @@
                     const card = `
                         <div class="employee-card">
                             <div class="text-center flex-grow">
-                                <img src="${profileImg}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-50">
+                                <img src="${emp.profileImageUrl || 'https://via.placeholder.com/150'}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-50">
                                 <h3 class="font-bold text-gray-800 truncate">${emp.name || 'مستخدم'}</h3>
                                 <p class="text-blue-600 text-xs font-medium mb-2">${emp.headline || 'مبدع مستقل'}</p>
-                                <span class="${statusClass}">${emp.jobStatus || 'متاح'}</span>
+                                <span class="${emp.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking'}">${emp.jobStatus || 'متاح'}</span>
                                 <div class="mt-4 flex flex-wrap justify-center">
                                     ${Array.isArray(emp.skills) ? emp.skills.slice(0, 2).map(s => `<span class="skill-tag">${s}</span>`).join('') : ''}
                                 </div>
                             </div>
                             ${portfolioHtml}
                             <div class="mt-4 pt-4 flex justify-between items-center border-t border-gray-50">
-                                <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600">
-                                    <i class="far fa-comment-dots text-lg"></i>
-                                </a>
-                                <a href="employee_listing_page.html?search=${encodeURIComponent(emp.name)}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                                <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600"><i class="far fa-comment-dots text-lg"></i></a>
+                                <a href="employee_listing_page.html?id=${id}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
                                     <i class="fas fa-eye text-sm"></i>
                                 </a>
                             </div>
@@ -242,10 +201,18 @@
                     `;
                     container.innerHTML += card;
                 });
-                startAutoScroll();
+
+                // إضافة سهم "عرض الكل" في النهاية
+                container.innerHTML += `
+                    <div class="view-all-card" onclick="window.location.href='employee_listing_page.html'">
+                        <i class="fas fa-arrow-left text-2xl mb-2"></i>
+                        <span>عرض الكل</span>
+                    </div>
+                `;
+
+                initLogic();
             } catch (err) {
                 console.error(err);
-                container.innerHTML = '<p class="text-red-500 w-full text-center">تعذر تحميل البيانات.</p>';
             }
         }
         fetchLatestEmployees();
