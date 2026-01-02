@@ -15,6 +15,18 @@
         .scrollable-nav, .course-slider { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .scrollable-nav::-webkit-scrollbar, .course-slider::-webkit-scrollbar { display: none; }
         
+        /* التعديل الجديد للتمرير الأفقي للكفاءات */
+        #home-employees-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 1.5rem;
+            padding: 1rem 0.5rem 2rem 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        #home-employees-container::-webkit-scrollbar { display: none; }
+
         .employee-card {
             background: white;
             border-radius: 1rem;
@@ -24,7 +36,19 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            flex: 0 0 280px; /* عرض ثابت للبطاقة للتمرير */
+            scroll-snap-align: start;
+            animation: hint-scroll 1.2s ease-in-out; /* حركة التنبيه عند التحميل */
         }
+        
+        /* حركة خفيفة لليمين واليسار للتنبيه بإمكانية التمرير */
+        @keyframes hint-scroll {
+            0% { transform: translateX(0); }
+            30% { transform: translateX(-25px); }
+            60% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+
         .employee-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
         
         .skill-tag {
@@ -32,7 +56,6 @@
             padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px;
         }
 
-        /* تنسيق معرض الأعمال المصغر */
         .portfolio-mini-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -87,17 +110,17 @@
         </div>
     </section>
 
-    <section class="py-16 container mx-auto px-6">
-        <div class="flex justify-between items-end mb-10">
+    <section class="py-16 container mx-auto px-6 overflow-hidden">
+        <div class="flex justify-between items-end mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">كفاءات سودانية منضمة حديثاً</h2>
-                <p class="text-gray-500 mt-1">اكتشف المبدعين وأعمالهم السابقة</p>
+                <p class="text-gray-500 mt-1">اكتشف المبدعين (اسحب لليسار لعرض المزيد)</p>
             </div>
             <a href="employee_listing_page.html" class="text-blue-600 font-bold hover:underline">عرض الكل <i class="fas fa-chevron-left text-xs"></i></a>
         </div>
         
-        <div id="home-employees-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="col-span-full text-center py-20">
+        <div id="home-employees-container">
+            <div class="col-span-full text-center py-20 w-full">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
                 <p class="mt-4 text-gray-500">جاري تحميل المبدعين...</p>
             </div>
@@ -166,11 +189,11 @@
 
         async function fetchLatestEmployees() {
             try {
-                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(4));
+                const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(6));
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p class="col-span-full text-center text-gray-500">لا يوجد مبدعون حالياً.</p>';
+                    container.innerHTML = '<p class="w-full text-center text-gray-500">لا يوجد مبدعون حالياً.</p>';
                     return;
                 }
 
@@ -182,7 +205,6 @@
                     const profileImg = emp.profileImageUrl || 'https://via.placeholder.com/150';
                     const statusClass = emp.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
                     
-                    // تم تعديل الحقل هنا ليتوافق مع قاعدة بياناتك (previousWorksUrls)
                     let portfolioHtml = '';
                     const works = emp.previousWorksUrls || []; 
                     
@@ -209,7 +231,7 @@
 
                             ${portfolioHtml}
 
-                            <div class="mt-auto pt-4 flex justify-between items-center border-t border-gray-50 mt-4">
+                            <div class="mt-auto pt-4 flex justify-between items-center border-t border-gray-50">
                                 <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" class="text-gray-400 hover:text-blue-600 transition">
                                     <i class="far fa-comment-dots text-lg"></i>
                                 </a>
@@ -223,7 +245,7 @@
                 });
             } catch (err) {
                 console.error("Firebase Error:", err);
-                container.innerHTML = '<p class="col-span-full text-center text-red-500">تعذر تحميل البيانات.</p>';
+                container.innerHTML = '<p class="w-full text-center text-red-500">تعذر تحميل البيانات.</p>';
             }
         }
         fetchLatestEmployees();
