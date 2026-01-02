@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل حساب جديد - شغلني</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+        }
+        .password-requirement-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+        .password-requirement-item.valid {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-6">إنشاء حساب جديد</h2>
+        <form id="registerForm" class="space-y-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">الاسم الكامل</label>
+                <div class="mt-1">
+                    <input id="name" name="name" type="text" required
+                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
+                           placeholder="أدخل اسمك الكامل">
+                </div>
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                <div class="mt-1">
+                    <input id="email" name="email" type="email" required
+                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
+                           placeholder="أدخل بريدك الإلكتروني">
+                </div>
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+                <div class="mt-1">
+                    <input id="password" name="password" type="password" required
+                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
+                           placeholder="أدخل كلمة مرور قوية">
+                </div>
+                <div class="password-requirements mt-2" id="passwordRequirements">
+                    <p class="text-gray-500 text-sm">يجب أن تحتوي كلمة المرور على:</p>
+                    <div id="min-length" class="password-requirement-item">
+                        <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                        <span>6 أحرف على الأقل</span>
+                    </div>
+                    <div id="has-upper" class="password-requirement-item">
+                        <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                        <span>حرف كبير واحد على الأقل</span>
+                    </div>
+                    <div id="has-lower" class="password-requirement-item">
+                        <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                        <span>حرف صغير واحد على الأقل</span>
+                    </div>
+                    <div id="has-number" class="password-requirement-item">
+                        <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                        <span>رقم واحد على الأقل</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700">تأكيد كلمة المرور</label>
+                <div class="mt-1">
+                    <input id="confirmPassword" name="confirmPassword" type="password" required
+                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
+                           placeholder="أعد إدخال كلمة المرور">
+                </div>
+            </div>
+            <div>
+                <label for="role" class="block text-sm font-medium text-gray-700">نوع الحساب</label>
+                <div class="mt-1">
+                    <select id="role" name="role" required
+                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
+                        <option value="" disabled selected>اختر نوع الحساب</option>
+                        <option value="employee">موظف</option>
+                        <option value="employer">صاحب عمل</option>
+                    </select>
+                </div>
+            </div>
+            <div id="feedbackMessage" class="hidden text-center mt-4"></div>
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    إنشاء الحساب
+                </button>
+            </div>
+        </form>
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                هل لديك حساب بالفعل؟
+                <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">
+                    تسجيل الدخول
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        // ** التعديل الجديد هنا: استيراد sendEmailVerification **
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // **1. تهيئة Firebase**
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+            authDomain: "shaglni-c64c0.firebaseapp.com",
+            projectId: "shaglni-c64c0",
+            storageBucket: "shaglni-c64c0.firebasestorage.app",
+            messagingSenderId: "768887356636",
+            appId: "1:768887356636:web:11ec1d6991add3309c8819",
+            measurementId: "G-98GQGZS09W"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // **2. ربط عناصر الواجهة بمتغيرات في الكود**
+        const registerForm = document.getElementById('registerForm');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const roleInput = document.getElementById('role');
+
+        // **3. دالة التحقق من كلمة المرور**
+        function validatePassword() {
+            const password = passwordInput.value;
+            const checks = {
+                minLength: password.length >= 6,
+                hasUpper: /[A-Z]/.test(password),
+                hasLower: /[a-z]/.test(password),
+                hasNumber: /[0-9]/.test(password)
+            };
+            const requirements = {
+                minLength: document.getElementById('min-length'),
+                hasUpper: document.getElementById('has-upper'),
+                hasLower: document.getElementById('has-lower'),
+                hasNumber: document.getElementById('has-number'),
+            };
+            for (const key in checks) {
+                const element = requirements[key];
+                if (checks[key]) {
+                    element.classList.add('valid');
+                    element.querySelector('i').className = 'fas fa-check-circle ml-2 text-green-500';
+                } else {
+                    element.classList.remove('valid');
+                    element.querySelector('i').className = 'fas fa-times-circle ml-2 text-red-500';
+                }
+            }
+            return Object.values(checks).every(Boolean);
+        }
+
+        passwordInput.addEventListener('input', validatePassword);
+
+        // **4. دالة التسجيل وإنشاء الحساب المعدلة**
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = nameInput.value;
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const role = roleInput.value;
+
+            feedbackMessage.classList.add('hidden');
+            feedbackMessage.textContent = '';
+
+            if (name.trim().indexOf(' ') === -1) {
+                feedbackMessage.classList.remove('hidden');
+                feedbackMessage.classList.add('text-red-500');
+                feedbackMessage.textContent = 'الرجاء إدخال اسمك الكامل.';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                feedbackMessage.classList.remove('hidden');
+                feedbackMessage.classList.add('text-red-500');
+                feedbackMessage.textContent = 'كلمة المرور وتأكيدها غير متطابقين.';
+                return;
+            }
+
+            if (!validatePassword()) {
+                feedbackMessage.classList.remove('hidden');
+                feedbackMessage.classList.add('text-red-500');
+                feedbackMessage.textContent = 'كلمة المرور لا تستوفي جميع المتطلبات.';
+                return;
+            }
+
+            try {
+                // إنشاء حساب المستخدم
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // **الخطوة الجديدة: إرسال رسالة تأكيد البريد الإلكتروني**
+                await sendEmailVerification(user);
+
+                const collectionName = role === 'employee' ? 'employees' : 'employers';
+                await setDoc(doc(db, collectionName, user.uid), {
+                    name: name,
+                    email: user.email,
+                    role: role,
+                    createdAt: serverTimestamp()
+                });
+
+                feedbackMessage.classList.remove('hidden', 'text-red-500');
+                feedbackMessage.classList.add('text-green-500');
+                feedbackMessage.textContent = 'تم إنشاء حسابك بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب.';
+
+                registerForm.reset();
+
+            } catch (error) {
+                feedbackMessage.classList.remove('hidden', 'text-green-500');
+                feedbackMessage.classList.add('text-red-500');
+
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        feedbackMessage.textContent = 'هذا البريد الإلكتروني مستخدم بالفعل.';
+                        break;
+                    case 'auth/invalid-email':
+                        feedbackMessage.textContent = 'صيغة البريد الإلكتروني غير صحيحة.';
+                        break;
+                    default:
+                        feedbackMessage.textContent = 'حدث خطأ غير متوقع. يرجى المحاولة لاحقًا.';
+                        console.error("خطأ التسجيل:", error);
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
