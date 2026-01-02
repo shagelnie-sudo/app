@@ -9,142 +9,118 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-        body { font-family: 'Tajawal', sans-serif; overflow-x: hidden; }
+        body { font-family: 'Tajawal', sans-serif; }
         
-        .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
-        .scrollable-nav, .course-slider { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .scrollable-nav::-webkit-scrollbar, .course-slider::-webkit-scrollbar { display: none; }
+        .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
         
+        /* تنسيق بطاقة الموظف */
         .employee-card {
             background: white;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s ease;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             height: 100%;
         }
-        .employee-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
+        .employee-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+        }
         
         .skill-tag {
-            background-color: #f3f4f6; color: #374151;
-            padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; margin: 2px;
+            background-color: #eff6ff; color: #1e40af;
+            padding: 0.25rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 500;
         }
 
-        /* تنسيق معرض الأعمال المصغر */
+        /* تنسيق شبكة صور الأعمال المصغرة */
         .portfolio-mini-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 12px;
+            gap: 8px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .portfolio-img-container {
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            background-color: #f8fafc;
+            border: 1px solid #f1f5f9;
         }
         .portfolio-img {
             width: 100%;
-            height: 60px;
+            height: 100%;
             object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            background-color: #f3f4f6;
+            transition: transform 0.3s ease;
         }
-        .portfolio-img:hover { opacity: 0.8; }
+        .employee-card:hover .portfolio-img { transform: scale(1.1); }
 
-        .status-available { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
-        .status-not-looking { background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
-
-        .mobile-menu-container { position: fixed; top: 0; right: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; display: none; }
-        .mobile-menu { position: absolute; top: 0; right: 0; width: 75%; height: 100%; background-color: #fff; transform: translateX(100%); transition: transform 0.3s ease; padding: 1.5rem; }
-        .mobile-menu.active { transform: translateX(0); }
+        .status-available { background-color: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-slate-50">
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
             <div class="flex items-center">
-                <img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain">
-                <div class="hidden md:flex space-x-1 space-x-reverse mr-6">
-                    <a href="index.html" class="px-4 py-2 text-blue-600 font-bold">الرئيسية</a>
-                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
-                    <a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
-                    <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
+                <div class="text-2xl font-black text-blue-600 ml-8">شغلني</div>
+                <div class="hidden md:flex space-x-2 space-x-reverse">
+                    <a href="index.html" class="px-4 py-2 text-blue-600 font-bold border-b-2 border-blue-600">الرئيسية</a>
+                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition">الوظائف</a>
+                    <a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition">الموظفون</a>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="login.html" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium">دخول</a>
-                <button id="mobile-menu-button" class="md:hidden text-gray-600"><i class="fas fa-bars text-2xl"></i></button>
-            </div>
+            <a href="login.html" class="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200">دخول</a>
         </nav>
     </header>
 
-    <section class="gradient-bg text-white py-16 px-6 text-center">
-        <h1 class="text-3xl md:text-5xl font-black mb-4">بوابة التوظيف السودانية الأولى</h1>
-        <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">اربط مهاراتك بالفرص المتاحة في السوق السوداني والعربي بكل سهولة.</p>
-        <div class="flex justify-center gap-4">
-            <a href="job_listing_page.html" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold shadow-lg">أنا باحث عن عمل</a>
-            <a href="employee_listing_page.html" class="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-blue-600 transition">أنا صاحب عمل</a>
+    <section class="gradient-bg text-white py-20 px-6 text-center">
+        <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight">سوق العمل السوداني <br>في مكان واحد</h1>
+        <p class="text-lg opacity-80 mb-10 max-w-2xl mx-auto font-light">اكتشف المبدعين السودانيين أو ابحث عن وظيفة أحلامك في أكبر شبكة مهنية سودانية.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="job_listing_page.html" class="bg-white text-blue-700 px-10 py-4 rounded-2xl font-bold shadow-xl hover:bg-gray-100 transition flex items-center justify-center">
+                <i class="fas fa-search-dollar ml-2"></i> ابحث عن عمل
+            </a>
+            <a href="employee_listing_page.html" class="bg-blue-500 bg-opacity-30 border border-blue-400 px-10 py-4 rounded-2xl font-bold hover:bg-opacity-40 transition flex items-center justify-center">
+                <i class="fas fa-user-tie ml-2"></i> وظّف محترفين
+            </a>
         </div>
     </section>
 
-    <section class="py-16 container mx-auto px-6">
-        <div class="flex justify-between items-end mb-10">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">كفاءات سودانية منضمة حديثاً</h2>
-                <p class="text-gray-500 mt-1">اكتشف المبدعين وأعمالهم السابقة</p>
+    <section class="py-20 container mx-auto px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-12">
+            <div class="text-center md:text-right mb-6 md:mb-0">
+                <h2 class="text-3xl font-black text-slate-800">أحدث الكفاءات</h2>
+                <p class="text-slate-500 mt-2">نخبة من المبدعين السودانيين انضموا إلينا مؤخراً</p>
             </div>
-            <a href="employee_listing_page.html" class="text-blue-600 font-bold hover:underline">عرض الكل <i class="fas fa-chevron-left text-xs"></i></a>
+            <a href="employee_listing_page.html" class="group bg-white border border-slate-200 px-6 py-3 rounded-xl font-bold text-slate-700 hover:border-blue-600 hover:text-blue-600 transition flex items-center">
+                عرض كافة الموظفين <i class="fas fa-arrow-left mr-3 group-hover:-translate-x-2 transition-transform"></i>
+            </a>
         </div>
         
-        <div id="home-employees-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="col-span-full text-center py-20">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-                <p class="mt-4 text-gray-500">جاري تحميل المبدعين...</p>
+        <div id="home-employees-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="col-span-full text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+                <p class="mt-4 text-slate-500 font-medium">جاري تحديث القائمة...</p>
             </div>
         </div>
     </section>
 
-    <section class="py-20 bg-white border-y border-gray-100">
-        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-            <div class="md:w-1/2 flex justify-center">
-                <img src="shagelnie.png.png" alt="حول منصة شغلني" class="max-w-[280px] w-full filter drop-shadow-xl">
+    <footer class="bg-slate-900 text-white pt-20 pb-10">
+        <div class="container mx-auto px-6 text-center">
+            <div class="text-3xl font-black text-blue-400 mb-6">شغلني</div>
+            <p class="text-slate-400 max-w-md mx-auto mb-10">المنصة الأولى لدعم وتوظيف الكوادر السودانية وبناء مستقبل مهني أفضل للجميع.</p>
+            <div class="flex justify-center gap-6 mb-12">
+                <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-instagram"></i></a>
             </div>
-            <div class="md:w-1/2 text-right">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">ما هي منصة شغلني؟</h2>
-                <p class="text-gray-600 text-lg leading-relaxed mb-6">
-                    انطلقت شغلني في عام 2025 لتكون الجسر التقني الأقوى في السودان، حيث نوفر مساحة آمنة واحترافية لعرض الكفاءات السودانية وتسهيل وصول الشركات المحلية والعالمية إليها.
-                </p>
-                <a href="about.us.html" class="bg-blue-50 text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition">اقرأ قصتنا كاملة</a>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-gray-900 text-white pt-16 pb-8">
-        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-gray-800 pb-12">
-            <div>
-                <img src="shagelnie.png.png" class="h-16 mb-6">
-                <p class="text-gray-400 leading-relaxed">بوابتك الذكية للعمل والتوظيف في السودان. نسعى لتمكين الشباب السوداني تقنياً ووظيفياً.</p>
-                <div class="flex gap-4 mt-6">
-                    <a href="https://www.facebook.com/profile.php?id=61585800242730" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.instagram.com/shagelnie/" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-xl font-bold mb-6">تواصل معنا</h3>
-                <ul class="space-y-4 text-gray-400">
-                    <li><i class="fas fa-envelope text-blue-500 ml-2"></i> shageline@gamil.com</li>
-                    <li><i class="fas fa-location-dot text-blue-500 ml-2"></i> الخرطوم، السودان</li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="text-xl font-bold mb-6">النشرة الإخبارية</h3>
-                <div class="flex gap-2">
-                    <input type="email" placeholder="بريدك الإلكتروني" class="bg-gray-800 border-none rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-blue-600">
-                    <button class="bg-blue-600 px-6 rounded-lg hover:bg-blue-700 transition"><i class="fas fa-paper-plane"></i></button>
-                </div>
+            <div class="border-t border-slate-800 pt-8 text-slate-500 text-sm">
+                &copy; 2026 شغلني - جميع الحقوق محفوظة
             </div>
         </div>
-        <p class="text-center text-gray-500 mt-8 text-sm">© 2025 شغلني - جميع الحقوق محفوظة.</p>
     </footer>
 
     <script type="module">
@@ -166,11 +142,12 @@
 
         async function fetchLatestEmployees() {
             try {
+                // جلب آخر 4 موظفين تم تسجيلهم
                 const q = query(collection(db, "employees"), orderBy("timestamp", "desc"), limit(4));
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p class="col-span-full text-center text-gray-500">لا يوجد مبدعون حالياً.</p>';
+                    container.innerHTML = '<p class="col-span-full text-center text-slate-500">لا يوجد بيانات لعرضها حالياً.</p>';
                     return;
                 }
 
@@ -180,39 +157,56 @@
                     const id = doc.id;
                     
                     const profileImg = emp.profileImageUrl || 'https://via.placeholder.com/150';
-                    const statusClass = emp.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
                     
-                    // منطق جلب صور الأعمال (بفرض أنها مخزنة في مصفوفة portfolioUrls)
+                    // منطق جلب صور الأعمال من الحقل الصحيح previousWorksUrls
                     let portfolioHtml = '';
-                    if (emp.portfolioUrls && Array.isArray(emp.portfolioUrls) && emp.portfolioUrls.length > 0) {
+                    const workImages = emp.previousWorksUrls || [];
+
+                    if (Array.isArray(workImages) && workImages.length > 0) {
                         portfolioHtml = `<div class="portfolio-mini-grid">`;
-                        // عرض أول 3 صور فقط
-                        emp.portfolioUrls.slice(0, 3).forEach(url => {
-                            portfolioHtml += `<img src="${url}" class="portfolio-img" loading="lazy" alt="عمل سابق">`;
+                        // عرض أول 3 صور أعمال فقط
+                        workImages.slice(0, 3).forEach(url => {
+                            portfolioHtml += `
+                                <div class="portfolio-img-container">
+                                    <img src="${url}" class="portfolio-img" loading="lazy" 
+                                         onerror="this.src='https://via.placeholder.com/100?text=Work'">
+                                </div>`;
                         });
                         portfolioHtml += `</div>`;
+                    } else {
+                        // حالة عدم وجود صور أعمال (مربعات فارغة أنيقة)
+                        portfolioHtml = `
+                            <div class="portfolio-mini-grid opacity-20">
+                                <div class="portfolio-img-container bg-slate-200 border-dashed border-2"></div>
+                                <div class="portfolio-img-container bg-slate-200 border-dashed border-2"></div>
+                                <div class="portfolio-img-container bg-slate-200 border-dashed border-2"></div>
+                            </div>`;
                     }
 
                     const card = `
                         <div class="employee-card">
-                            <div class="text-center">
-                                <img src="${profileImg}" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-blue-50 shadow-sm">
-                                <h3 class="font-bold text-gray-800 truncate">${emp.name}</h3>
-                                <p class="text-blue-600 text-xs font-medium mb-2">${emp.headline || 'مبدع مستقل'}</p>
-                                <span class="${statusClass}">${emp.jobStatus}</span>
-                            </div>
-
-                            <div class="mt-4 flex flex-wrap justify-center">
-                                ${Array.isArray(emp.skills) ? emp.skills.slice(0, 2).map(s => `<span class="skill-tag">${s}</span>`).join('') : ''}
+                            <div class="text-center flex-grow">
+                                <div class="relative inline-block mb-4">
+                                    <img src="${profileImg}" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md">
+                                    <span class="absolute bottom-1 right-1 w-5 h-5 border-4 border-white rounded-full ${emp.jobStatus === 'متاح للعمل' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-lg mb-1 truncate">${emp.name || 'مستخدم'}</h3>
+                                <p class="text-blue-600 text-sm font-semibold mb-4">${emp.headline || 'مبدع مستقل'}</p>
+                                
+                                <div class="flex flex-wrap justify-center gap-2 mb-4">
+                                    ${Array.isArray(emp.skills) ? emp.skills.slice(0, 2).map(s => `<span class="skill-tag">${s}</span>`).join('') : ''}
+                                </div>
                             </div>
 
                             ${portfolioHtml}
 
-                            <div class="mt-auto pt-4 flex justify-between items-center border-t border-gray-50 mt-4">
-                                <a href="chat.html?employeeId=${id}" class="text-gray-400 hover:text-blue-600 transition">
-                                    <i class="far fa-comment-dots text-lg"></i>
+                            <div class="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
+                                <a href="chat.html?employeeId=${id}&employeeName=${encodeURIComponent(emp.name)}" 
+                                   class="text-slate-400 hover:text-blue-600 transition p-2">
+                                    <i class="far fa-comment-dots text-xl"></i>
                                 </a>
-                                <a href="employee_listing_page.html?id=${id}" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition shadow-sm" title="عرض الملف">
+                                <a href="employee_listing_page.html?search=${encodeURIComponent(emp.name)}" 
+                                   class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-blue-700 transition shadow-lg shadow-blue-100">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </div>
@@ -221,11 +215,12 @@
                     container.innerHTML += card;
                 });
             } catch (err) {
-                console.error(err);
-                container.innerHTML = '<p class="col-span-full text-center text-red-500">تعذر تحميل البيانات.</p>';
+                console.error("Firebase Error:", err);
+                container.innerHTML = '<p class="col-span-full text-center text-red-500">حدث خطأ في الاتصال بقاعدة البيانات.</p>';
             }
         }
-        fetchLatestEmployees();
+
+        document.addEventListener('DOMContentLoaded', fetchLatestEmployees);
     </script>
 </body>
 </html>
