@@ -81,14 +81,9 @@
         #mobile-menu.open {
             transform: translateX(0);
         }
-        #menu-overlay.show {
-            display: block;
-        }
     </style>
 </head>
 <body class="bg-gray-50">
-
-    <div id="menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60]"></div>
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
@@ -97,7 +92,7 @@
                 <div class="hidden md:flex space-x-1 space-x-reverse mr-6">
                     <a href="index.html" class="px-4 py-2 text-blue-600 font-bold">الرئيسية</a>
                     <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
-                    <a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
+                    <a href="employee_list_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
                     <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
                 </div>
             </div>
@@ -211,16 +206,13 @@
         const menuButton = document.getElementById('mobile-menu-button');
         const closeButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
-        const overlay = document.getElementById('menu-overlay');
 
         function toggleMenu() {
             mobileMenu.classList.toggle('open');
-            overlay.classList.toggle('hidden');
         }
 
         menuButton.addEventListener('click', toggleMenu);
         closeButton.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
 
         async function fetchLatestEmployees() {
             try {
