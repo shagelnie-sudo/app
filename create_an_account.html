@@ -85,31 +85,6 @@
         .password-requirement-item.valid {
             color: #10b981;
         }
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal.hidden {
-            display: none;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
@@ -338,13 +313,8 @@
                     </div>
                     <div class="mb-4">
                         <label for="companyEmail" class="block text-sm font-medium text-gray-700">البريد الإلكتروني الرسمي</label>
-                        <div class="flex gap-2">
-                            <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com" required
-                                class="flex-1 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <button type="button" id="verifyCompanyEmailBtn" class="px-3 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600">
-                                توثيق
-                            </button>
-                        </div>
+                        <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com" required
+                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
                         <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف (اختياري)</label>
@@ -463,27 +433,10 @@
         </div>
     </div>
 
-    <div id="verificationModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="mb-4 text-green-500">
-                <i class="fas fa-envelope-open-text text-5xl"></i>
-            </div>
-            <h3 class="text-xl font-bold mb-2">توثيق البريد الإلكتروني</h3>
-            <p class="text-gray-600 mb-4" id="verificationText">
-                تم إرسال رمز التحقق إلى بريدك الإلكتروني. يرجى إدخاله للمتابعة.
-            </p>
-            <div class="mb-4">
-                 <input type="text" id="verificationCode" class="w-full px-3 py-2 border border-gray-300 rounded-md text-center text-lg tracking-widest" placeholder="XXXXXX">
-            </div>
-            <button id="confirmVerificationBtn" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-2">تحقق ومتابعة</button>
-            <button id="closeModalBtn" class="text-gray-500 text-sm hover:underline">إلغاء</button>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
         const firebaseConfig = {
@@ -584,6 +537,17 @@
 
         document.getElementById('password').addEventListener('input', validatePassword);
 
+        // --- NEW: Hide Error Messages on Input ---
+        function hideMessage() {
+            messageDiv.classList.add('hidden');
+        }
+        // Attach to all current and future inputs
+        document.addEventListener('input', function(e) {
+            if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                hideMessage();
+            }
+        });
+
         roleSelect.addEventListener('change', () => {
             isEmployerFlow = (roleSelect.value === 'employer');
             updateStepIndicator();
@@ -610,51 +574,6 @@
             currentStep = stepNumber;
             updateStepIndicator();
         }
-
-        // --- NEW: Modal Logic ---
-        const verificationModal = document.getElementById('verificationModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const confirmVerificationBtn = document.getElementById('confirmVerificationBtn');
-        const verificationText = document.getElementById('verificationText');
-        let pendingStepLogic = null; // Store function to run after verification
-
-        closeModalBtn.addEventListener('click', () => {
-            verificationModal.classList.add('hidden');
-        });
-
-        confirmVerificationBtn.addEventListener('click', () => {
-            // Here you would normally check the code against backend
-            const code = document.getElementById('verificationCode').value;
-            if(code.length > 0) {
-                verificationModal.classList.add('hidden');
-                showMessage('تم التوثيق بنجاح', 'success');
-                if (pendingStepLogic) pendingStepLogic();
-                pendingStepLogic = null;
-            } else {
-                alert('الرجاء إدخال رمز التحقق');
-            }
-        });
-
-        function openVerificationModal(email, callback) {
-            verificationText.textContent = `تم إرسال رمز التحقق إلى ${email}. يرجى إدخاله للمتابعة.`;
-            document.getElementById('verificationCode').value = '';
-            verificationModal.classList.remove('hidden');
-            pendingStepLogic = callback;
-        }
-        
-        // --- NEW: Verify Company Email Logic ---
-        document.getElementById('verifyCompanyEmailBtn').addEventListener('click', () => {
-            const email = document.getElementById('companyEmail').value;
-            if(email && email.includes('@')) {
-                openVerificationModal(email, () => {
-                     // Just purely for UX in this specific field
-                     document.getElementById('companyEmail').style.borderColor = '#10b981'; 
-                });
-            } else {
-                showMessage('يرجى إدخال بريد إلكتروني صحيح للشركة', 'error');
-            }
-        });
-
 
         function nextStep(step) {
             let currentStepElementId;
@@ -690,20 +609,9 @@
                     return;
                 }
 
-                // --- NEW: Trigger Modal before proceeding ---
-                const email = document.getElementById('email').value;
-                openVerificationModal(email, () => {
-                    // Logic to execute AFTER verification
-                    isEmployerFlow = (document.getElementById('role').value === 'employer');
-                    nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
-                    
-                    document.getElementById(currentStepElementId).classList.add('hidden');
-                    document.getElementById(nextStepElementId).classList.remove('hidden');
-                    currentStep++;
-                    updateStepIndicator();
-                });
-                return; // Stop here until modal callback handles the rest
-
+                isEmployerFlow = (document.getElementById('role').value === 'employer');
+                nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
+            
             } else {
                 const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
                 currentStepElementId = `step${step}-${stepIdSuffix}`;
@@ -719,10 +627,7 @@
                          countryCode = document.getElementById('countryCode').value;
                     }
                     
-                    // Basic validation: If there is a number, it should be valid format
                     if (phoneInput.value.trim() !== "") {
-                        // Regex: Start with 0, 10 digits total usually for Sudan like 0912345678
-                        // Or just checking length. Let's strict it a bit to Sudan format if code is +249
                         if (countryCode === '+249') {
                             const phoneRegex = /^0(1|9)\d{8}$/;
                             if (!phoneRegex.test(phoneInput.value)) {
@@ -778,6 +683,10 @@
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+                
+                // --- NEW: Send REAL Verification Link ---
+                await sendEmailVerification(user);
+
                 let userData;
 
                 if (role === 'employee') {
@@ -792,8 +701,6 @@
 
                     const skillInputs = document.querySelectorAll('.skill-input');
                     const skills = Array.from(skillInputs).map(input => input.value.trim()).filter(skill => skill !== '');
-
-                    // Collect Full Phone with code
                     const fullPhone = formInputs['countryCode'].value + formInputs['phone'].value;
 
                     userData = {
@@ -806,7 +713,7 @@
                         bio: formInputs['bio'].value || null,
                         profileImageUrl,
                         contact: {
-                            phone: fullPhone || null, // Updated to include full number
+                            phone: fullPhone || null, 
                             location: { state: formInputs['state'].value || null, city: formInputs['city'].value || null, area: formInputs['area'].value || null }
                         },
                         skills,
@@ -835,7 +742,6 @@
                         companyPhotosUrls = await Promise.all(Array.from(companyPhotosFiles).map(file => uploadFile(file, `company_photos/${user.uid}`)));
                     }
 
-                    // Collect Company Phone with code
                     const fullCompanyPhone = formInputs['companyCountryCode'].value + formInputs['companyPhone'].value;
 
                     userData = {
@@ -847,7 +753,7 @@
                         companyInfo: {
                             name: formInputs['companyName'].value || null,
                             email: formInputs['companyEmail'].value || null,
-                            phone: fullCompanyPhone || null, // Updated
+                            phone: fullCompanyPhone || null,
                             logoUrl: companyLogoUrl,
                             businessType: formInputs['businessType'].value || null,
                             description: formInputs['companyDescription'].value || null,
@@ -866,16 +772,16 @@
                     };
                 }
 
-                // تم تغيير اسم المجموعة (Collection) من 'employers' إلى 'All_jops'
                 const collectionName = role === 'employee' ? 'employees' : 'All_jops';
                 await setDoc(doc(db, collectionName, user.uid), userData);
 
-                showMessage('تم إنشاء حسابك بنجاح! سيتم توجيهك الآن.', 'success');
+                // --- Updated Success Message ---
+                showMessage('تم إنشاء الحساب وإرسال رابط التوثيق إلى بريدك الإلكتروني! يرجى التحقق من صندوق الوارد.', 'success');
 
                 setTimeout(() => {
                     const redirectUrl = role === 'employee' ? "profile.html" : "employer-dashboard.html";
                     window.location.href = redirectUrl;
-                }, 2000);
+                }, 4000); // Increased time to let user read the message
 
             } catch (error) {
                 console.error("خطأ في التسجيل:", error);
