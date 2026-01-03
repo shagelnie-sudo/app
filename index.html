@@ -72,9 +72,23 @@
 
         .status-available { background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
         .status-not-looking { background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
+
+        /* تنسيقات القائمة الجانبية */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+        #menu-overlay.show {
+            display: block;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
+
+    <div id="menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60]"></div>
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
@@ -92,12 +106,19 @@
                 <button id="mobile-menu-button" class="md:hidden text-gray-600"><i class="fas fa-bars text-2xl"></i></button>
             </div>
         </nav>
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-2">
-            <a href="index.html" class="block px-4 py-2 text-blue-600 font-bold bg-blue-50 rounded-lg">الرئيسية</a>
-            <a href="job_listing_page.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">الوظائف</a>
-            <a href="employee_listing_page.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">الموظفون</a>
-            <a href="jop_posting_page.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">أضف وظيفة</a>
-            <a href="login.html" class="block px-4 py-2 bg-blue-600 text-white rounded-lg text-center font-medium mt-4">دخول</a>
+
+        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-64 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+            <div class="flex justify-between items-center mb-8">
+                <img src="shagelnie.png.png" class="h-10">
+                <button id="close-menu" class="text-gray-500"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            <nav class="flex flex-col space-y-4">
+                <a href="index.html" class="text-blue-600 font-bold py-2 border-b border-gray-50">الرئيسية</a>
+                <a href="job_listing_page.html" class="text-gray-600 py-2 border-b border-gray-50">الوظائف</a>
+                <a href="employee_listing_page.html" class="text-gray-600 py-2 border-b border-gray-50">الموظفون</a>
+                <a href="jop_posting_page.html" class="text-gray-600 py-2 border-b border-gray-50">أضف وظيفة</a>
+                <a href="login.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold mt-4">دخول</a>
+            </nav>
         </div>
     </header>
 
@@ -186,15 +207,20 @@
         const db = getFirestore(app);
         const container = document.getElementById('home-employees-container');
 
-        // كود تشغيل زر القائمة للجوال
+        // كود تشغيل القائمة الجانبية
         const menuButton = document.getElementById('mobile-menu-button');
+        const closeButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('menu-overlay');
 
-        if (menuButton && mobileMenu) {
-            menuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+        function toggleMenu() {
+            mobileMenu.classList.toggle('open');
+            overlay.classList.toggle('hidden');
         }
+
+        menuButton.addEventListener('click', toggleMenu);
+        closeButton.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
 
         async function fetchLatestEmployees() {
             try {
