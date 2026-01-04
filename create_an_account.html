@@ -21,7 +21,7 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background-color: #f57fa;
+            background-color: #f5f7fa;
         }
 
         .step {
@@ -194,7 +194,7 @@
                         <textarea id="bio" name="bio" rows="5" placeholder="وصف مختصر عنك وعن خبراتك"
                                   class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
-                     <div class="mb-4">
+                    <div class="mb-4">
                         <label for="profilePhoto" class="block text-sm font-medium text-gray-700">صورة الملف الشخصي</label>
                         <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -238,7 +238,6 @@
                         التالي
                     </button>
                 </div>
-
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
                     <h2 class="text-lg font-bold mb-4">الخطوة 3: المهارات ومستوى الخبرة</h2>
                     <div id="skillsContainer">
@@ -572,6 +571,97 @@
             }
         }
 
+        function nextStep(step) {
+            let currentStepElementId;
+            let nextStepElementId;
+
+            if (step === 1) {
+                currentStepElementId = 'step1';
+                const formInputs = document.getElementById(currentStepElementId).querySelectorAll('input:required, select:required');
+                let isStepValid = true;
+                formInputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.reportValidity();
+                        isStepValid = false;
+                    }
+                });
+                if (!isStepValid) return;
+
+                const nameInput = document.getElementById('name');
+                if (!validateName(nameInput.value)) {
+                    showMessage('الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
+                    return;
+                }
+
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                if (password !== confirmPassword) {
+                    showMessage('كلمة المرور وتأكيدها غير متطابقين.', 'error');
+                    return;
+                }
+                if (!validatePassword()) {
+                    showMessage('كلمة المرور لا تستوفي جميع المتطلبات.', 'error');
+                    return;
+                }
+
+                isEmployerFlow = (document.getElementById('role').value === 'employer');
+                nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
+
+            } else {
+                const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
+                currentStepElementId = `step${step}-${stepIdSuffix}`;
+
+                if (step === 2) {
+                    let phoneInput, countryCode;
+                    if(isEmployerFlow) {
+                         phoneInput = document.getElementById('companyPhone');
+                         countryCode = document.getElementById('companyCountryCode').value;
+                    } else {
+                         phoneInput = document.getElementById('phone');
+                         countryCode = document.getElementById('countryCode').value;
+                    }
+
+                    if (phoneInput.value.trim() !== "") {
+                        if (countryCode === '+249') {
+                            const phoneRegex = /^0(1|9)\d{8}$/;
+                            if (!phoneRegex.test(phoneInput.value)) {
+                                showMessage('رقم الهاتف غير صحيح. للسودان يجب أن يبدأ بـ 09 أو 01 ويتكون من 10 أرقام.', 'error');
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                const formInputs = document.getElementById(currentStepElementId).querySelectorAll('input:required, select:required, textarea:required');
+                let isStepValid = true;
+                formInputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.reportValidity();
+                        isStepValid = false;
+                    }
+                });
+                if (!isStepValid) return;
+                nextStepElementId = `step${step + 1}-${stepIdSuffix}`;
+            }
+
+            document.getElementById(currentStepElementId).classList.add('hidden');
+            document.getElementById(nextStepElementId).classList.remove('hidden');
+            currentStep++;
+            updateStepIndicator();
+        }
+
+        function prevStep(step) {
+            const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
+            const currentStepElementId = `step${step}-${stepIdSuffix}`;
+            const prevStepElementId = step === 2 ? 'step1' : `step${step - 1}-${stepIdSuffix}`;
+
+            document.getElementById(currentStepElementId).classList.add('hidden');
+            document.getElementById(prevStepElementId).classList.remove('hidden');
+            currentStep--;
+            updateStepIndicator();
+        }
+
+        // تعديل 3: إصلاح الحفظ وإظهار رسالة المراجعة
         async function submitForm(event) {
             event.preventDefault();
             const submitButton = event.target;
@@ -614,7 +704,7 @@
                         isProfileComplete: true,
                         createdAt: serverTimestamp(),
                         headline: formInputs['headline'].value || null,
-                        dob: formInputs['dob'].value || null, // حفظ تاريخ الميلاد
+                        dob: formInputs['dob'].value || null, // حفظ تاريخ الميلاد المضاف
                         bio: formInputs['bio'].value || null,
                         profileImageUrl,
                         contact: {
@@ -660,7 +750,7 @@
                             email: formInputs['companyEmail'].value || null,
                             phone: fullCompanyPhone || null,
                             logoUrl: companyLogoUrl,
-                            businessType: formInputs['businessType'].value || null, // حفظ نوع النشاط المختار
+                            businessType: formInputs['businessType'].value || null, // حفظ نوع النشاط المختار من القائمة
                             description: formInputs['companyDescription'].value || null,
                             location: {
                                 state: formInputs['companyState'].value || null,
@@ -681,7 +771,7 @@
                 await setDoc(doc(db, collectionName, user.uid), userData);
 
                 // رسالة النجاح المعدلة
-                showMessage('تم إنشاء حسابك بنجاح! سنقوم بمراجعة بياناتك وتوثيق الحساب في أقرب وقت ممكن. يرجى متابعة بريدك الإلكتروني.', 'success');
+                showMessage('تم إنشاء الحساب بنجاح! سنقوم بمراجعة بياناتك في أقرب وقت ممكن. يرجى التحقق من بريدك الإلكتروني لتوثيق الحساب.', 'success');
 
                 setTimeout(() => {
                     const redirectUrl = role === 'employee' ? "profile.html" : "employer-dashboard.html";
@@ -707,77 +797,6 @@
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
-        }
-
-        // --- الدوال المساعدة للتنقل والمواقع (بقيت كما هي دون تغيير) ---
-
-        function nextStep(step) {
-            let currentStepElementId;
-            let nextStepElementId;
-
-            if (step === 1) {
-                currentStepElementId = 'step1';
-                const formInputs = document.getElementById(currentStepElementId).querySelectorAll('input:required, select:required');
-                let isStepValid = true;
-                formInputs.forEach(input => {
-                    if (!input.checkValidity()) {
-                        input.reportValidity();
-                        isStepValid = false;
-                    }
-                });
-                if (!isStepValid) return;
-
-                const nameInput = document.getElementById('name');
-                if (!validateName(nameInput.value)) {
-                    showMessage('الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
-                    return;
-                }
-
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                if (password !== confirmPassword) {
-                    showMessage('كلمة المرور وتأكيدها غير متطابقين.', 'error');
-                    return;
-                }
-                if (!validatePassword()) {
-                    showMessage('كلمة المرور لا تستوفي جميع المتطلبات.', 'error');
-                    return;
-                }
-
-                isEmployerFlow = (document.getElementById('role').value === 'employer');
-                nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
-
-            } else {
-                const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
-                currentStepElementId = `step${step}-${stepIdSuffix}`;
-
-                const formInputs = document.getElementById(currentStepElementId).querySelectorAll('input:required, select:required, textarea:required');
-                let isStepValid = true;
-                formInputs.forEach(input => {
-                    if (!input.checkValidity()) {
-                        input.reportValidity();
-                        isStepValid = false;
-                    }
-                });
-                if (!isStepValid) return;
-                nextStepElementId = `step${step + 1}-${stepIdSuffix}`;
-            }
-
-            document.getElementById(currentStepElementId).classList.add('hidden');
-            document.getElementById(nextStepElementId).classList.remove('hidden');
-            currentStep++;
-            updateStepIndicator();
-        }
-
-        function prevStep(step) {
-            const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
-            const currentStepElementId = `step${step}-${stepIdSuffix}`;
-            const prevStepElementId = step === 2 ? 'step1' : `step${step - 1}-${stepIdSuffix}`;
-
-            document.getElementById(currentStepElementId).classList.add('hidden');
-            document.getElementById(prevStepElementId).classList.remove('hidden');
-            currentStep--;
-            updateStepIndicator();
         }
 
         async function uploadFile(file, filePath) {
