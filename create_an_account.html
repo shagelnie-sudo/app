@@ -550,7 +550,29 @@
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, document.getElementById('password').value);
-                await sendEmailVerification(userCredential.user);
+                await
+                // --- هذا هو الجزء الذي سنضيفه فقط ---
+try {
+    // 1. هنا الكود الخاص بك الذي ينشئ الحساب (لا نلمسه)
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 2. السطر السحري الذي سينشئ لك مجموعة users في Firestore
+    // نستخدم الـ UID الخاص بالمستخدم كعنوان للمستند
+    await setDoc(doc(db, "users", user.uid), {
+        name: document.getElementById('fullName').value, // تأكد من اسم الـ ID عندك
+        email: user.email,
+        role: "employee", // أو القيمة التي يختارها المستخدم
+        createdAt: new Date()
+    });
+    
+    console.log("تم الحفظ في قاعدة البيانات بنجاح!");
+    // ---------------------------------------
+
+} catch (error) {
+    console.error("حدث خطأ:", error.message);
+}
+                sendEmailVerification(userCredential.user);
                 document.getElementById('verificationEmailDisplay').textContent = email;
                 document.getElementById('step1').classList.add('hidden');
                 showStep(2, null); 
