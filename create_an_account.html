@@ -203,24 +203,10 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
                     <h2 class="text-lg font-bold mb-4">الخطوة 3: البيانات الأساسية</h2>
                     <div class="mb-4">
-    <label for="state" class="block text-sm font-medium text-gray-700">الولاية</label>
-    <select id="state" name="state" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <option value="" disabled selected>اختر ولاية</option>
-    </select>
-</div>
-<div class="mb-4 hidden" id="cityContainer">
-    <label for="city" class="block text-sm font-medium text-gray-700">المدينة</label>
-    <select id="city" name="city" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <option value="" disabled selected>اختر مدينة</option>
-    </select>
-</div>
-<div class="mb-4 hidden" id="areaContainer">
-    <label for="area" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
-    <select id="area" name="area" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <option value="" disabled selected>اختر منطقة أو حي</option>
-    </select>
-</div>
-
+                        <label for="headline" class="block text-sm font-medium text-gray-700">العنوان الاحترافي</label>
+                        <input type="text" id="headline" name="headline" placeholder="مثال: عامل ديكور"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
                     <div class="mb-4">
                         <label for="bio" class="block text-sm font-medium text-gray-700">نبذة وظيفية عنك</label>
                         <textarea id="bio" name="bio" rows="5" placeholder="وصف مختصر عنك وعن خبراتك"
@@ -345,15 +331,13 @@
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف</label>
-                        <input type="tel" id="companyPhone" name="companyPhone" placeholder="مثال: 0912345678" 
-                        required
+                        <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف (اختياري)</label>
+                        <input type="tel" id="companyPhone" name="companyPhone" placeholder="مثال: 0912345678"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
                         <label for="companyLogo" class="block text-sm font-medium text-gray-700">الشعار / اللوجو</label>
                         <input type="file" id="companyLogo" name="companyLogo" accept="image/*"
-                        required
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
@@ -371,24 +355,10 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employer">
                     <h2 class="text-lg font-bold mb-4">الخطوة 4: التفاصيل</h2>
                     <div class="mb-4">
-    <label for="companyState" class="block text-sm font-medium text-gray-700">الولاية</label>
-    <select id="companyState" name="companyState" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <option value="" disabled selected>اختر ولاية</option>
-    </select>
-</div>
-<div class="mb-4 hidden" id="companyCityContainer">
-    <label for="companyCity" class="block text-sm font-medium text-gray-700">المدينة</label>
-    <select id="companyCity" name="companyCity" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <option value="" disabled selected>اختر مدينة</option>
-    </select>
-</div>
-<div class="mb-4 hidden" id="companyAreaContainer">
-    <label for="companyArea" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
-    <select id="companyArea" name="companyArea" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <option value="" disabled selected>اختر منطقة أو حي</option>
-    </select>
-</div>
-
+                        <label for="companyDescription" class="block text-sm font-medium text-gray-700">نبذة عن الشركة</label>
+                        <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات" required
+                                  class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
                     <div class="mb-4">
                         <label for="companyState" class="block text-sm font-medium text-gray-700">الولاية</label>
                         <select id="companyState" name="companyState" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -435,7 +405,7 @@
                         التالي
                     </button>
                 </div>
-
+                
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step6-employer">
                     <h2 class="text-lg font-bold mb-4">الخطوة 6: المهنة الرئيسية المطلوبة</h2>
                     <p class="text-sm text-gray-600 mb-4">أدخل **وظيفة واحدة** رئيسية تصف طبيعة الموظفين الذين تبحث عنهم غالبًا.</p>
@@ -451,7 +421,7 @@
                         التالي
                     </button>
                 </div>
-
+                
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step7-employer">
                     <h2 class="text-lg font-bold mb-4">الخطوة 7: تفعيل الحساب</h2>
                      <p class="text-sm text-gray-500 mb-4">اختر نوع الحساب الفرعي لتفعيل حسابك:</p>
@@ -918,7 +888,7 @@
                     if (companyPhotosFiles.length > 0) {
                         companyPhotosUrls = await Promise.all(Array.from(companyPhotosFiles).map(file => uploadFile(file)));
                     }
-
+                    
                     const jobTitle = formInputs['mainJobTitle'].value || null;
 
                     userData = {
@@ -1081,7 +1051,7 @@
                 }
             }
         });
-
+        
         document.getElementById('previousWorks').addEventListener('change', function(event) {
             const previewContainer = document.getElementById('image-preview');
             previewContainer.innerHTML = '';
