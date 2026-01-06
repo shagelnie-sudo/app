@@ -224,13 +224,17 @@
                     </div>
                     <div class="mb-4">
                         <label for="state" class="block text-sm font-medium text-gray-700">الولاية</label>
-                        <select id="state" name="state" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select 
+                        required
+                        id="state" name="state" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر ولاية</option>
                         </select>
                     </div>
                     <div class="mb-4 hidden" id="cityContainer">
                         <label for="city" class="block text-sm font-medium text-gray-700">المدينة</label>
-                        <select id="city" name="city" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select id="city" 
+                        required
+                        name="city" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر مدينة</option>
                         </select>
                     </div>
