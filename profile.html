@@ -8,122 +8,146 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
         :root {
             --primary: #2563eb;
+            --secondary: #f59e0b;
             --success: #10b981;
             --dark: #1f2937;
         }
+
         body {
             font-family: 'Tajawal', sans-serif;
-            background-color: #f5f7fa;
+            background-color: #f3f4f6;
         }
-        .profile-header {
-            background: linear-gradient(to right, #2563eb, #1e40af);
+
+        .profile-header-bg {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
         }
-        .skill-badge {
-            background-color: #dbeafe;
+
+        .skill-tag {
+            background-color: #eff6ff;
             color: #1e40af;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
             font-size: 0.875rem;
-            display: inline-block;
-            margin: 4px;
+            border: 1px solid #dbeafe;
+        }
+
+        /* أنيميشن التحميل */
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen">
 
-    <nav class="bg-white shadow-sm p-4 mb-8">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black text-blue-600">شغلني</h1>
-            <button id="logoutBtn" class="text-gray-600 hover:text-red-600 transition">
-                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">ش</div>
+                <span class="text-xl font-black text-gray-800">شغلني</span>
+            </div>
+            <button id="logoutBtn" class="flex items-center gap-2 text-gray-600 hover:text-red-600 font-medium transition">
+                <span>تسجيل الخروج</span>
+                <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
     </nav>
 
-    <div class="max-w-4xl mx-auto px-4">
-        <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-6">
-            <div class="profile-header h-32 w-full"></div>
-            <div class="px-8 pb-8">
-                <div class="relative flex justify-between items-end -mt-12">
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden mb-8 border border-gray-100">
+            <div class="profile-header-bg h-40"></div>
+            <div class="px-6 md:px-12 pb-8">
+                <div class="relative flex flex-col md:flex-row md:items-end justify-between -mt-16 gap-6">
                     <div class="relative">
-                        <img id="userImage" src="https://via.placeholder.com/150" alt="Profile" 
-                             class="w-32 h-32 rounded-2xl border-4 border-white shadow-sm object-cover bg-white">
-                        <span id="roleBadge" class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm">
-                            --
-                        </span>
+                        <img id="userAvatar" src="https://via.placeholder.com/150" alt="Avatar" 
+                             class="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 border-white shadow-md object-cover bg-white">
+                        <div id="statusIndicator" class="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
                     </div>
-                    <div class="mb-2">
-                        <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">تعديل الحساب</button>
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h1 id="userName" class="text-3xl font-extrabold text-gray-900 leading-tight">...</h1>
+                            <span id="roleLabel" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"></span>
+                        </div>
+                        <p id="userHeadline" class="text-blue-600 font-bold text-lg mt-1"></p>
+                        <div class="flex flex-wrap items-center gap-4 mt-3 text-gray-500">
+                            <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt"></i> <span id="userLocation">...</span></span>
+                            <span class="flex items-center gap-1"><i class="fas fa-briefcase"></i> <span id="experienceLevel">...</span></span>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="mt-6">
-                    <h2 id="userName" class="text-2xl font-bold text-gray-900">جاري التحميل...</h2>
-                    <p id="userHeadline" class="text-blue-600 font-medium"></p>
-                    <div class="flex items-center mt-2 text-gray-500 text-sm">
-                        <i class="fas fa-map-marker-alt ml-2"></i>
-                        <span id="userLocation">--</span>
-                        <span class="mx-2">•</span>
-                        <i class="fas fa-calendar-alt ml-2"></i>
-                        <span>انضم منذ 2024</span>
+                    <div class="flex gap-2">
+                        <button class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition">تعديل الملف</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="font-bold text-gray-900 mb-4">معلومات التواصل</h3>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex items-center text-gray-600">
-                            <i class="fas fa-envelope w-6 text-blue-500"></i>
-                            <span id="userEmail">--</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="space-y-8">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-id-card text-blue-500"></i> معلومات التواصل
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-400">البريد الإلكتروني</p>
+                                <p id="userEmail" class="text-sm font-semibold text-gray-700">...</p>
+                            </div>
                         </div>
-                        <div class="flex items-center text-gray-600">
-                            <i class="fas fa-phone w-6 text-blue-500"></i>
-                            <span id="userPhone">--</span>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400"><i class="fas fa-phone"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-400">رقم الهاتف</p>
+                                <p id="userPhone" class="text-sm font-semibold text-gray-700 text-left" dir="ltr">...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="skillsSection" class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hidden">
-                    <h3 class="font-bold text-gray-900 mb-4">المهارات</h3>
-                    <div id="skillsList" class="flex flex-wrap -m-1">
+                <div id="skillsCard" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hidden">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">المهارات والخبرات</h3>
+                    <div id="skillsContainer" class="flex flex-wrap gap-2">
                         </div>
                 </div>
             </div>
 
-            <div class="md:col-span-2 space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="font-bold text-gray-900 mb-4">النبذة التعريفية</h3>
-                    <p id="userBio" class="text-gray-600 leading-relaxed">
+            <div class="lg:col-span-2 space-y-8">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">النبذة التعريفية</h3>
+                    <p id="userBio" class="text-gray-600 leading-relaxed text-lg">
                         جاري تحميل البيانات...
                     </p>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                    <h3 id="portfolioTitle" class="font-bold text-gray-900 mb-4">معرض الأعمال</h3>
-                    <div id="portfolioGallery" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                    <h3 id="galleryTitle" class="text-xl font-bold text-gray-900 mb-6">معرض الأعمال</h3>
+                    <div id="galleryGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // نفس إعدادات Firebase الخاصة بك
+        // إعدادات المشروع (نفس التي أرفقتها أنت)
         const firebaseConfig = {
           apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
           authDomain: "shaglni-c64c0.firebaseapp.com",
           projectId: "shaglni-c64c0",
-          storageBucket: "shaglni-c64c0.appspot.com", 
+          storageBucket: "shaglni-c64c0.appspot.com",
           messagingSenderId: "768887356636",
           appId: "1:768887356636:web:11ec1d6991add3309c8819"
         };
@@ -132,91 +156,114 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // مراقبة حالة تسجيل الدخول
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const docRef = doc(db, "users", user.uid);
+                console.log("Logged in as:", user.uid);
+                await fetchAndPopulateProfile(user.uid);
+            } else {
+                console.log("No user logged in.");
+                // window.location.href = "login.html"; // وجهه لصفحة الدخول إذا لم يسجل
+            }
+        });
+
+        async function fetchAndPopulateProfile(uid) {
+            try {
+                const docRef = doc(db, "users", uid);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    displayUserData(data);
+                    renderUI(data);
                 } else {
-                    console.log("No such document!");
+                    document.getElementById('userBio').innerText = "لم يتم العثور على بيانات الحساب. تأكد من إتمام عملية التسجيل وحفظ البيانات في Firestore.";
                 }
-            } else {
-                window.location.href = 'login.html'; // توجيه لتسجيل الدخول إذا لم يكن مسجلاً
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                alert("حدث خطأ أثناء جلب البيانات");
             }
-        });
+        }
 
-        function displayUserData(data) {
-            const role = data.role;
-            const employerType = data.employerType; // hiring or individual
+        function renderUI(data) {
+            const role = data.role; // employee or employer
+            const type = data.employerType; // hiring or individual
 
-            // تعبئة البيانات العامة
-            document.getElementById('userName').innerText = data.name || data.companyName;
+            // 1. البيانات الأساسية
+            document.getElementById('userName').innerText = data.name || data.companyName || "مستخدم غير معروف";
             document.getElementById('userEmail').innerText = data.email || data.companyEmail;
             document.getElementById('userPhone').innerText = data.phone || data.companyPhone;
             document.getElementById('userLocation').innerText = `${data.state} - ${data.city || ''}`;
             document.getElementById('userBio').innerText = data.bio || data.companyDescription;
+            document.getElementById('experienceLevel').innerText = data.experience || data.businessType || "غير محدد";
 
-            const badge = document.getElementById('roleBadge');
-            const userImage = document.getElementById('userImage');
+            // 2. معالجة الصور والأدوار
+            const avatarImg = document.getElementById('userAvatar');
+            const roleLabel = document.getElementById('roleLabel');
+            const galleryGrid = document.getElementById('galleryGrid');
+            const galleryTitle = document.getElementById('galleryTitle');
 
             if (role === 'employee') {
-                // شكل بروفايل الموظف
-                badge.innerText = 'موظف';
-                badge.style.backgroundColor = '#10b981'; // Green
+                // مظهر الموظف
+                avatarImg.src = data.profilePhotoUrl || 'https://via.placeholder.com/150';
+                roleLabel.innerText = "موظف / باحث عن عمل";
+                roleLabel.className += " bg-green-100 text-green-700";
                 document.getElementById('userHeadline').innerText = data.headline;
-                userImage.src = data.profilePhotoUrl || 'https://via.placeholder.com/150';
                 
                 // عرض المهارات
-                document.getElementById('skillsSection').classList.remove('hidden');
-                const skillsList = document.getElementById('skillsList');
-                data.skills?.forEach(skill => {
-                    const span = document.createElement('span');
-                    span.className = 'skill-badge';
-                    span.innerText = skill;
-                    skillsList.appendChild(span);
-                });
-
-                renderGallery(data.previousWorksUrls, 'معرض الأعمال');
+                document.getElementById('skillsCard').classList.remove('hidden');
+                if (data.skills) {
+                    const container = document.getElementById('skillsContainer');
+                    data.skills.forEach(skill => {
+                        const s = document.createElement('span');
+                        s.className = 'skill-tag';
+                        s.innerText = skill;
+                        container.appendChild(s);
+                    });
+                }
+                // صور الأعمال
+                renderGallery(data.previousWorksUrls, galleryGrid);
+                galleryTitle.innerText = "معرض الأعمال السابقة";
 
             } else {
-                // شكل بروفايل الشركة أو صاحب العمل
-                userImage.src = data.companyLogoUrl || 'https://via.placeholder.com/150';
+                // مظهر صاحب العمل أو الشركة
+                avatarImg.src = data.companyLogoUrl || 'https://via.placeholder.com/150';
                 document.getElementById('userHeadline').innerText = data.businessType;
                 
-                if (employerType === 'hiring') {
-                    badge.innerText = 'شركة / نشاط تجاري';
-                    badge.style.backgroundColor = '#2563eb'; // Blue
-                    document.getElementById('portfolioTitle').innerText = 'صور المقر والنشاط';
+                // التمييز بين الشركة وصاحب العمل الفردي
+                if (type === 'hiring') {
+                    roleLabel.innerText = "شركة / نشاط تجاري";
+                    roleLabel.className += " bg-blue-100 text-blue-700";
+                    galleryTitle.innerText = "صور مقر الشركة والخدمات";
                 } else {
-                    badge.innerText = 'صاحب عمل فردي';
-                    badge.style.backgroundColor = '#f59e0b'; // Orange
-                    document.getElementById('portfolioTitle').innerText = 'صور من أعمالنا';
+                    roleLabel.innerText = "صاحب عمل فردي";
+                    roleLabel.className += " bg-amber-100 text-amber-700";
+                    galleryTitle.innerText = "صور من أعمالنا";
                 }
 
-                renderGallery(data.companyPhotosUrls, 'صور النشاط');
+                renderGallery(data.companyPhotosUrls, galleryGrid);
             }
         }
 
-        function renderGallery(urls, title) {
-            const gallery = document.getElementById('portfolioGallery');
+        function renderGallery(urls, container) {
+            container.innerHTML = '';
             if (urls && urls.length > 0) {
                 urls.forEach(url => {
                     const img = document.createElement('img');
                     img.src = url;
-                    img.className = "w-full h-32 object-cover rounded-lg shadow-sm hover:opacity-75 transition cursor-pointer";
-                    gallery.appendChild(img);
+                    img.className = "w-full h-40 object-cover rounded-xl shadow-sm hover:scale-105 transition duration-300 cursor-pointer";
+                    container.appendChild(img);
                 });
             } else {
-                gallery.innerHTML = '<p class="text-gray-400 text-sm italic">لا توجد صور لعرضها</p>';
+                container.innerHTML = '<p class="text-gray-400 italic col-span-full">لا توجد صور في المعرض حالياً.</p>';
             }
         }
 
-        // تسجيل الخروج
+        // زر تسجيل الخروج
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            signOut(auth).then(() => { window.location.href = 'login.html'; });
+            signOut(auth).then(() => {
+                alert("تم تسجيل الخروج بنجاح");
+                // window.location.href = "login.html";
+            });
         });
     </script>
 </body>
