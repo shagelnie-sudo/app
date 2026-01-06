@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي - شغلني</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --dark: #1f2937;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+        }
+        .profile-header {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+        }
+        .skill-badge {
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <nav class="bg-white shadow-sm p-4 mb-8">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black text-blue-600">شغلني</h1>
+            <button id="logoutBtn" class="text-gray-600 hover:text-red-600 transition">
+                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+            </button>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-6">
+            <div class="profile-header h-32 w-full"></div>
+            <div class="px-8 pb-8">
+                <div class="relative flex justify-between items-end -mt-12">
+                    <div class="relative">
+                        <img id="userImage" src="https://via.placeholder.com/150" alt="Profile" 
+                             class="w-32 h-32 rounded-2xl border-4 border-white shadow-sm object-cover bg-white">
+                        <span id="roleBadge" class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm">
+                            --
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">تعديل الحساب</button>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h2 id="userName" class="text-2xl font-bold text-gray-900">جاري التحميل...</h2>
+                    <p id="userHeadline" class="text-blue-600 font-medium"></p>
+                    <div class="flex items-center mt-2 text-gray-500 text-sm">
+                        <i class="fas fa-map-marker-alt ml-2"></i>
+                        <span id="userLocation">--</span>
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-calendar-alt ml-2"></i>
+                        <span>انضم منذ 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                    <h3 class="font-bold text-gray-900 mb-4">معلومات التواصل</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-envelope w-6 text-blue-500"></i>
+                            <span id="userEmail">--</span>
+                        </div>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-phone w-6 text-blue-500"></i>
+                            <span id="userPhone">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="skillsSection" class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hidden">
+                    <h3 class="font-bold text-gray-900 mb-4">المهارات</h3>
+                    <div id="skillsList" class="flex flex-wrap -m-1">
+                        </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                    <h3 class="font-bold text-gray-900 mb-4">النبذة التعريفية</h3>
+                    <p id="userBio" class="text-gray-600 leading-relaxed">
+                        جاري تحميل البيانات...
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                    <h3 id="portfolioTitle" class="font-bold text-gray-900 mb-4">معرض الأعمال</h3>
+                    <div id="portfolioGallery" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // نفس إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+          apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+          authDomain: "shaglni-c64c0.firebaseapp.com",
+          projectId: "shaglni-c64c0",
+          storageBucket: "shaglni-c64c0.appspot.com", 
+          messagingSenderId: "768887356636",
+          appId: "1:768887356636:web:11ec1d6991add3309c8819"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    displayUserData(data);
+                } else {
+                    console.log("No such document!");
+                }
+            } else {
+                window.location.href = 'login.html'; // توجيه لتسجيل الدخول إذا لم يكن مسجلاً
+            }
+        });
+
+        function displayUserData(data) {
+            const role = data.role;
+            const employerType = data.employerType; // hiring or individual
+
+            // تعبئة البيانات العامة
+            document.getElementById('userName').innerText = data.name || data.companyName;
+            document.getElementById('userEmail').innerText = data.email || data.companyEmail;
+            document.getElementById('userPhone').innerText = data.phone || data.companyPhone;
+            document.getElementById('userLocation').innerText = `${data.state} - ${data.city || ''}`;
+            document.getElementById('userBio').innerText = data.bio || data.companyDescription;
+
+            const badge = document.getElementById('roleBadge');
+            const userImage = document.getElementById('userImage');
+
+            if (role === 'employee') {
+                // شكل بروفايل الموظف
+                badge.innerText = 'موظف';
+                badge.style.backgroundColor = '#10b981'; // Green
+                document.getElementById('userHeadline').innerText = data.headline;
+                userImage.src = data.profilePhotoUrl || 'https://via.placeholder.com/150';
+                
+                // عرض المهارات
+                document.getElementById('skillsSection').classList.remove('hidden');
+                const skillsList = document.getElementById('skillsList');
+                data.skills?.forEach(skill => {
+                    const span = document.createElement('span');
+                    span.className = 'skill-badge';
+                    span.innerText = skill;
+                    skillsList.appendChild(span);
+                });
+
+                renderGallery(data.previousWorksUrls, 'معرض الأعمال');
+
+            } else {
+                // شكل بروفايل الشركة أو صاحب العمل
+                userImage.src = data.companyLogoUrl || 'https://via.placeholder.com/150';
+                document.getElementById('userHeadline').innerText = data.businessType;
+                
+                if (employerType === 'hiring') {
+                    badge.innerText = 'شركة / نشاط تجاري';
+                    badge.style.backgroundColor = '#2563eb'; // Blue
+                    document.getElementById('portfolioTitle').innerText = 'صور المقر والنشاط';
+                } else {
+                    badge.innerText = 'صاحب عمل فردي';
+                    badge.style.backgroundColor = '#f59e0b'; // Orange
+                    document.getElementById('portfolioTitle').innerText = 'صور من أعمالنا';
+                }
+
+                renderGallery(data.companyPhotosUrls, 'صور النشاط');
+            }
+        }
+
+        function renderGallery(urls, title) {
+            const gallery = document.getElementById('portfolioGallery');
+            if (urls && urls.length > 0) {
+                urls.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = "w-full h-32 object-cover rounded-lg shadow-sm hover:opacity-75 transition cursor-pointer";
+                    gallery.appendChild(img);
+                });
+            } else {
+                gallery.innerHTML = '<p class="text-gray-400 text-sm italic">لا توجد صور لعرضها</p>';
+            }
+        }
+
+        // تسجيل الخروج
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = 'login.html'; });
+        });
+    </script>
+</body>
+</html>
