@@ -8,263 +8,350 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-        
-        :root {
-            --primary: #2563eb;
-            --secondary: #f59e0b;
-            --success: #10b981;
-            --dark: #1f2937;
+        body { font-family: 'Tajawal', sans-serif; background-color: #f3f4f6; }
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto;
         }
-
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f3f4f6;
-        }
-
-        .profile-header-bg {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
-        }
-
-        .skill-tag {
-            background-color: #eff6ff;
-            color: #1e40af;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            border: 1px solid #dbeafe;
-        }
-
-        /* أنيميشن التحميل */
-        .loading-shimmer {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* تحسين مظهر السكرول بار للصور */
+        .scrolling-wrapper {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
         }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">ش</div>
-                <span class="text-xl font-black text-gray-800">شغلني</span>
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-blue-600">شغلني</h1>
+                </div>
+                <div class="flex items-center">
+                    <button id="logoutBtn" class="text-red-500 hover:text-red-700 font-medium text-sm flex items-center gap-2">
+                        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                    </button>
+                </div>
             </div>
-            <button id="logoutBtn" class="flex items-center gap-2 text-gray-600 hover:text-red-600 font-medium transition">
-                <span>تسجيل الخروج</span>
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto px-4 py-8">
-        <div class="bg-white rounded-3xl shadow-sm overflow-hidden mb-8 border border-gray-100">
-            <div class="profile-header-bg h-40"></div>
-            <div class="px-6 md:px-12 pb-8">
-                <div class="relative flex flex-col md:flex-row md:items-end justify-between -mt-16 gap-6">
-                    <div class="relative">
-                        <img id="userAvatar" src="https://via.placeholder.com/150" alt="Avatar" 
-                             class="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 border-white shadow-md object-cover bg-white">
-                        <div id="statusIndicator" class="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <h1 id="userName" class="text-3xl font-extrabold text-gray-900 leading-tight">...</h1>
-                            <span id="roleLabel" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"></span>
-                        </div>
-                        <p id="userHeadline" class="text-blue-600 font-bold text-lg mt-1"></p>
-                        <div class="flex flex-wrap items-center gap-4 mt-3 text-gray-500">
-                            <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt"></i> <span id="userLocation">...</span></span>
-                            <span class="flex items-center gap-1"><i class="fas fa-briefcase"></i> <span id="experienceLevel">...</span></span>
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition">تعديل الملف</button>
-                    </div>
-                </div>
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        
+        <div id="loadingIndicator" class="text-center py-20">
+            <div class="loader"></div>
+            <p class="text-gray-500 mt-4">جاري تحميل البيانات...</p>
+        </div>
+
+        <div id="profileContent" class="hidden">
+            </div>
+
+        <div id="errorMessage" class="hidden text-center py-10">
+            <div class="bg-red-50 text-red-600 p-4 rounded-lg inline-block">
+                <i class="fas fa-exclamation-circle ml-2"></i>
+                <span id="errorText">حدث خطأ</span>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="space-y-8">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-id-card text-blue-500"></i> معلومات التواصل
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400"><i class="fas fa-envelope"></i></div>
-                            <div>
-                                <p class="text-xs text-gray-400">البريد الإلكتروني</p>
-                                <p id="userEmail" class="text-sm font-semibold text-gray-700">...</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400"><i class="fas fa-phone"></i></div>
-                            <div>
-                                <p class="text-xs text-gray-400">رقم الهاتف</p>
-                                <p id="userPhone" class="text-sm font-semibold text-gray-700 text-left" dir="ltr">...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="skillsCard" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hidden">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">المهارات والخبرات</h3>
-                    <div id="skillsContainer" class="flex flex-wrap gap-2">
-                        </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2 space-y-8">
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">النبذة التعريفية</h3>
-                    <p id="userBio" class="text-gray-600 leading-relaxed text-lg">
-                        جاري تحميل البيانات...
-                    </p>
-                </div>
-
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                    <h3 id="galleryTitle" class="text-xl font-bold text-gray-900 mb-6">معرض الأعمال</h3>
-                    <div id="galleryGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        </div>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // إعدادات المشروع (نفس التي أرفقتها أنت)
+        // إعدادات Firebase (نفس الإعدادات في صفحة التسجيل)
         const firebaseConfig = {
           apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
           authDomain: "shaglni-c64c0.firebaseapp.com",
           projectId: "shaglni-c64c0",
-          storageBucket: "shaglni-c64c0.appspot.com",
+          storageBucket: "shaglni-c64c0.appspot.com", 
           messagingSenderId: "768887356636",
-          appId: "1:768887356636:web:11ec1d6991add3309c8819"
+          appId: "1:768887356636:web:11ec1d6991add3309c8819", 
+          measurementId: "G-98GQGZS09W" 
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // مراقبة حالة تسجيل الدخول
+        const profileContent = document.getElementById('profileContent');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // التحقق من حالة تسجيل الدخول
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log("Logged in as:", user.uid);
-                await fetchAndPopulateProfile(user.uid);
+                // المستخدم مسجل دخول، سنبحث عن بياناته
+                await fetchUserData(user.uid);
             } else {
-                console.log("No user logged in.");
-                // window.location.href = "login.html"; // وجهه لصفحة الدخول إذا لم يسجل
+                // غير مسجل دخول، توجيه لصفحة الدخول
+                window.location.href = 'login.html'; 
             }
         });
 
-        async function fetchAndPopulateProfile(uid) {
+        // دالة جلب البيانات
+        async function fetchUserData(uid) {
             try {
-                const docRef = doc(db, "users", uid);
-                const docSnap = await getDoc(docRef);
+                // 1. محاولة البحث في مجموعة الموظفين (employees)
+                const employeeRef = doc(db, "employees", uid);
+                const employeeSnap = await getDoc(employeeRef);
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    renderUI(data);
-                } else {
-                    document.getElementById('userBio').innerText = "لم يتم العثور على بيانات الحساب. تأكد من إتمام عملية التسجيل وحفظ البيانات في Firestore.";
+                if (employeeSnap.exists()) {
+                    renderEmployeeProfile(employeeSnap.data());
+                    return;
                 }
+
+                // 2. محاولة البحث في مجموعة أصحاب العمل (All_jops)
+                // ملاحظة: نستخدم All_jops لأن كود التسجيل يحفظ بيانات الشركة هناك
+                const employerRef = doc(db, "All_jops", uid);
+                const employerSnap = await getDoc(employerRef);
+
+                if (employerSnap.exists()) {
+                    renderEmployerProfile(employerSnap.data());
+                    return;
+                }
+
+                // 3. لم يتم العثور على بيانات
+                showError("لم يتم العثور على ملف شخصي لهذا الحساب.");
+
             } catch (error) {
                 console.error("Error fetching data:", error);
-                alert("حدث خطأ أثناء جلب البيانات");
+                showError("حدث خطأ أثناء جلب البيانات. حاول مرة أخرى لاحقاً.");
             }
         }
 
-        function renderUI(data) {
-            const role = data.role; // employee or employer
-            const type = data.employerType; // hiring or individual
+        // دالة عرض بروفايل الموظف
+        function renderEmployeeProfile(data) {
+            const skillsHtml = data.skills ? data.skills.map(skill => 
+                `<span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">${skill}</span>`
+            ).join('') : '';
 
-            // 1. البيانات الأساسية
-            document.getElementById('userName').innerText = data.name || data.companyName || "مستخدم غير معروف";
-            document.getElementById('userEmail').innerText = data.email || data.companyEmail;
-            document.getElementById('userPhone').innerText = data.phone || data.companyPhone;
-            document.getElementById('userLocation').innerText = `${data.state} - ${data.city || ''}`;
-            document.getElementById('userBio').innerText = data.bio || data.companyDescription;
-            document.getElementById('experienceLevel').innerText = data.experience || data.businessType || "غير محدد";
+            const galleryHtml = data.previousWorksUrls ? data.previousWorksUrls.map(url => 
+                `<a href="${url}" target="_blank" class="block w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img src="${url}" class="w-full h-full object-cover" alt="عمل سابق">
+                </a>`
+            ).join('') : '<p class="text-gray-500 text-sm">لا توجد صور أعمال.</p>';
 
-            // 2. معالجة الصور والأدوار
-            const avatarImg = document.getElementById('userAvatar');
-            const roleLabel = document.getElementById('roleLabel');
-            const galleryGrid = document.getElementById('galleryGrid');
-            const galleryTitle = document.getElementById('galleryTitle');
+            const statusColor = data.jobStatus === 'متاح للعمل' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
 
-            if (role === 'employee') {
-                // مظهر الموظف
-                avatarImg.src = data.profilePhotoUrl || 'https://via.placeholder.com/150';
-                roleLabel.innerText = "موظف / باحث عن عمل";
-                roleLabel.className += " bg-green-100 text-green-700";
-                document.getElementById('userHeadline').innerText = data.headline;
-                
-                // عرض المهارات
-                document.getElementById('skillsCard').classList.remove('hidden');
-                if (data.skills) {
-                    const container = document.getElementById('skillsContainer');
-                    data.skills.forEach(skill => {
-                        const s = document.createElement('span');
-                        s.className = 'skill-tag';
-                        s.innerText = skill;
-                        container.appendChild(s);
-                    });
-                }
-                // صور الأعمال
-                renderGallery(data.previousWorksUrls, galleryGrid);
-                galleryTitle.innerText = "معرض الأعمال السابقة";
+            const html = `
+                <div class="bg-white rounded-2xl shadow overflow-hidden mb-6">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-32"></div>
+                    <div class="px-6 pb-6 relative">
+                        <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-12 mb-4">
+                            <img src="${data.profileImageUrl || 'https://via.placeholder.com/150'}" 
+                                 class="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover bg-white" alt="الصورة الشخصية">
+                            <div class="mt-4 sm:mt-0 sm:mr-4 text-center sm:text-right flex-1">
+                                <h2 class="text-2xl font-bold text-gray-900">${data.name}</h2>
+                                <p class="text-gray-600 font-medium">${data.headline || 'بدون عنوان وظيفي'}</p>
+                                <div class="flex items-center justify-center sm:justify-start mt-2 text-sm text-gray-500">
+                                    <i class="fas fa-map-marker-alt ml-1"></i>
+                                    ${data.contact?.location?.state || ''} - ${data.contact?.location?.city || ''}
+                                </div>
+                            </div>
+                            <div class="mt-4 sm:mt-0">
+                                <span class="${statusColor} px-3 py-1 rounded-full text-sm font-bold">
+                                    ${data.jobStatus || 'غير محدد'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            } else {
-                // مظهر صاحب العمل أو الشركة
-                avatarImg.src = data.companyLogoUrl || 'https://via.placeholder.com/150';
-                document.getElementById('userHeadline').innerText = data.businessType;
-                
-                // التمييز بين الشركة وصاحب العمل الفردي
-                if (type === 'hiring') {
-                    roleLabel.innerText = "شركة / نشاط تجاري";
-                    roleLabel.className += " bg-blue-100 text-blue-700";
-                    galleryTitle.innerText = "صور مقر الشركة والخدمات";
-                } else {
-                    roleLabel.innerText = "صاحب عمل فردي";
-                    roleLabel.className += " bg-amber-100 text-amber-700";
-                    galleryTitle.innerText = "صور من أعمالنا";
-                }
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">معلومات الاتصال</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-envelope w-6 text-blue-500"></i>
+                                    <span class="text-sm truncate" dir="ltr">${data.email}</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-phone w-6 text-blue-500"></i>
+                                    <span class="text-sm" dir="ltr">${data.contact?.phone || '-'}</span>
+                                </div>
+                                ${data.links?.cv ? `
+                                <a href="${data.links.cv}" target="_blank" class="flex items-center text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-file-pdf w-6"></i>
+                                    <span class="text-sm">السيرة الذاتية (CV)</span>
+                                </a>` : ''}
+                                ${data.links?.linkedin ? `
+                                <a href="${data.links.linkedin}" target="_blank" class="flex items-center text-blue-600 hover:text-blue-800">
+                                    <i class="fab fa-linkedin w-6"></i>
+                                    <span class="text-sm">LinkedIn</span>
+                                </a>` : ''}
+                            </div>
+                        </div>
 
-                renderGallery(data.companyPhotosUrls, galleryGrid);
-            }
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">المهارات</h3>
+                            <div class="flex flex-wrap gap-2">
+                                ${skillsHtml}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-3">نبذة عني</h3>
+                            <p class="text-gray-600 leading-relaxed whitespace-pre-line">
+                                ${data.bio || 'لا توجد نبذة.'}
+                            </p>
+                            <div class="mt-4 pt-4 border-t border-gray-100 flex items-center">
+                                <span class="text-gray-500 text-sm ml-2">مستوى الخبرة:</span>
+                                <span class="font-semibold text-gray-800">${data.experience || 'غير محدد'}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">معرض الأعمال</h3>
+                            <div class="flex gap-4 overflow-x-auto pb-2 scrolling-wrapper">
+                                ${galleryHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showContent(html);
         }
 
-        function renderGallery(urls, container) {
-            container.innerHTML = '';
-            if (urls && urls.length > 0) {
-                urls.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.className = "w-full h-40 object-cover rounded-xl shadow-sm hover:scale-105 transition duration-300 cursor-pointer";
-                    container.appendChild(img);
-                });
-            } else {
-                container.innerHTML = '<p class="text-gray-400 italic col-span-full">لا توجد صور في المعرض حالياً.</p>';
-            }
+        // دالة عرض بروفايل الشركة / صاحب العمل
+        function renderEmployerProfile(data) {
+            // الوصول للبيانات داخل كائن companyInfo
+            const info = data.companyInfo || {};
+            const verification = data.verification || {};
+
+            const photosHtml = verification.companyPhotosUrls ? verification.companyPhotosUrls.map(url => 
+                `<a href="${url}" target="_blank" class="block w-40 h-32 flex-shrink-0 rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img src="${url}" class="w-full h-full object-cover" alt="صورة من الشركة">
+                </a>`
+            ).join('') : '<p class="text-gray-500 text-sm">لا توجد صور للمنشأة.</p>';
+
+            const verifiedBadge = verification.isVerified ? 
+                `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    <i class="fas fa-check-circle"></i> موثق
+                 </span>` : 
+                `<span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    <i class="fas fa-clock"></i> قيد المراجعة
+                 </span>`;
+
+            const html = `
+                <div class="bg-white rounded-2xl shadow overflow-hidden mb-6">
+                    <div class="bg-gradient-to-r from-slate-700 to-slate-900 h-32"></div>
+                    <div class="px-6 pb-6 relative">
+                        <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-12 mb-4">
+                            <img src="${info.logoUrl || 'https://via.placeholder.com/150'}" 
+                                 class="w-24 h-24 rounded-lg border-4 border-white shadow-lg object-contain bg-white" alt="شعار الشركة">
+                            <div class="mt-4 sm:mt-0 sm:mr-4 text-center sm:text-right flex-1">
+                                <div class="flex items-center justify-center sm:justify-start gap-2">
+                                    <h2 class="text-2xl font-bold text-gray-900">${info.name || 'اسم الشركة'}</h2>
+                                    ${verifiedBadge}
+                                </div>
+                                <p class="text-gray-600 font-medium">${info.businessType || 'نشاط تجاري'}</p>
+                                <div class="flex items-center justify-center sm:justify-start mt-2 text-sm text-gray-500">
+                                    <i class="fas fa-map-marker-alt ml-1"></i>
+                                    ${info.location?.state || ''} - ${info.location?.city || ''}
+                                </div>
+                            </div>
+                             <div class="mt-4 sm:mt-0">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold">
+                                    حساب شركة
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">بيانات التواصل</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-envelope w-6 text-blue-500"></i>
+                                    <span class="text-sm truncate" dir="ltr">${info.email}</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-phone w-6 text-blue-500"></i>
+                                    <span class="text-sm" dir="ltr">${info.phone || '-'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">حالة التوثيق</h3>
+                            <div class="text-sm text-gray-600">
+                                <div class="flex justify-between mb-2">
+                                    <span>السجل التجاري:</span>
+                                    <span class="text-green-600 font-bold"><i class="fas fa-check"></i> تم الرفع</span>
+                                </div>
+                                ${verification.commercialRegisterUrl ? `
+                                <a href="${verification.commercialRegisterUrl}" target="_blank" class="block text-center bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg mt-3 transition">
+                                    <i class="fas fa-file-download ml-1"></i> معاينة الملف
+                                </a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-3">عن الشركة</h3>
+                            <p class="text-gray-600 leading-relaxed whitespace-pre-line">
+                                ${info.description || 'لا يوجد وصف.'}
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">صور من النشاط / المقر</h3>
+                            <div class="flex gap-4 overflow-x-auto pb-2 scrolling-wrapper">
+                                ${photosHtml}
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-xl border border-blue-100 p-6 flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-blue-900">ترغب في توظيف شخص؟</h4>
+                                <p class="text-sm text-blue-700">يمكنك نشر وظيفة جديدة واستقبال طلبات الموظفين.</p>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition">
+                                <i class="fas fa-plus ml-1"></i> نشر وظيفة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            showContent(html);
         }
 
-        // زر تسجيل الخروج
+        function showContent(htmlContent) {
+            loadingIndicator.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            profileContent.innerHTML = htmlContent;
+            profileContent.classList.remove('hidden');
+        }
+
+        function showError(msg) {
+            loadingIndicator.classList.add('hidden');
+            profileContent.classList.add('hidden');
+            document.getElementById('errorText').textContent = msg;
+            errorMessage.classList.remove('hidden');
+        }
+
+        // تسجيل الخروج
         document.getElementById('logoutBtn').addEventListener('click', () => {
             signOut(auth).then(() => {
-                alert("تم تسجيل الخروج بنجاح");
-                // window.location.href = "login.html";
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Error signing out:', error);
             });
         });
+
     </script>
 </body>
 </html>
