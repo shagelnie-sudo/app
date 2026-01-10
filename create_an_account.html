@@ -97,6 +97,14 @@
             cursor: pointer;
             color: #6b7280;
         }
+        /* تأكيد ظهور زر التوثيق بوضوح */
+#confirmVerificationBtn {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 50px; /* لضمان وجود مساحة كافية للضغط */
+}
+
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
@@ -784,7 +792,7 @@
             return data.secure_url;
         }
 
-        async function handleDataSubmission(event) {
+              async function handleDataSubmission(event) {
             event.preventDefault();
             const submitButton = event.target;
             submitButton.disabled = true;
@@ -840,14 +848,22 @@
                     };
                 }
 
+                // حفظ البيانات في Firestore
                 await setDoc(doc(db, role === 'employee' ? 'employees' : 'All_jops', user.uid), userData);
+                
+                // تسجيل الخروج لتنظيف الجلسة قبل التوجه للصفحة الرئيسية
                 await signOut(auth);
-                window.location.href = role === 'employee' ? "profile.html" : "employer-dashboard.html";
+                
+                // التوجيه إلى الصفحة الرئيسية
+                window.location.href = "index.html";
+
             } catch (error) {
-                showMessage('خطأ في حفظ البيانات.', 'error');
+                console.error("حدث خطأ أثناء الحفظ:", error);
+                showMessage('حدث خطأ في حفظ البيانات، يرجى المحاولة مرة أخرى.', 'error');
                 submitButton.disabled = false;
             }
         }
+
 
         function showMessage(msg, type) {
             messageDiv.textContent = msg;
