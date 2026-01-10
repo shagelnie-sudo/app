@@ -233,12 +233,14 @@
                             <option value="">اختر منطقة أو حي</option>
                         </select>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employee">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employee">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employee">
+                            التالي
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
@@ -272,12 +274,14 @@
                             </label>
                         </div>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
+                            التالي
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employee">
@@ -285,7 +289,7 @@
                     <div class="mb-4">
                         <label for="previousWorks" class="block text-sm font-medium text-gray-700">صور من أعمالك السابقة (5 صور على الأقل)</label>
                         <input type="file" id="previousWorks" name="previousWorks" multiple accept="image/*"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <div id="image-preview" class="flex flex-wrap mt-2"></div>
                         <p class="text-sm text-gray-500 mt-1">
                             **مطلوب:** تحميل 5 صور على الأقل.
@@ -301,12 +305,14 @@
                         <input type="url" id="linkedinUrl" name="linkedinUrl" placeholder="مثال: https://linkedin.com/in/your-profile"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employee">
-                        السابق
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employee">
-                        إنشاء الحساب
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employee">
+                            السابق
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employee">
+                            إنشاء الحساب
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -315,12 +321,12 @@
                     <h2 class="text-lg font-bold mb-4">الخطوة 2: بيانات الشركة</h2>
                     <div class="mb-4">
                         <label for="companyName" class="block text-sm font-medium text-gray-700">اسم الشركة / النشاط التجاري</label>
-                        <input type="text" id="companyName" name="companyName" placeholder="مثال: شركة التقنية الحديثة" required
+                        <input type="text" id="companyName" name="companyName" placeholder="مثال: شركة التقنية الحديثة"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
                         <label for="companyEmail" class="block text-sm font-medium text-gray-700">البريد الإلكتروني الرسمي</label>
-                        <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com" required
+                        <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
@@ -330,21 +336,23 @@
                     </div>
                     <div class="mb-4">
                         <label for="businessType" class="block text-sm font-medium text-gray-700">نوع النشاط</label>
-                        <input type="text" id="businessType" name="businessType" placeholder="مثال: مطعم، برمجة، ورشة..." required
+                        <input type="text" id="businessType" name="businessType" placeholder="مثال: مطعم، برمجة، ورشة..."
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employer">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employer">
+                            التالي
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employer">
                     <h2 class="text-lg font-bold mb-4">الخطوة 3: التفاصيل</h2>
                     <div class="mb-4">
                         <label for="companyDescription" class="block text-sm font-medium text-gray-700">نبذة عن الشركة</label>
-                        <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات" required
+                        <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات"
                                   class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                     <div class="mb-4">
@@ -365,12 +373,14 @@
                             <option value="">اختر منطقة أو حي</option>
                         </select>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
+                            التالي
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employer">
                     <h2 class="text-lg font-bold mb-4">الخطوة 4: التوثيق (اختياري)</h2>
@@ -386,12 +396,14 @@
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <div id="company-photos-preview" class="flex flex-wrap mt-2"></div>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
+                            التالي
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step5-employer">
                     <h2 class="text-lg font-bold mb-4">الخطوة 5: تفعيل الحساب</h2>
@@ -406,12 +418,14 @@
                             <span class="text-lg font-semibold mr-2">صاحب عمل فردي يبحث عن موظف أو عامل</span>
                         </label>
                     </div>
-                    <button type="button" class="mt-6 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employer">
-                        السابق
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employer">
-                        إنشاء الحساب
-                    </button>
+                    <div class="flex gap-2 mt-6">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employer">
+                            السابق
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employer">
+                            إنشاء الحساب
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -449,7 +463,6 @@
         const auth = getAuth(app);
         const storage = getStorage(app);
 
-        // إعداد حقل الهاتف الدولي
         const phoneInput = document.querySelector("#phone");
         const iti = window.intlTelInput(phoneInput, {
             initialCountry: "sd",
@@ -457,7 +470,6 @@
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js",
         });
 
-        // وظيفة إظهار/إخفاء كلمة المرور
         const setupPasswordToggle = (inputId, iconId) => {
             const icon = document.getElementById(iconId);
             const input = document.getElementById(inputId);
@@ -470,7 +482,6 @@
         setupPasswordToggle('password', 'togglePassword');
         setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
 
-        // وظيفة للتحقق من أن رقم الهاتف لم يُستخدم من قبل في كلا المجموعتين
         async function checkPhoneUniqueness(fullNumber) {
             const collectionsToCheck = ['employees', 'All_jops'];
             for (const colName of collectionsToCheck) {
@@ -478,7 +489,6 @@
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) return false;
                 
-                // للشركات البيانات مخزنة في هيكل مختلف قليلاً
                 const q2 = query(collection(db, colName), where("companyInfo.phone", "==", fullNumber));
                 const querySnapshot2 = await getDocs(q2);
                 if (!querySnapshot2.empty) return false;
@@ -497,9 +507,7 @@
                 "الخرطوم": ["السجانة", "العمارات", "الرياض", "الطائف", "المنشية", "بري", "الخرطوم 2", "الخرطوم 3", "السوق العربي", "حي المطار", "الشجرة", "جبرة", "الأزهري", "الصحافة", "الكلاكلة"],
                 "أم درمان": ["العباسية", "بيت المال", "الملازمين", "أبو روف", "الموردة", "الهاشماب", "العرضة", "ود نوباوي", "حي العرب", "الشهداء", "المسالمة", "بانت", "الثورة", "الحتانة", "الفتيحاب", "الواحة", "أم بدة", "السلام", "الفتح", "دار السلام"],
                 "الخرطوم بحري": ["كافوري", "شمبات", "الشعبية", "الدناقلة", "الخوجلاب", "الصافية", "كوبر", "الحلفايا", "الدروشاب", "الحاج يوسف", "سوبا شرق", "العيلفون", "أم ضوا بان", "أم دوم", "الشقلة", "النصر", "الوادي الأخضر"],
-                "شرق النيل": ["شرق النيل"],
-                "جبل أولياء": ["جبل أولياء"],
-                "كرري": ["كرري"]
+                "شرق النيل": ["شرق النيل"], "جبل أولياء": ["جبل أولياء"], "كرري": ["كرري"]
             },
             "الجزيرة": ["ود مدني", "الحصاحيصا", "المناقل", "رفاعة"],
             "البحر الأحمر": ["بورتسودان", "سواكن", "طوكر", "هيا"],
@@ -575,52 +583,24 @@
                 currentStepElementId = 'step1';
                 const formInputs = document.getElementById(currentStepElementId).querySelectorAll('input:required, select:required');
                 let isStepValid = true;
-                formInputs.forEach(input => {
-                    if (!input.checkValidity()) {
-                        input.reportValidity();
-                        isStepValid = false;
-                    }
-                });
+                formInputs.forEach(input => { if (!input.checkValidity()) { input.reportValidity(); isStepValid = false; } });
                 if (!isStepValid) return;
 
-                // التحقق من صحة رقم الهاتف
-                if (!iti.isValidNumber()) {
-                    showMessage('يرجى إدخال رقم هاتف صحيح يطابق الدولة المختارة.', 'error');
-                    return;
-                }
-
-                // التحقق من فرادة الرقم في قاعدة البيانات
+                if (!iti.isValidNumber()) { showMessage('يرجى إدخال رقم هاتف صحيح.', 'error'); return; }
                 const fullNumber = iti.getNumber();
                 const isUnique = await checkPhoneUniqueness(fullNumber);
-                if (!isUnique) {
-                    showMessage('عذراً، رقم الهاتف هذا تم استخدامه من قبل.', 'error');
-                    return;
-                }
+                if (!isUnique) { showMessage('عذراً، رقم الهاتف هذا تم استخدامه من قبل.', 'error'); return; }
 
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
-                if (password !== confirmPassword) {
-                    showMessage('كلمة المرور وتأكيدها غير متطابقين.', 'error');
-                    return;
-                }
-                if (!validatePassword()) {
-                    showMessage('كلمة المرور لا تستوفي جميع المتطلبات.', 'error');
-                    return;
-                }
+                if (password !== confirmPassword) { showMessage('كلمة المرور غير متطابقة.', 'error'); return; }
+                if (!validatePassword()) { showMessage('كلمة المرور ضعيفة.', 'error'); return; }
+                
                 isEmployerFlow = (document.getElementById('role').value === 'employer');
                 nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
             } else {
                 const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
                 currentStepElementId = `step${step}-${stepIdSuffix}`;
-                const formInputs = document.getElementById(currentStepElementId).querySelectorAll('input:required, select:required, textarea:required');
-                let isStepValid = true;
-                formInputs.forEach(input => {
-                    if (!input.checkValidity()) {
-                        input.reportValidity();
-                        isStepValid = false;
-                    }
-                });
-                if (!isStepValid) return;
                 nextStepElementId = `step${step + 1}-${stepIdSuffix}`;
             }
 
@@ -634,18 +614,31 @@
             const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
             const currentStepElementId = `step${step}-${stepIdSuffix}`;
             const prevStepElementId = step === 2 ? 'step1' : `step${step - 1}-${stepIdSuffix}`;
-
             document.getElementById(currentStepElementId).classList.add('hidden');
             document.getElementById(prevStepElementId).classList.remove('hidden');
             currentStep--;
             updateStepIndicator();
         }
 
+        // دالة الرفع المعدلة
+        async function uploadFile(file, filePath) {
+            if (!file) return null;
+            try {
+                const storageRef = ref(storage, filePath + '/' + Date.now() + "_" + file.name);
+                const uploadTask = await uploadBytes(storageRef, file);
+                return await getDownloadURL(uploadTask.ref);
+            } catch (e) {
+                console.error("Upload error:", e);
+                return null;
+            }
+        }
+
         async function submitForm(event) {
             event.preventDefault();
-            const submitButton = event.target;
+            const submitButton = event.target.tagName === 'FORM' ? event.submitter : event.target;
+            if (!submitButton) return;
+
             submitButton.disabled = true;
-            const originalButtonText = submitButton.textContent;
             submitButton.textContent = 'جاري الحفظ...';
 
             const formInputs = form.elements;
@@ -653,7 +646,7 @@
             const email = formInputs['email'].value;
             const password = formInputs['password'].value;
             const role = formInputs['role'].value;
-            const phoneNumber = iti.getNumber(); // جلب الرقم بالتنسيق الدولي
+            const phoneNumber = iti.getNumber();
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -663,20 +656,19 @@
                 if (role === 'employee') {
                     const profilePhotoFile = formInputs['profilePhoto'].files[0];
                     const previousWorksFiles = formInputs['previousWorks'].files;
-                    let profileImageUrl = null;
-                    let previousWorksUrls = [];
-                    if (profilePhotoFile) { profileImageUrl = await uploadFile(profilePhotoFile, `profile_photos/${user.uid}`); }
-                    if (previousWorksFiles.length > 0) {
-                        previousWorksUrls = await Promise.all(Array.from(previousWorksFiles).map(file => uploadFile(file, `previous_works/${user.uid}`)));
+                    
+                    const profileImageUrl = await uploadFile(profilePhotoFile, `profile_photos/${user.uid}`);
+                    const previousWorksUrls = [];
+                    for (const file of previousWorksFiles) {
+                        const url = await uploadFile(file, `previous_works/${user.uid}`);
+                        if (url) previousWorksUrls.push(url);
                     }
 
                     const skillInputs = document.querySelectorAll('.skill-input');
                     const skills = Array.from(skillInputs).map(input => input.value.trim()).filter(skill => skill !== '');
 
                     userData = {
-                        name: name,
-                        email: user.email,
-                        role: role,
+                        name, email, role,
                         isProfileComplete: true,
                         createdAt: serverTimestamp(),
                         headline: formInputs['headline'].value || null,
@@ -693,29 +685,22 @@
                         previousWorksUrls,
                     };
                     
-                } else if (role === 'employer') {
+                } else {
                     const companyLogoFile = formInputs['companyLogo'].files[0];
                     const commercialRegisterFile = formInputs['commercialRegister'].files[0];
                     const companyPhotosFiles = formInputs['companyPhotos'].files;
 
-                    let companyLogoUrl = null;
-                    let commercialRegisterUrl = null;
-                    let companyPhotosUrls = [];
-                    let isVerified = false;
-
-                    if (companyLogoFile) { companyLogoUrl = await uploadFile(companyLogoFile, `company_logos/${user.uid}`); }
-                    if (commercialRegisterFile) { 
-                        commercialRegisterUrl = await uploadFile(commercialRegisterFile, `company_documents/${user.uid}`); 
-                        isVerified = true;
-                    }
-                    if (companyPhotosFiles.length > 0) {
-                        companyPhotosUrls = await Promise.all(Array.from(companyPhotosFiles).map(file => uploadFile(file, `company_photos/${user.uid}`)));
+                    const companyLogoUrl = await uploadFile(companyLogoFile, `company_logos/${user.uid}`);
+                    const commercialRegisterUrl = await uploadFile(commercialRegisterFile, `company_documents/${user.uid}`);
+                    
+                    const companyPhotosUrls = [];
+                    for (const file of companyPhotosFiles) {
+                        const url = await uploadFile(file, `company_photos/${user.uid}`);
+                        if (url) companyPhotosUrls.push(url);
                     }
 
                     userData = {
-                        name: name,
-                        email: user.email,
-                        role: role,
+                        name, email, role,
                         isProfileComplete: true,
                         createdAt: serverTimestamp(),
                         companyInfo: {
@@ -732,9 +717,9 @@
                             }
                         },
                         verification: {
-                            isVerified: isVerified,
-                            commercialRegisterUrl: commercialRegisterUrl,
-                            companyPhotosUrls: companyPhotosUrls,
+                            isVerified: !!commercialRegisterUrl,
+                            commercialRegisterUrl,
+                            companyPhotosUrls,
                         },
                         subRole: formInputs['employerType'].value
                     };
@@ -743,37 +728,19 @@
                 const collectionName = role === 'employee' ? 'employees' : 'All_jops';
                 await setDoc(doc(db, collectionName, user.uid), userData);
 
-                showMessage('تم إنشاء حسابك بنجاح! سيتم توجيهك الآن.', 'success');
+                showMessage('تم إنشاء حسابك بنجاح!', 'success');
                 setTimeout(() => {
-                    const redirectUrl = role === 'employee' ? "profile.html" : "employer-dashboard.html";
-                    window.location.href = redirectUrl;
+                    window.location.href = role === 'employee' ? "profile.html" : "employer-dashboard.html";
                 }, 2000);
 
             } catch (error) {
-                console.error("خطأ في التسجيل:", error);
-                let errorMessage = 'حدث خطأ غير متوقع. يرجى المحاولة لاحقًا.';
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'صيغة البريد الإلكتروني غير صحيحة.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'كلمة المرور ضعيفة جداً.';
-                        break;
-                }
+                console.error("Registration Error:", error);
+                let errorMessage = 'حدث خطأ في التسجيل: ' + error.message;
+                if (error.code === 'auth/email-already-in-use') errorMessage = 'البريد الإلكتروني مستخدم بالفعل.';
                 showMessage(errorMessage, 'error');
-            } finally {
                 submitButton.disabled = false;
-                submitButton.textContent = originalButtonText;
+                submitButton.textContent = 'إنشاء الحساب';
             }
-        }
-
-        async function uploadFile(file, filePath) {
-            const storageRef = ref(storage, filePath + '/' + file.name);
-            const uploadTask = await uploadBytes(storageRef, file);
-            return await getDownloadURL(uploadTask.ref);
         }
 
         function showMessage(msg, type) {
@@ -787,7 +754,6 @@
         const employeeAreaSelect = document.getElementById('area');
         const employeeCityContainer = document.getElementById('cityContainer');
         const employeeAreaContainer = document.getElementById('areaContainer');
-
         const employerStateSelect = document.getElementById('companyState');
         const employerCitySelect = document.getElementById('companyCity');
         const employerAreaSelect = document.getElementById('companyArea');
@@ -806,16 +772,14 @@
                     if (Array.isArray(citiesOrAreas)) {
                         citiesOrAreas.forEach(city => {
                             const option = document.createElement('option');
-                            option.value = city;
-                            option.textContent = city;
+                            option.value = city; option.textContent = city;
                             citySelect.appendChild(option);
                         });
                         cityContainer.classList.remove('hidden');
-                    } else if (typeof citiesOrAreas === 'object') {
+                    } else {
                         for (const city in citiesOrAreas) {
                             const option = document.createElement('option');
-                            option.value = city;
-                            option.textContent = city;
+                            option.value = city; option.textContent = city;
                             citySelect.appendChild(option);
                         }
                         cityContainer.classList.remove('hidden');
@@ -830,15 +794,12 @@
                 areaContainer.classList.add('hidden');
                 if (selectedState && selectedCity && sudanLocations[selectedState][selectedCity]) {
                     const areas = sudanLocations[selectedState][selectedCity];
-                    if (areas && Array.isArray(areas)) {
-                        areas.forEach(area => {
-                            const option = document.createElement('option');
-                            option.value = area;
-                            option.textContent = area;
-                            areaSelect.appendChild(option);
-                        });
-                        areaContainer.classList.remove('hidden');
-                    }
+                    areas.forEach(area => {
+                        const option = document.createElement('option');
+                        option.value = area; option.textContent = area;
+                        areaSelect.appendChild(option);
+                    });
+                    areaContainer.classList.remove('hidden');
                 }
             });
         }
@@ -846,79 +807,49 @@
         populateLocations(employeeStateSelect, employeeCitySelect, employeeAreaSelect, employeeCityContainer, employeeAreaContainer);
         populateLocations(employerStateSelect, employerCitySelect, employerAreaSelect, employerCityContainer, employerAreaContainer);
 
-        function populateStateSelects() {
-            const stateNames = Object.keys(sudanLocations);
-            [employeeStateSelect, employerStateSelect].forEach(select => {
-                stateNames.forEach(state => {
-                    const option = document.createElement('option');
-                    option.value = state;
-                    option.textContent = state;
-                    select.appendChild(option);
-                });
+        const stateNames = Object.keys(sudanLocations);
+        [employeeStateSelect, employerStateSelect].forEach(select => {
+            stateNames.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state; option.textContent = state;
+                select.appendChild(option);
             });
-        }
-        populateStateSelects();
+        });
 
         document.getElementById('skillsContainer').addEventListener('click', function(event) {
             const currentSkillsCount = document.querySelectorAll('.skill-input').length;
             const messageElement = document.getElementById('skillsLimitMessage');
             if (event.target.closest('.add-skill-btn')) {
-                if (currentSkillsCount >= 6) {
-                    messageElement.classList.remove('hidden');
-                    return;
-                }
-                messageElement.classList.add('hidden');
+                if (currentSkillsCount >= 6) { messageElement.classList.remove('hidden'); return; }
                 const newSkillInputHtml = `
                     <div class="mb-4 flex items-center">
                         <input type="text" name="skills[]" placeholder="مثال: React.js" class="skill-input w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <button type="button" class="remove-skill-btn mr-2 p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"><i class="fas fa-minus"></i></button>
-                    </div>
-                `;
+                    </div>`;
                 document.getElementById('skillsContainer').insertAdjacentHTML('beforeend', newSkillInputHtml);
             }
-            if (event.target.closest('.remove-skill-btn')) {
-                event.target.closest('.mb-4').remove();
-                if (document.querySelectorAll('.skill-input').length < 6) {
-                    messageElement.classList.add('hidden');
-                }
-            }
+            if (event.target.closest('.remove-skill-btn')) { event.target.closest('.mb-4').remove(); }
         });
 
-        document.getElementById('previousWorks').addEventListener('change', function(event) {
-            const previewContainer = document.getElementById('image-preview');
-            previewContainer.innerHTML = '';
-            const files = event.target.files;
-            if (files) {
-                Array.from(files).forEach(file => {
+        function handleFilePreview(inputId, previewId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                const container = document.getElementById(previewId);
+                container.innerHTML = '';
+                Array.from(e.target.files).forEach(file => {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = (ev) => {
                         const img = document.createElement('img');
-                        img.src = e.target.result;
-                        previewContainer.appendChild(img);
-                    }
+                        img.src = ev.target.result;
+                        container.appendChild(img);
+                    };
                     reader.readAsDataURL(file);
                 });
-            }
-        });
-
-        document.getElementById('companyPhotos').addEventListener('change', function(event) {
-            const previewContainer = document.getElementById('company-photos-preview');
-            previewContainer.innerHTML = '';
-            const files = event.target.files;
-            if (files) {
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        previewContainer.appendChild(img);
-                    }
-                    reader.readAsDataURL(file);
-                });
-            }
-        });
+            });
+        }
+        handleFilePreview('previousWorks', 'image-preview');
+        handleFilePreview('companyPhotos', 'company-photos-preview');
         
-        // Navigation Event Listeners
+        // Navigation Listeners
         document.getElementById('nextBtn1').addEventListener('click', () => nextStep(1));
         document.getElementById('nextBtn2-employee').addEventListener('click', () => nextStep(2));
         document.getElementById('nextBtn3-employee').addEventListener('click', () => nextStep(3));
@@ -934,9 +865,9 @@
         document.getElementById('prevBtn4-employer').addEventListener('click', () => prevStep(4));
         document.getElementById('prevBtn5-employer').addEventListener('click', () => prevStep(5));
         
-        document.getElementById('submitBtn-employee').addEventListener('click', submitForm);
-        document.getElementById('submitBtn-employer').addEventListener('click', submitForm);
-        
+        // ربط الإرسال بالنموذج
+        form.addEventListener('submit', submitForm);
+
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.form-card').forEach(el => el.classList.add('hidden'));
             document.getElementById('step1').classList.remove('hidden');
