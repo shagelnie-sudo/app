@@ -10,12 +10,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
         :root {
             --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --secondary: #f59e0b;
             --success: #10b981;
-            --danger: #ef4444;
-            --light: #f9fafb;
-            --dark: #1f2937;
             --gray: #6b7280;
         }
 
@@ -25,62 +20,30 @@
         }
 
         .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--gray);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: var(--gray); color: white;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto; font-weight: bold;
         }
 
-        .step.active {
-            background-color: var(--success);
-        }
+        .step.active { background-color: var(--success); }
 
-        .step-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
+        .step-container { display: flex; justify-content: space-between; margin-bottom: 20px; }
 
-        /* --- حل مشكلة زر التوثيق --- */
+        /* تعديل CSS لضمان ظهور الزر فوراً ومنع اختفائه */
         #confirmVerificationBtn {
-            display: flex !important; /* لضمان الظهور كعنصر مرئي */
+            display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            background-color: var(--success) !important;
+            min-height: 50px;
+            background-color: #10b981 !important;
             color: white !important;
-            padding: 12px 24px;
-            border-radius: 8px;
-            width: 100%;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            margin-top: 1rem;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            cursor: pointer !important;
+            position: relative !important;
+            z-index: 10 !important;
         }
 
-        #confirmVerificationBtn:hover {
-            background-color: #059669 !important;
-            transform: translateY(-2px);
-        }
-
-        .form-card {
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .hidden {
-            display: none;
-        }
+        .form-card { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
@@ -95,53 +58,36 @@
         </div>
 
         <form id="unifiedForm">
-            <div class="bg-white rounded-xl p-2 mb-6" id="step1">
-                <h2 class="text-lg font-bold mb-4 border-b pb-2">بيانات الحساب الأساسية</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 text-right">الاسم الثلاثي</label>
-                        <input type="text" class="w-full px-3 py-2 border rounded-md text-right" placeholder="أدخل اسمك الثلاثي">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 text-right">البريد الإلكتروني</label>
-                        <input type="email" class="w-full px-3 py-2 border rounded-md text-right" placeholder="example@mail.com">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 text-right">نوع الحساب</label>
-                        <select id="role" class="w-full px-3 py-2 border rounded-md text-right">
-                            <option value="employee">موظف / باحث عن عمل</option>
-                            <option value="employer">صاحب عمل / شركة</option>
-                        </select>
-                    </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card" id="step1">
+                <h2 class="text-lg font-bold mb-4 text-right">الخطوة 1: بيانات الحساب</h2>
+                <div class="space-y-4 text-right">
+                    <input type="text" placeholder="الاسم الثلاثي" class="w-full p-2 border rounded text-right">
+                    <input type="email" placeholder="البريد الإلكتروني" class="w-full p-2 border rounded text-right">
+                    <select id="role" class="w-full p-2 border rounded text-right">
+                        <option value="employee">موظف</option>
+                        <option value="employer">صاحب عمل</option>
+                    </select>
                 </div>
+                <button type="button" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg w-full" id="nextBtn1">التالي</button>
             </div>
 
-            <div class="bg-white rounded-xl p-6 mb-6 border-2 border-dashed border-blue-200" id="step2-verification">
-                <h2 class="text-lg font-bold mb-4 text-center">توثيق الحساب</h2>
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card" id="step2-verification">
+                <h2 class="text-lg font-bold mb-4 text-center">الخطوة 2: توثيق البريد الإلكتروني</h2>
                 <div class="text-center space-y-4">
-                    <div class="text-blue-500 text-5xl mb-2">
-                        <i class="fas fa-envelope-open-text"></i>
-                    </div>
-                    <p class="text-gray-700 text-sm">
-                        يرجى التحقق من بريدك الإلكتروني والضغط على الرابط المرسل إليك.
-                    </p>
+                    <p class="text-gray-700">لقد أرسلنا رابط توثيق إلى بريدك الإلكتروني.</p>
                     
-                    <button type="button" id="confirmVerificationBtn">
-                        <i class="fas fa-check-circle ml-2"></i>
+                    <button type="button" class="px-6 py-3 rounded-lg w-full font-bold" id="confirmVerificationBtn">
                         تأكيد التوثيق والمتابعة
                     </button>
-
-                    <button type="button" class="text-xs text-gray-500 underline mt-2">
-                        لم يصلك الرمز؟ إعادة الإرسال
-                    </button>
+                    
+                    <button type="button" class="text-sm text-blue-600" id="resendVerificationBtn">إعادة إرسال الإيميل</button>
                 </div>
             </div>
         </form>
 
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
-                لديك حساب بالفعل؟
-                <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">تسجيل الدخول</a>
+                لديك حساب بالفعل؟ <a href="login.html" class="text-blue-600 font-medium">تسجيل الدخول</a>
             </p>
         </div>
     </div>
