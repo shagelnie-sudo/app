@@ -48,452 +48,102 @@
             margin-bottom: 20px;
         }
 
+        /* --- حل مشكلة زر التوثيق --- */
+        #confirmVerificationBtn {
+            display: flex !important; /* لضمان الظهور كعنصر مرئي */
+            visibility: visible !important;
+            opacity: 1 !important;
+            background-color: var(--success) !important;
+            color: white !important;
+            padding: 12px 24px;
+            border-radius: 8px;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-top: 1rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        #confirmVerificationBtn:hover {
+            background-color: #059669 !important;
+            transform: translateY(-2px);
+        }
+
         .form-card {
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 2px solid transparent;
         }
 
-        .image-preview img, .document-preview img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-left: 8px;
+        .hidden {
+            display: none;
         }
-        .message {
-            text-align: center;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-        }
-        .success-message {
-            background-color: #dcfce7;
-            color: #065f46;
-        }
-        .error-message {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-        .password-requirement-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-top: 0.5rem;
-        }
-        .password-requirement-item.valid {
-            color: #10b981;
-        }
-        /* Style for password toggle */
-        .password-input-wrapper {
-            position: relative;
-        }
-        .password-toggle {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #6b7280;
-        }
-        /* تأكيد ظهور زر التوثيق بوضوح */
-#confirmVerificationBtn {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    min-height: 50px; /* لضمان وجود مساحة كافية للضغط */
-}
-
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
     <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
         <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-6">إنشاء حساب جديد</h2>
+        
         <div class="step-container" id="stepContainer">
             <div class="step active" id="stepIndicator1">1</div>
             <div class="step" id="stepIndicator2">2</div>
             <div class="step" id="stepIndicator3">3</div>
             <div class="step" id="stepIndicator4">4</div>
-            <div class="step hidden" id="stepIndicator5">5</div>
-            <div class="step hidden" id="stepIndicator6">6</div>
-            <div class="step hidden" id="stepIndicator7">7</div>
         </div>
 
         <form id="unifiedForm">
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card" id="step1">
-                <h2 class="text-lg font-bold mb-4">الخطوة 1: بيانات الحساب</h2>
-                <div class="space-y-6">
+            <div class="bg-white rounded-xl p-2 mb-6" id="step1">
+                <h2 class="text-lg font-bold mb-4 border-b pb-2">بيانات الحساب الأساسية</h2>
+                <div class="space-y-4">
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">الاسم الثلاثي</label>
-                        <div class="mt-1">
-                            <input id="name" name="name" type="text" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
-                                placeholder="أدخل اسمك الثلاثي">
-                        </div>
+                        <label class="block text-sm font-medium text-gray-700 text-right">الاسم الثلاثي</label>
+                        <input type="text" class="w-full px-3 py-2 border rounded-md text-right" placeholder="أدخل اسمك الثلاثي">
                     </div>
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
-                        <div class="mt-1">
-                            <input id="email" name="email" type="email" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
-                                placeholder="أدخل بريدك الإلكتروني">
-                        </div>
+                        <label class="block text-sm font-medium text-gray-700 text-right">البريد الإلكتروني</label>
+                        <input type="email" class="w-full px-3 py-2 border rounded-md text-right" placeholder="example@mail.com">
                     </div>
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
-                        <div class="mt-1 password-input-wrapper">
-                            <input id="password" name="password" type="password" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right pr-10"
-                                placeholder="أدخل كلمة مرور قوية">
-                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
-                        </div>
-                        <div class="password-requirements mt-2" id="passwordRequirements">
-                            <p class="text-gray-500 text-sm">يجب أن تحتوي كلمة المرور على:</p>
-                            <div id="min-length" class="password-requirement-item">
-                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
-                                <span>6 أحرف على الأقل</span>
-                            </div>
-                            <div id="has-upper" class="password-requirement-item">
-                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
-                                <span>حرف كبير واحد على الأقل</span>
-                            </div>
-                            <div id="has-lower" class="password-requirement-item">
-                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
-                                <span>حرف صغير واحد على الأقل</span>
-                            </div>
-                            <div id="has-number" class="password-requirement-item">
-                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
-                                <span>رقم واحد على الأقل</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">تأكيد كلمة المرور</label>
-                        <div class="mt-1 password-input-wrapper">
-                            <input id="confirmPassword" name="confirmPassword" type="password" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right pr-10"
-                                placeholder="أعد إدخال كلمة المرور">
-                            <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="role" class="block text-sm font-medium text-gray-700">نوع الحساب</label>
-                        <div class="mt-1">
-                            <select id="role" name="role" required
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
-                                <option value="" disabled selected>اختر نوع الحساب</option>
-                                <option value="employee">موظف</option>
-                                <option value="employer">شركة / صاحب عمل</option>
-                            </select>
-                        </div>
+                        <label class="block text-sm font-medium text-gray-700 text-right">نوع الحساب</label>
+                        <select id="role" class="w-full px-3 py-2 border rounded-md text-right">
+                            <option value="employee">موظف / باحث عن عمل</option>
+                            <option value="employer">صاحب عمل / شركة</option>
+                        </select>
                     </div>
                 </div>
-                <button type="button" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn1">
-                    التالي
-                </button>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step2-verification">
-                <h2 class="text-lg font-bold mb-4 text-center">الخطوة 2: توثيق البريد الإلكتروني</h2>
+            <div class="bg-white rounded-xl p-6 mb-6 border-2 border-dashed border-blue-200" id="step2-verification">
+                <h2 class="text-lg font-bold mb-4 text-center">توثيق الحساب</h2>
                 <div class="text-center space-y-4">
-                    <p class="text-gray-700">لقد أرسلنا رابط توثيق إلى بريدك الإلكتروني (<span id="verificationEmailDisplay" class="font-semibold text-blue-600"></span>).</p>
-                    <p class="text-gray-700">الرجاء النقر على الرابط في بريدك الإلكتروني **ثم** اضغط على زر "تأكيد التوثيق" أدناه للمتابعة.</p>
-                    <button type="button" class="mt-4 px-6 py-3 bg-success text-white rounded-lg hover:bg-green-700 w-full" id="confirmVerificationBtn">
+                    <div class="text-blue-500 text-5xl mb-2">
+                        <i class="fas fa-envelope-open-text"></i>
+                    </div>
+                    <p class="text-gray-700 text-sm">
+                        يرجى التحقق من بريدك الإلكتروني والضغط على الرابط المرسل إليك.
+                    </p>
+                    
+                    <button type="button" id="confirmVerificationBtn">
+                        <i class="fas fa-check-circle ml-2"></i>
                         تأكيد التوثيق والمتابعة
                     </button>
-                    <button type="button" class="text-sm text-blue-600 hover:text-blue-800" id="resendVerificationBtn">
-                        إعادة إرسال الإيميل
-                    </button>
-                </div>
-            </div>
-            <div class="employee-steps">
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 3: البيانات الأساسية</h2>
-                    <div class="mb-4">
-                        <label for="headline" class="block text-sm font-medium text-gray-700">العنوان الوظيفي</label>
-                        <input 
-                        required
-                        
-                        type="text" id="headline" name="headline" placeholder="مثال: عامل ديكور"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="bio" class="block text-sm font-medium text-gray-700">نبذة وظيفية عنك</label
-                        <textarea
-                        required
-                        
-                        
-                        id="bio" name="bio" rows="5" placeholder="وصف مختصر عنك وعن خبراتك"
-                                  class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                    </div>
-                     <div class="mb-4">
-                        <label for="profilePhoto" class="block text-sm font-medium text-gray-700">صورة الملف الشخصي</label>
-                        <input 
-                        required
-                        
-                        
-                        
-                        type="file" id="profilePhoto" name="profilePhoto" accept="image/*"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="phone" class="block text-sm font-medium text-gray-700">رقم الهاتف</label>
-                        <input 
-                        required
-                        type="tel" id="phone" name="phone" placeholder="مثال: 0912345678"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="state" class="block text-sm font-medium text-gray-700">الولاية</label>
-                        <select 
-                        required
-                        id="state" name="state" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر ولاية</option>
-                        </select>
-                    </div>
-                    <div class="mb-4 hidden" id="cityContainer">
-                        <label for="city" class="block text-sm font-medium text-gray-700">المدينة</label>
-                        <select id="city" 
-                        required
-                        name="city" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر مدينة</option>
-                        </select>
-                    </div>
-                    <div class="mb-4 hidden" id="areaContainer">
-                        <label for="area" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
-                        <select id="area" name="area" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر منطقة أو حي</option>
-                        </select>
-                    </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
-                        التالي
-                    </button>
-                </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employee">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 4: المهارات ومستوى الخبرة</h2>
-                    <div id="skillsContainer">
-                        <div class="mb-4 flex items-center">
-                            <input
-                            required
-                          
-                            type="text" name="skills[]" placeholder="مثال: React.js" class="skill-input w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <button type="button" class="add-skill-btn mr-2 p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"><i class="fas fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <p id="skillsLimitMessage" class="text-red-500 text-sm mt-2 hidden">لا يمكنك إضافة أكثر من 6 مهارات.</p>
-                    <div class="mb-4">
-                        <label for="experience" class="block text-sm font-medium text-gray-700">مستوى الخبرة</label>
-                        <select
-                        required
-                        id="experience" name="experience" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر مستوى الخبرة</option>
-                            <option value="مبتدئ">مبتدئ (0-2 سنوات)</option>
-                            <option value="متوسط">متوسط (2-5 سنوات)</option>
-                            <option value="خبير">خبير (5+ سنوات)</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">حالة البحث عن عمل</label>
-                        <div class="flex gap-4">
-                            <label class="inline-flex items-center">
-                                <input
-                                required
-                            
-                                type="radio" name="jobStatus" value="متاح للعمل" class="form-radio text-blue-600" checked>
-                                <span class="mr-2">متاح للعمل</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="jobStatus" value="لا أبحث حالياً" class="form-radio text-blue-600">
-                                <span class="mr-2">لا أبحث حالياً</span>
-                            </label>
-                        </div>
-                    </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employee">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employee">
-                        التالي
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step5-employee">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 5: الملفات والروابط</h2>
-                    <div class="mb-4">
-                        <label for="previousWorks" class="block text-sm font-medium text-gray-700">صور من أعمالك السابقة (5 صور على الأقل)</label>
-                        <input
-                        required
-                        type="file" id="previousWorks" name="previousWorks" multiple accept="image/*"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        <div id="image-preview" class="flex flex-wrap mt-2"></div>
-                        <p class="text-sm text-gray-500 mt-1">
-                            **مطلوب:** تحميل 5 صور على الأقل.
-                        </p>
-                    </div>
-                    <div class="mb-4">
-                        <label for="cvUrl" class="block text-sm font-medium text-gray-700">رابط السيرة الذاتية (CV) (اختياري)</label>
-                        <input type="url" id="cvUrl" name="cvUrl" placeholder="مثال: https://docs.google.com/your-cv"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="linkedinUrl" class="block text-sm font-medium text-gray-700">رابط لينكد إن (اختياري)</label>
-                        <input type="url" id="linkedinUrl" name="linkedinUrl" placeholder="مثال: https://linkedin.com/in/your-profile"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employee">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employee">
-                        إنشاء الحساب
-                    </button>
-                </div>
-            </div>
-
-            <div class="employer-steps">
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 3: بيانات الشركة</h2>
-                    <div class="mb-4">
-                        <label for="companyName" class="block text-sm font-medium text-gray-700">اسم الشركة / النشاط التجاري</label>
-                        <input
-                        
-                        type="text" id="companyName" name="companyName" placeholder="مثال: شركة التقنية الحديثة" required
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="companyEmail" class="block text-sm font-medium text-gray-700">البريد الإلكتروني الرسمي</label>
-                        <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com" required
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف </label>
-                        <input
-                        required
-                        type="tel" id="companyPhone" name="companyPhone" placeholder="مثال: 0912345678"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="companyLogo" class="block text-sm font-medium text-gray-700">الشعار / اللوجو</label>
-                        <input 
-                        required
-                        type="file" id="companyLogo" name="companyLogo" accept="image/*"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="businessType" class="block text-sm font-medium text-gray-700">نوع النشاط</label>
-                        <input type="text" id="businessType" name="businessType" placeholder="مثال: مطعم، برمجة، ورشة..." required
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
-                        التالي
-                    </button>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 4: التفاصيل</h2>
-                    <div class="mb-4">
-                        <label for="companyDescription" class="block text-sm font-medium text-gray-700">نبذة عن الشركة</label>
-                        <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات" required
-                                  class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label for="companyState" class="block text-sm font-medium text-gray-700">الولاية</label>
-                        <select 
-                        required
-                  
-                        id="companyState" name="companyState" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر ولاية</option>
-                        </select>
-                    </div>
-                    <div class="mb-4 hidden" id="companyCityContainer">
-                        <label for="companyCity" class="block text-sm font-medium text-gray-700">المدينة</label>
-                        <select 
-                        required
-                        id="companyCity" name="companyCity" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر مدينة</option>
-                        </select>
-                    </div>
-                    <div class="mb-4 hidden" id="companyAreaContainer">
-                        <label for="companyArea" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
-                        <select
-                        
-              
-                        id="companyArea" name="companyArea" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر منطقة أو حي</option>
-                        </select>
-                    </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
-                        التالي
-                    </button>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step5-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 5: التوثيق </h2>
-                    <p class="text-sm text-gray-500 mb-4">         </p>
-                    <div class="mb-4">
-                        <label for="commercialRegister" class="block text-sm font-medium text-gray-700">رخصة / سجل تجاري </label>
-                        <input
-                        required
-                        type="file" id="commercialRegister" name="commercialRegister" accept=".pdf,.doc,.docx"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="companyPhotos" class="block text-sm font-medium text-gray-700">صور من مقر الشركة / النشاط (3 صور على الأقل)</label>
-                        <input
-                        required
-                        type="file" id="companyPhotos" name="companyPhotos" multiple accept="image/*"
-                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <div id="company-photos-preview" class="flex flex-wrap mt-2"></div>
-                    </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn5-employer">
-                        التالي
-                    </button>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step7-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 6: تفعيل الحساب</h2>
-                     <p class="text-sm text-gray-500 mb-4">اختر نوع الحساب الفرعي لتفعيل حسابك:</p>
-                    <div class="flex flex-col space-y-4">
-                        <label class="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                            <input type="radio" name="employerType" value="hiring" class="form-radio text-blue-600" checked>
-                            <span class="text-lg font-semibold mr-2">شركة لديها شواغر وتريد التوظيف</span>
-                        </label>
-                        <label class="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                            <input type="radio" name="employerType" value="individual" class="form-radio text-blue-600">
-                            <span class="text-lg font-semibold mr-2">صاحب عمل فردي يبحث عن موظف أو عامل</span>
-                        </label>
-                    </div>
-                    <button type="button" class="mt-6 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn7-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employer">
-                        إنشاء الحساب
+                    <button type="button" class="text-xs text-gray-500 underline mt-2">
+                        لم يصلك الرمز؟ إعادة الإرسال
                     </button>
                 </div>
             </div>
         </form>
 
-        <div id="message" class="message hidden"></div>
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
-                هل لديك حساب بالفعل؟
-                <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">
-                    تسجيل الدخول
-                </a>
+                لديك حساب بالفعل؟
+                <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">تسجيل الدخول</a>
             </p>
         </div>
     </div>
-
-    <script src="js/registration.js"></script>
 </body>
 </html>
