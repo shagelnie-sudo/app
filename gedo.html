@@ -3,187 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البحث الذكي عن الجامعات</title>
+    <title>مستكشف الجامعات الذكي</title>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --bg-color: #f8fafc;
-            --text-color: #1e293b;
+            --primary: #007bff;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #f4f7f6;
             display: flex;
             justify-content: center;
-            padding-top: 50px;
-            color: var(--text-color);
+            padding: 50px 20px;
         }
 
-        .search-box {
+        .search-container {
+            width: 100%;
+            max-width: 550px;
             position: relative;
-            width: 100%;
-            max-width: 500px;
         }
 
-        /* تنسيق حقل الإدخال */
-        input#uni-search {
+        .input-wrapper {
+            position: relative;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+        }
+
+        input {
             width: 100%;
-            padding: 15px 20px;
-            font-size: 18px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
+            padding: 18px 25px;
+            border: none;
             outline: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            box-sizing: border-box;
         }
 
-        input#uni-search:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
-        }
-
-        /* قائمة الاقتراحات */
-        .results-list {
+        .results-box {
             position: absolute;
-            top: calc(100% + 10px);
+            top: 110%;
             left: 0;
             right: 0;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            max-height: 400px;
+            box-shadow: var(--shadow);
+            max-height: 450px;
             overflow-y: auto;
             display: none;
-            z-index: 100;
-            border: 1px solid #e2e8f0;
+            z-index: 999;
         }
 
-        .result-item {
+        .uni-item {
             display: flex;
             align-items: center;
-            padding: 12px 15px;
+            padding: 12px 20px;
             cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            transition: background 0.2s;
+            border-bottom: 1px solid #eee;
+            transition: 0.2s;
         }
 
-        .result-item:last-child { border-bottom: none; }
+        .uni-item:hover {
+            background-color: #f8f9fa;
+        }
 
-        .result-item:hover { background-color: #f8fafc; }
-
-        /* تنسيق الشعار */
         .uni-logo {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             object-fit: contain;
             margin-left: 15px;
-            border-radius: 4px;
-            background: #eee;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 2px;
         }
 
-        .uni-info {
+        .uni-details {
             display: flex;
             flex-direction: column;
         }
 
         .uni-name {
-            font-weight: 600;
+            font-weight: bold;
+            color: #333;
             font-size: 16px;
         }
 
-        .uni-country {
-            font-size: 12px;
-            color: #64748b;
+        .uni-location {
+            font-size: 13px;
+            color: #777;
+            margin-top: 3px;
         }
 
-        .loading-spinner {
-            padding: 15px;
+        .status-msg {
+            padding: 20px;
             text-align: center;
-            color: #64748b;
+            color: #666;
         }
+
+        /* تنسيق جميل لشريط التمرير */
+        .results-box::-webkit-scrollbar { width: 6px; }
+        .results-box::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="search-box">
-    <input type="text" id="uni-search" placeholder="ابحث عن جامعة أو مدرسة..." autocomplete="off">
-    <div id="results" class="results-list"></div>
+<div class="search-container">
+    <div class="input-wrapper">
+        <input type="text" id="uniInput" placeholder="اكتب اسم الجامعة (مثلاً: جامعة الخرطوم)..." autocomplete="off">
+    </div>
+    <div id="resultsBox" class="results-box"></div>
 </div>
 
 <script>
-    const input = document.getElementById('uni-search');
-    const resultsBox = document.getElementById('results');
-    let timeout = null;
+    const uniInput = document.getElementById('uniInput');
+    const resultsBox = document.getElementById('resultsBox');
+    let debounceTimer;
 
-    input.addEventListener('input', () => {
-        clearTimeout(timeout);
-        const query = input.value.trim();
+    uniInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const query = uniInput.value.trim();
 
         if (query.length < 2) {
             resultsBox.style.display = 'none';
             return;
         }
 
-        // الانتظار 500 ملي ثانية قبل البحث (Debouncing)
-        timeout = setTimeout(() => fetchUniversities(query), 500);
+        debounceTimer = setTimeout(() => fetchUniversities(query), 600);
     });
 
     async function fetchUniversities(query) {
-        resultsBox.innerHTML = '<div class="loading-spinner">جاري البحث عن العمالقة...</div>';
+        resultsBox.innerHTML = '<div class="status-msg">جاري البحث في الجامعات...</div>';
         resultsBox.style.display = 'block';
 
-        // استخدام Wikidata API للبحث عن الجامعات باللغة العربية
-        const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=ar&format=json&origin=*&type=item`;
+        // استعلام SPARQL متطور: يبحث عن المؤسسات التعليمية (Q2385804) أو الجامعات (Q3918)
+        const sparqlQuery = `
+            SELECT DISTINCT ?item ?itemLabel ?logo ?countryLabel WHERE {
+              ?item (wdt:P31/wdt:P279*) wd:Q2385804 . 
+              ?item rdfs:label ?itemLabel .
+              FILTER(CONTAINS(LCASE(?itemLabel), LCASE("${query}")))
+              FILTER(LANG(?itemLabel) = "ar")
+              OPTIONAL { ?item wdt:P154 ?logo . }
+              OPTIONAL { ?item wdt:P17 ?country . ?country rdfs:label ?countryLabel . FILTER(LANG(?countryLabel) = "ar") }
+              SERVICE wikibase:label { bd:serviceParam wikibase:language "ar". }
+            } LIMIT 15
+        `;
+
+        const url = "https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(sparqlQuery);
 
         try {
             const response = await fetch(url);
             const data = await response.json();
-            
-            // تصفية النتائج لعرض الجامعات فقط (تقريبياً) وجلب الصور
-            displayResults(data.search);
+            renderResults(data.results.bindings);
         } catch (error) {
-            resultsBox.innerHTML = '<div class="loading-spinner">حدث خطأ، حاول مرة أخرى</div>';
+            resultsBox.innerHTML = '<div class="status-msg">عذراً، تعذر الاتصال بالخدمة.</div>';
         }
     }
 
-    async function displayResults(items) {
-        if (items.length === 0) {
-            resultsBox.innerHTML = '<div class="loading-spinner">لم نجد نتائج تطابق بحثك</div>';
+    function renderResults(universities) {
+        if (universities.length === 0) {
+            resultsBox.innerHTML = '<div class="status-msg">لم يتم العثور على جامعات بهذا الاسم.</div>';
             return;
         }
 
         resultsBox.innerHTML = '';
         
-        for (const item of items) {
-            const div = document.createElement('div');
-            div.className = 'result-item';
-            
-            // جلب صورة الشعار من Wikidata (إجراء إضافي اختياري لزيادة الجمالية)
-            const logoUrl = `https://www.wikidata.org/wiki/Special:FilePath/${item.id}?width=50`;
-            const placeholder = "https://cdn-icons-png.flaticon.com/512/807/807310.png";
+        universities.forEach(u => {
+            const name = u.itemLabel.value;
+            const logo = u.logo ? u.logo.value.replace("http://", "https://") : 'https://cdn-icons-png.flaticon.com/512/807/807310.png';
+            const country = u.countryLabel ? u.countryLabel.value : 'مؤسسة تعليمية';
 
+            const div = document.createElement('div');
+            div.className = 'uni-item';
             div.innerHTML = `
-                <img src="${placeholder}" data-src="${logoUrl}" class="uni-logo" onerror="this.src='${placeholder}'">
-                <div class="uni-info">
-                    <span class="uni-name">${item.label}</span>
-                    <span class="uni-country">${item.description || 'مؤسسة تعليمية'}</span>
+                <img src="${logo}" class="uni-logo" alt="logo">
+                <div class="uni-details">
+                    <span class="uni-name">${name}</span>
+                    <span class="uni-location">📍 ${country}</span>
                 </div>
             `;
 
             div.onclick = () => {
-                input.value = item.label;
+                uniInput.value = name;
                 resultsBox.style.display = 'none';
             };
             resultsBox.appendChild(div);
-        }
+        });
     }
 
-    // إغلاق القائمة عند الضغط في أي مكان آخر
+    // إغلاق القائمة عند النقر في الخارج
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-box')) {
-            resultsBox.style.display = 'none';
-        }
+        if (!e.target.closest('.search-container')) resultsBox.style.display = 'none';
     });
 </script>
 
