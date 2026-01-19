@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختيار الموقع من الخريطة</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; direction: rtl; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; position: relative; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        
+        #map { height: 350px; width: 100%; margin-top: 15px; border-radius: 8px; border: 2px solid #ddd; }
+        
+        #suggestions {
+            position: absolute; width: 100%; background: white; border: 1px solid #ccc;
+            max-height: 150px; overflow-y: auto; z-index: 1000; display: none;
+            list-style: none; padding: 0; margin: 0; border-radius: 0 0 8px 8px;
+        }
+        #suggestions li { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
+        #suggestions li:hover { background-color: #f0f0f0; }
+        
+        .result-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
+        input[readonly] { background-color: #f9f9f9; font-size: 13px; color: #d35400; font-weight: bold; }
+        .hint { font-size: 12px; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>حدد موقعك (بحث أو ضغط على الخريطة)</h3>
+    
+    <div class="form-group">
+        <label>ابحث عن عنوان:</label>
+        <input id="search" type="text" placeholder="اكتب اسم الحي أو الشارع..." autocomplete="off">
+        <ul id="suggestions"></ul>
+        <div class="hint">يمكنك أيضاً النقر مباشرة على الخريطة لتحديد الموقع</div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="result-fields">
+        <div class="form-group">
+            <label>الولاية/المنطقة:</label>
+            <input id="state" type="text" readonly>
+        </div>
+        <div class="form-group">
+            <label>المدينة:</label>
+            <input id="city" type="text" readonly>
+        </div>
+        <div class="form-group">
+            <label>الحي:</label>
+            <input id="district" type="text" readonly>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. إعداد الخريطة (افتراضياً على مكة المكرمة أو موقع عام)
+    const map = L.map('map').setView([21.4225, 39.8262], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    let marker = L.marker([21.4225, 39.8262], {draggable: false}).addTo(map);
+
+    const searchInput = document.getElementById('search');
+    const suggestionsList = document.getElementById('suggestions');
+
+    // 2. البحث عند الكتابة
+    searchInput.addEventListener('input', function() {
+        const query = this.value;
+        if (query.length < 3) { suggestionsList.style.display = 'none'; return; }
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=5&accept-language=ar`)
+            .then(res => res.json())
+            .then(data => {
+                suggestionsList.innerHTML = '';
+                suggestionsList.style.display = 'block';
+                data.forEach(place => {
+                    const li = document.createElement('li');
+                    li.textContent = place.display_name;
+                    li.onclick = () => {
+                        updateInputs(place);
+                        map.setView([place.lat, place.lon], 15);
+                        marker.setLatLng([place.lat, place.lon]);
+                        suggestionsList.style.display = 'none';
+                    };
+                    suggestionsList.appendChild(li);
+                });
+            });
+    });
+
+    // 3. الاختيار عند الضغط على الخريطة
+    map.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        
+        marker.setLatLng([lat, lng]);
+        
+        // جلب بيانات العنوان من الإحداثيات (Reverse Geocoding)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=ar`)
+            .then(res => res.json())
+            .then(data => {
+                updateInputs(data);
+                searchInput.value = data.display_name;
+            });
+    });
+
+    // 4. دالة تحديث الحقول
+    function updateInputs(data) {
+        const addr = data.address;
+        if (!addr) return;
+
+        document.getElementById('state').value = addr.state || addr.region || addr.province || "";
+        document.getElementById('city').value = addr.city || addr.town || addr.municipality || addr.village || "";
+        document.getElementById('district').value = addr.suburb || addr.neighbourhood || addr.residential || addr.quarter || "";
+    }
+</script>
+
+</body>
+</html>
