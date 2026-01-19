@@ -3,117 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحديد الموقع عبر GPS والخريطة</title>
+    <title>نظام الإحداثيات والعناوين الدقيق</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; direction: rtl; }
-        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; position: relative; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; direction: rtl; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h3 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
         
-        /* زر GPS */
         .gps-btn {
-            background-color: #27ae60; color: white; border: none; padding: 10px 15px;
-            border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 15px;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background-color: #007bff; color: white; border: none; padding: 12px;
+            border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px;
+            transition: 0.3s; margin-bottom: 15px;
         }
-        .gps-btn:hover { background-color: #219150; }
+        .gps-btn:hover { background-color: #0056b3; }
 
-        #map { height: 300px; width: 100%; margin-top: 10px; border-radius: 8px; border: 2px solid #ddd; }
+        #map { height: 350px; width: 100%; border-radius: 10px; border: 1px solid #ddd; }
         
-        .result-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
-        input[readonly] { background-color: #f9f9f9; color: #d35400; font-weight: bold; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9; font-size: 14px; }
         
-        #loading { display: none; color: #2980b9; font-size: 14px; margin-bottom: 10px; }
+        .coords-group { background: #eef9ff; padding: 15px; border-radius: 10px; grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border: 1px inset #d1e9ff; }
+        .coords-group input { background-color: #fff; color: #2c3e50; font-weight: bold; }
+        
+        #status { font-size: 13px; color: #007bff; margin-top: 10px; text-align: center; font-style: italic; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h3>تحديد العنوان (GPS / خريطة)</h3>
+    <h3>تحديد الموقع الجغرافي الدقيق</h3>
     
-    <button class="gps-btn" onclick="getLocation()">
-        📍 تحديد موقعي الحالي الآن
-    </button>
-    <div id="loading">جاري جلب موقعك وتحديد التفاصيل...</div>
+    <button class="gps-btn" onclick="getLocation()">📍 تحديد موقعي الحالي (GPS)</button>
+    <div id="status">جاري معالجة البيانات الجغرافية...</div>
 
     <div id="map"></div>
 
-    <div class="result-fields">
+    <div class="info-grid">
         <div class="form-group">
-            <label>الولاية:</label>
-            <input id="state" type="text" readonly placeholder="تلقائي">
+            <label>الولاية / المنطقة:</label>
+            <input id="state" type="text" readonly placeholder="...">
         </div>
         <div class="form-group">
             <label>المدينة:</label>
-            <input id="city" type="text" readonly placeholder="تلقائي">
+            <input id="city" type="text" readonly placeholder="...">
         </div>
-        <div class="form-group">
-            <label>الحي:</label>
-            <input id="district" type="text" readonly placeholder="تلقائي">
+        <div class="form-group" style="grid-column: span 2;">
+            <label>الحي / اسم الشارع المحلي:</label>
+            <input id="district" type="text" readonly placeholder="سيتم البحث عن أدق مسمى للحي...">
+        </div>
+
+        <div class="coords-group">
+            <div class="form-group">
+                <label>خط العرض (Latitude):</label>
+                <input id="lat" type="text" readonly>
+            </div>
+            <div class="form-group">
+                <label>خط الطول (Longitude):</label>
+                <input id="lng" type="text" readonly>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // إعداد الخريطة
-    const map = L.map('map').setView([24.7136, 46.6753], 5); // البداية من مركز عام (مثلاً الرياض)
+    // إعداد الخريطة والبدء بإحداثيات افتراضية
+    const map = L.map('map').setView([24.7136, 46.6753], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     let marker = L.marker([24.7136, 46.6753]).addTo(map);
 
-    // دالة الحصول على الموقع عبر GPS
     function getLocation() {
-        const loading = document.getElementById('loading');
+        const status = document.getElementById('status');
         if (navigator.geolocation) {
-            loading.style.display = 'block';
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    // تحديث الخريطة والمؤشر
-                    map.setView([lat, lng], 16);
-                    marker.setLatLng([lat, lng]);
-                    
-                    // جلب اسم المنطقة من الإحداثيات
-                    fetchReverseGeocode(lat, lng);
-                },
-                (error) => {
-                    loading.style.display = 'none';
-                    alert("تعذر الوصول لموقعك. تأكد من تفعيل الـ GPS والسماح للمتصفح.");
-                }
-            );
-        } else {
-            alert("متصفحك لا يدعم خاصية تحديد الموقع.");
+            status.style.display = 'block';
+            status.innerText = "جاري الاتصال بالأقمار الصناعية...";
+            
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                updateInterface(lat, lng);
+            }, () => {
+                status.innerText = "فشل تحديد الموقع. يرجى تفعيل الـ GPS.";
+            });
         }
     }
 
-    // دالة جلب بيانات العنوان (الولاية، المدينة، الحي)
-    function fetchReverseGeocode(lat, lng) {
+    // عند النقر يدوياً على الخريطة
+    map.on('click', function(e) {
+        updateInterface(e.latlng.lat, e.latlng.lng);
+    });
+
+    function updateInterface(lat, lng) {
+        // 1. تحديث الخريطة والمؤشر
+        map.setView([lat, lng], 16);
+        marker.setLatLng([lat, lng]);
+
+        // 2. تحديث حقول الإحداثيات الرقمية
+        document.getElementById('lat').value = lat.toFixed(6);
+        document.getElementById('lng').value = lng.toFixed(6);
+
+        // 3. جلب بيانات العنوان (تحسين جلب الحي)
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=ar`)
             .then(res => res.json())
             .then(data => {
                 const addr = data.address;
-                document.getElementById('state').value = addr.state || addr.region || "";
-                document.getElementById('city').value = addr.city || addr.town || addr.municipality || "";
-                document.getElementById('district').value = addr.suburb || addr.neighbourhood || addr.residential || "";
                 
-                document.getElementById('loading').style.display = 'none';
-            })
-            .catch(() => {
-                document.getElementById('loading').style.display = 'none';
+                // تحديد الولاية والمدينة
+                document.getElementById('state').value = addr.state || addr.region || addr.province || "";
+                document.getElementById('city').value = addr.city || addr.town || addr.municipality || addr.village || "";
+
+                // تحسين منطق جلب الحي (البحث في كافة التصنيفات الممكنة)
+                // يبدأ بالحي الصغير وينتقل للأكبر حتى يجد قيمة
+                const districtName = addr.neighbourhood || addr.suburb || addr.residential || addr.quarter || addr.subdistrict || addr.road || "غير معرف بدقة";
+                document.getElementById('district').value = districtName;
+
+                document.getElementById('status').innerText = "تم تحديث الموقع بنجاح";
+                setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
             });
     }
-
-    // السماح باختيار موقع يدوي أيضاً عند النقر على الخريطة
-    map.on('click', function(e) {
-        marker.setLatLng(e.latlng);
-        fetchReverseGeocode(e.latlng.lat, e.latlng.lng);
-    });
 </script>
 
 </body>
