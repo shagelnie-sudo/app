@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Autocomplete جامعات حقيقية</title>
+  <style>
+    body {
+      font-family: Arial, Tahoma;
+      background: #f4f6f8;
+      padding: 50px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border: 1px solid #ccc;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #fff;
+      position: absolute;
+      width: 100%;
+      z-index: 10;
+    }
+    li {
+      padding: 10px;
+      cursor: pointer;
+    }
+    li:hover {
+      background: #eaeaea;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>ابحث عن الجامعة</h2>
+  <div style="position: relative;">
+    <input type="text" id="search" placeholder="ابدأ بكتابة اسم الجامعة...">
+    <ul id="results"></ul>
+  </div>
+</div>
+
+<script>
+const input = document.getElementById("search");
+const resultsBox = document.getElementById("results");
+
+/* قاعدة بيانات صغيرة كمثال، يمكن توسيعها لاحقاً من Wikidata */
+let universities = [
+  "University of Khartoum",
+  "Sudan University of Science and Technology",
+  "Omdurman Islamic University",
+  "Al Neelain University",
+  "Cairo University",
+  "Alexandria University",
+  "Harvard University",
+  "Stanford University",
+  "Oxford University",
+  "Cambridge University"
+];
+
+// وظيفة Autocomplete
+input.addEventListener("input", async () => {
+  const query = input.value.toLowerCase();
+  resultsBox.innerHTML = "";
+
+  if (!query) return;
+
+  // نبحث في قاعدة البيانات المحلية
+  let matches = universities.filter(u => u.toLowerCase().includes(query));
+
+  // إذا لم نجد أي شيء، نحاول البحث في Wikidata تلقائيًا
+  if (matches.length === 0 && query.length >= 3) {
+    try {
+      const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&format=json&origin=*`;
+      const res = await fetch(url);
+      const data = await res.json();
+      matches = data.search.map(item => item.label).slice(0, 5); // نأخذ أول 5 نتائج
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  matches.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    li.onclick = () => {
+      input.value = item;
+      resultsBox.innerHTML = "";
+    };
+    resultsBox.appendChild(li);
+  });
+});
+
+// إخفاء النتائج عند الضغط خارجها
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".container")) {
+    resultsBox.innerHTML = "";
+  }
+});
+</script>
+
+</body>
+</html>
