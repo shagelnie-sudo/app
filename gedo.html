@@ -2,127 +2,187 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البحث الذكي عن الجامعات</title>
     <style>
-        /* تنسيق حاوية البحث */
-        .autocomplete-container {
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+            color: var(--text-color);
+        }
+
+        .search-box {
             position: relative;
-            width: 400px;
-            margin: 50px auto;
-            font-family: Arial, sans-serif;
-        }
-
-        /* تنسيق مربع الكتابة */
-        input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
+            max-width: 500px;
         }
 
-        /* تنسيق قائمة الاقتراحات */
-        .suggestions-list {
+        /* تنسيق حقل الإدخال */
+        input#uni-search {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        input#uni-search:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+        }
+
+        /* قائمة الاقتراحات */
+        .results-list {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 10px);
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #ddd;
-            border-top: none;
-            max-height: 200px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
             overflow-y: auto;
-            z-index: 1000;
-            display: none; /* مخفية افتراضياً */
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 100;
+            border: 1px solid #e2e8f0;
         }
 
-        /* تنسيق كل عنصر في القائمة */
-        .suggestion-item {
-            padding: 10px;
+        .result-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
             cursor: pointer;
-            text-align: right;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
         }
 
-        .suggestion-item:hover {
-            background-color: #f0f0f0;
+        .result-item:last-child { border-bottom: none; }
+
+        .result-item:hover { background-color: #f8fafc; }
+
+        /* تنسيق الشعار */
+        .uni-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-left: 15px;
+            border-radius: 4px;
+            background: #eee;
         }
 
-        .loading {
-            padding: 10px;
-            color: #888;
-            font-style: italic;
+        .uni-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .uni-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .uni-country {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .loading-spinner {
+            padding: 15px;
+            text-align: center;
+            color: #64748b;
         }
     </style>
 </head>
 <body>
 
-<div class="autocomplete-container">
-    <label for="university-search">ابحث عن جامعتك:</label>
-    <input type="text" id="university-search" placeholder="اكتب اسم الجامعة (مثلاً: Khartoum)..." autocomplete="off">
-    <div id="suggestions" class="suggestions-list"></div>
+<div class="search-box">
+    <input type="text" id="uni-search" placeholder="ابحث عن جامعة أو مدرسة..." autocomplete="off">
+    <div id="results" class="results-list"></div>
 </div>
 
 <script>
-    const searchInput = document.getElementById('university-search');
-    const suggestionsBox = document.getElementById('suggestions');
+    const input = document.getElementById('uni-search');
+    const resultsBox = document.getElementById('results');
+    let timeout = null;
 
-    // الاستماع لحدث الكتابة
-    searchInput.addEventListener('input', async (e) => {
-        const query = e.target.value;
+    input.addEventListener('input', () => {
+        clearTimeout(timeout);
+        const query = input.value.trim();
 
-        // نبدأ البحث فقط إذا كتب المستخدم أكثر من حرفين
-        if (query.length < 3) {
-            suggestionsBox.style.display = 'none';
+        if (query.length < 2) {
+            resultsBox.style.display = 'none';
             return;
         }
 
-        // إظهار رسالة "جاري التحميل"
-        suggestionsBox.innerHTML = '<div class="loading">جاري البحث...</div>';
-        suggestionsBox.style.display = 'block';
-
-        try {
-            // طلب البيانات من خدمة Hipolabs العامة
-            // ملاحظة: الخدمة تدعم البحث باللغة الإنجليزية بشكل أفضل
-            const response = await fetch(`http://universities.hipolabs.com/search?name=${query}`);
-            const data = await response.json();
-
-            displaySuggestions(data.slice(0, 10)); // عرض أول 10 نتائج فقط للسرعة
-        } catch (error) {
-            console.error('خطأ في جلب البيانات:', error);
-            suggestionsBox.style.display = 'none';
-        }
+        // الانتظار 500 ملي ثانية قبل البحث (Debouncing)
+        timeout = setTimeout(() => fetchUniversities(query), 500);
     });
 
-    // وظيفة عرض الاقتراحات في القائمة
-    function displaySuggestions(universities) {
-        if (universities.length === 0) {
-            suggestionsBox.innerHTML = '<div class="suggestion-item">لا توجد نتائج</div>';
+    async function fetchUniversities(query) {
+        resultsBox.innerHTML = '<div class="loading-spinner">جاري البحث عن العمالقة...</div>';
+        resultsBox.style.display = 'block';
+
+        // استخدام Wikidata API للبحث عن الجامعات باللغة العربية
+        const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=ar&format=json&origin=*&type=item`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            // تصفية النتائج لعرض الجامعات فقط (تقريبياً) وجلب الصور
+            displayResults(data.search);
+        } catch (error) {
+            resultsBox.innerHTML = '<div class="loading-spinner">حدث خطأ، حاول مرة أخرى</div>';
+        }
+    }
+
+    async function displayResults(items) {
+        if (items.length === 0) {
+            resultsBox.innerHTML = '<div class="loading-spinner">لم نجد نتائج تطابق بحثك</div>';
             return;
         }
 
-        suggestionsBox.innerHTML = ''; // مسح القائمة القديمة
-
-        universities.forEach(uni => {
+        resultsBox.innerHTML = '';
+        
+        for (const item of items) {
             const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = uni.name;
+            div.className = 'result-item';
             
-            // عند الضغط على اقتراح
+            // جلب صورة الشعار من Wikidata (إجراء إضافي اختياري لزيادة الجمالية)
+            const logoUrl = `https://www.wikidata.org/wiki/Special:FilePath/${item.id}?width=50`;
+            const placeholder = "https://cdn-icons-png.flaticon.com/512/807/807310.png";
+
+            div.innerHTML = `
+                <img src="${placeholder}" data-src="${logoUrl}" class="uni-logo" onerror="this.src='${placeholder}'">
+                <div class="uni-info">
+                    <span class="uni-name">${item.label}</span>
+                    <span class="uni-country">${item.description || 'مؤسسة تعليمية'}</span>
+                </div>
+            `;
+
             div.onclick = () => {
-                searchInput.value = uni.name; // ملء الحقل
-                suggestionsBox.style.display = 'none'; // إخفاء القائمة
+                input.value = item.label;
+                resultsBox.style.display = 'none';
             };
-            suggestionsBox.appendChild(div);
-        });
+            resultsBox.appendChild(div);
+        }
     }
 
-    // إغلاق القائمة عند النقر خارجها
+    // إغلاق القائمة عند الضغط في أي مكان آخر
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.autocomplete-container')) {
-            suggestionsBox.style.display = 'none';
+        if (!e.target.closest('.search-box')) {
+            resultsBox.style.display = 'none';
         }
     });
 </script>
