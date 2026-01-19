@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اختيار الموقع من الخريطة</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        #map { height: 300px; width: 100%; margin-top: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <h3>أدخل الموقع أو اختر من الخريطة</h3>
+    
+    <div class="form-group">
+        <label>ابحث عن موقعك:</label>
+        <input id="autocomplete" type="text" placeholder="ابدأ بكتابة اسم المنطقة أو الشارع...">
+    </div>
+
+    <hr>
+
+    <div class="form-group">
+        <label>الولاية / المنطقة الإدارية:</label>
+        <input id="state" type="text" readonly placeholder="ستظهر هنا تلقائياً">
+    </div>
+    
+    <div class="form-group">
+        <label>المدينة:</label>
+        <input id="city" type="text" readonly placeholder="ستظهر هنا تلقائياً">
+    </div>
+
+    <div class="form-group">
+        <label>الحي / المنطقة:</label>
+        <input id="district" type="text" readonly placeholder="ستظهر هنا تلقائياً">
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&language=ar"></script>
+
+    <script>
+        function initAutocomplete() {
+            // ربط حقل الإدخال بميزة Google Places
+            const autocomplete = new google.maps.places.Autocomplete(
+                document.getElementById('autocomplete'),
+                { types: ['address'] }
+            );
+
+            // عند اختيار المستخدم لموقع من القائمة
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                
+                if (!place.address_components) {
+                    window.alert("الرجاء اختيار موقع من القائمة المنسدلة.");
+                    return;
+                }
+
+                // تفريغ الحقول قبل الملء الجديد
+                document.getElementById('state').value = "";
+                document.getElementById('city').value = "";
+                document.getElementById('district').value = "";
+
+                // استخراج البيانات من مكونات العنوان
+                place.address_components.forEach(component => {
+                    const types = component.types;
+
+                    if (types.includes("administrative_area_level_1")) {
+                        document.getElementById('state').value = component.long_name; // الولاية
+                    }
+                    if (types.includes("locality")) {
+                        document.getElementById('city').value = component.long_name; // المدينة
+                    }
+                    if (types.includes("sublocality_level_1") || types.includes("neighborhood")) {
+                        document.getElementById('district').value = component.long_name; // الحي
+                    }
+                });
+            });
+        }
+
+        // تشغيل الدالة عند تحميل الصفحة
+        google.maps.event.addDomListener(window, 'load', initAutocomplete);
+    </script>
+</body>
+</html>
