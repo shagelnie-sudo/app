@@ -3,127 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الإحداثيات والعناوين الدقيق</title>
+    <title>نظام تحديد الموقع الاحترافي</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; direction: rtl; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h3 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
-        
-        .gps-btn {
-            background-color: #007bff; color: white; border: none; padding: 12px;
-            border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px;
-            transition: 0.3s; margin-bottom: 15px;
+        :root {
+            --primary: #4f46e5;
+            --secondary: #0ea5e9;
+            --bg: #f8fafc;
+            --text: #1e293b;
         }
-        .gps-btn:hover { background-color: #0056b3; }
 
-        #map { height: 350px; width: 100%; border-radius: 10px; border: 1px solid #ddd; }
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .content { padding: 25px; }
+
+        .btn-gps {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-gps:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        #map { 
+            height: 300px; 
+            width: 100%; 
+            border-radius: 15px; 
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        .input-box { display: flex; flex-direction: column; gap: 8px; }
+
+        label { font-size: 14px; font-weight: 600; color: #64748b; }
+
+        input {
+            padding: 12px;
+            border: 2px solid #f1f5f9;
+            border-radius: 10px;
+            background: #f8fafc;
+            font-size: 15px;
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--secondary); outline: none; }
         
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; background-color: #f9f9f9; font-size: 14px; }
-        
-        .coords-group { background: #eef9ff; padding: 15px; border-radius: 10px; grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border: 1px inset #d1e9ff; }
-        .coords-group input { background-color: #fff; color: #2c3e50; font-weight: bold; }
-        
-        #status { font-size: 13px; color: #007bff; margin-top: 10px; text-align: center; font-style: italic; display: none; }
+        input[readonly] { color: var(--primary); font-weight: 500; }
+
+        .coords-section {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h3>تحديد الموقع الجغرافي الدقيق</h3>
-    
-    <button class="gps-btn" onclick="getLocation()">📍 تحديد موقعي الحالي (GPS)</button>
-    <div id="status">جاري معالجة البيانات الجغرافية...</div>
+<div class="card">
+    <div class="header">
+        <h2 style="margin:0">تحديد العنوان الجغرافي</h2>
+        <p style="margin:10px 0 0; opacity:0.8">حدد موقعك بدقة للحصول على تفاصيل العنوان والإحداثيات</p>
+    </div>
 
-    <div id="map"></div>
+    <div class="content">
+        <button class="btn-gps" onclick="getLocation()">
+            <span>📍</span> تحديد موقعي الحالي تلقائياً
+        </button>
 
-    <div class="info-grid">
-        <div class="form-group">
-            <label>الولاية / المنطقة:</label>
-            <input id="state" type="text" readonly placeholder="...">
-        </div>
-        <div class="form-group">
-            <label>المدينة:</label>
-            <input id="city" type="text" readonly placeholder="...">
-        </div>
-        <div class="form-group" style="grid-column: span 2;">
-            <label>الحي / اسم الشارع المحلي:</label>
-            <input id="district" type="text" readonly placeholder="سيتم البحث عن أدق مسمى للحي...">
-        </div>
+        <div id="map"></div>
 
-        <div class="coords-group">
-            <div class="form-group">
-                <label>خط العرض (Latitude):</label>
-                <input id="lat" type="text" readonly>
+        <div class="grid-layout">
+            <div class="input-box">
+                <label>المنطقة / الولاية</label>
+                <input id="state" type="text" readonly placeholder="---">
             </div>
-            <div class="form-group">
-                <label>خط الطول (Longitude):</label>
-                <input id="lng" type="text" readonly>
+            
+            <div class="input-box">
+                <label>المدينة</label>
+                <input id="city" type="text" readonly placeholder="---">
+            </div>
+
+            <div class="input-box full-width">
+                <label>الحي / الموقع الوصفي</label>
+                <input id="district" type="text" readonly placeholder="انقر على الخريطة لتحديد الحي">
+            </div>
+
+            <div class="coords-section full-width">
+                <div class="input-box">
+                    <label>خط العرض (Lat)</label>
+                    <input id="lat" type="text" readonly>
+                </div>
+                <div class="input-box">
+                    <label>خط الطول (Lng)</label>
+                    <input id="lng" type="text" readonly>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // إعداد الخريطة والبدء بإحداثيات افتراضية
     const map = L.map('map').setView([24.7136, 46.6753], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     let marker = L.marker([24.7136, 46.6753]).addTo(map);
 
     function getLocation() {
-        const status = document.getElementById('status');
         if (navigator.geolocation) {
-            status.style.display = 'block';
-            status.innerText = "جاري الاتصال بالأقمار الصناعية...";
-            
             navigator.geolocation.getCurrentPosition((position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                
-                updateInterface(lat, lng);
-            }, () => {
-                status.innerText = "فشل تحديد الموقع. يرجى تفعيل الـ GPS.";
+                updateInterface(position.coords.latitude, position.coords.longitude);
             });
         }
     }
 
-    // عند النقر يدوياً على الخريطة
     map.on('click', function(e) {
         updateInterface(e.latlng.lat, e.latlng.lng);
     });
 
     function updateInterface(lat, lng) {
-        // 1. تحديث الخريطة والمؤشر
         map.setView([lat, lng], 16);
         marker.setLatLng([lat, lng]);
-
-        // 2. تحديث حقول الإحداثيات الرقمية
         document.getElementById('lat').value = lat.toFixed(6);
         document.getElementById('lng').value = lng.toFixed(6);
 
-        // 3. جلب بيانات العنوان (تحسين جلب الحي)
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=ar`)
             .then(res => res.json())
             .then(data => {
                 const addr = data.address;
                 
-                // تحديد الولاية والمدينة
-                document.getElementById('state').value = addr.state || addr.region || addr.province || "";
-                document.getElementById('city').value = addr.city || addr.town || addr.municipality || addr.village || "";
+                document.getElementById('state').value = addr.state || addr.region || "";
+                document.getElementById('city').value = addr.city || addr.town || addr.municipality || "";
 
-                // تحسين منطق جلب الحي (البحث في كافة التصنيفات الممكنة)
-                // يبدأ بالحي الصغير وينتقل للأكبر حتى يجد قيمة
-                const districtName = addr.neighbourhood || addr.suburb || addr.residential || addr.quarter || addr.subdistrict || addr.road || "غير معرف بدقة";
-                document.getElementById('district').value = districtName;
-
-                document.getElementById('status').innerText = "تم تحديث الموقع بنجاح";
-                setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
+                // تنقية الحي من الرموز البرمجية مثل a1 أو الأرقام المجردة
+                let rawDistrict = addr.neighbourhood || addr.suburb || addr.residential || addr.quarter || addr.road || "";
+                
+                // فحص إذا كانت القيمة مجرد رمز (أقل من 3 أحرف أو تحتوي أرقام فقط)
+                if (rawDistrict.length <= 2 || /^\d+$/.test(rawDistrict)) {
+                    // محاولة جلب بديل أو تركه لاسم الشارع
+                    rawDistrict = addr.road || "منطقة سكنية";
+                }
+                
+                document.getElementById('district').value = rawDistrict;
             });
     }
 </script>
