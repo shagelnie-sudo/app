@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل حساب جديد - شغلني</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
@@ -61,13 +62,19 @@
             border-radius: 8px;
             margin-left: 8px;
         }
+
+        /* Message styling - below form */
+        .message-container {
+            margin-top: 1rem;
+            min-height: 60px;
+        }
         .message {
             text-align: center;
             padding: 1rem;
             border-radius: 8px;
-            margin-top: 1rem;
             display: none;
             animation: slideDown 0.3s ease-out;
+            margin-bottom: 1rem;
         }
         .message.show {
             display: block;
@@ -92,6 +99,7 @@
             color: #991b1b;
             border: 1px solid #ef4444;
         }
+
         .password-requirement-item {
             display: flex;
             align-items: center;
@@ -102,6 +110,7 @@
         .password-requirement-item.valid {
             color: #10b981;
         }
+
         /* Modal Styles */
         .modal {
             position: fixed;
@@ -139,6 +148,40 @@
                 transform: scale(1);
             }
         }
+
+        /* Modal message styling */
+        .modal-message {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+        .modal-message.show {
+            display: block;
+        }
+        .modal-message.success {
+            background-color: #dcfce7;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .modal-message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .modal-message.info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+
+        /* Countdown timer */
+        .countdown-timer {
+            font-weight: bold;
+            color: #dc2626;
+        }
+
         #confirmVerificationBtn {
             display: block !important;
             visibility: visible !important;
@@ -156,6 +199,7 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
         /* Skip Button New Design */
         .skip-btn {
             background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
@@ -176,15 +220,30 @@
         .skip-btn:active {
             transform: translateY(0);
         }
-        .skip-btn::before {
+        .skip-btn::after {
             content: '→';
-            margin-left: 6px;
+            margin-right: 6px;
             display: inline-block;
             transition: transform 0.3s ease;
         }
-        .skip-btn:hover::before {
+        .skip-btn:hover::after {
             transform: translateX(-4px);
         }
+
+        /* Step header with skip */
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .step-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+
         .optional-badge {
             display: inline-block;
             background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
@@ -192,14 +251,41 @@
             font-size: 0.7rem;
             padding: 0.35rem 0.75rem;
             border-radius: 9999px;
-            margin-right: 0.5rem;
             font-weight: 600;
             border: 1px solid #a5b4fc;
         }
-        .step-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+
+        /* Intel Tel Input customization */
+        .iti {
+            width: 100%;
+            display: block;
+        }
+        .iti__flag-container {
+            left: auto;
+            right: 0;
+        }
+        .iti__selected-flag {
+            border-radius: 0 0.375rem 0.375rem 0;
+            border-left: 1px solid #d1d5db;
+        }
+        .iti__country-list {
+            text-align: right;
+        }
+        .iti__country {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        .iti__flag-box {
+            margin-left: 0.5rem;
+            margin-right: 0;
+        }
+        .iti__country-name {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+        .iti__dial-code {
+            margin-left: 0.5rem;
         }
     </style>
 </head>
@@ -213,8 +299,6 @@
             <div class="step" id="stepIndicator4">4</div>
             <div class="step hidden" id="stepIndicator5">5</div>
         </div>
-
-        <div id="message" class="message"></div>
 
         <form id="unifiedForm">
             <!-- Step 1: إلزامي -->
@@ -236,6 +320,14 @@
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
                                 placeholder="أدخل بريدك الإلكتروني">
                         </div>
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">رقم الهاتف <span class="text-red-500">*</span></label>
+                        <div class="mt-1">
+                            <input id="phone" name="phone" type="tel" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">يرجى اختيار كود الدولة وإدخال رقم الهاتف</p>
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
@@ -290,7 +382,13 @@
                         </div>
                     </div>
                 </div>
-                <button type="button" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full" id="nextBtn1">
+
+                <!-- Message container below form -->
+                <div class="message-container">
+                    <div id="message" class="message"></div>
+                </div>
+
+                <button type="button" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full" id="nextBtn1">
                     التالي
                 </button>
             </div>
@@ -299,10 +397,12 @@
             <div class="employee-steps">
                 <!-- Step 2 Employee -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step2-employee">
-                    <h2 class="text-lg font-bold mb-4 step-badge">
-                        الخطوة 2: البيانات الأساسية
-                        <span class="optional-badge">يمكن التخطي</span>
-                    </h2>
+                    <div class="step-header">
+                        <h2 class="step-title">الخطوة 2: البيانات الأساسية <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(2, 'employee')">
+                            تخطي
+                        </button>
+                    </div>
                     <div class="mb-4">
                         <label for="headline" class="block text-sm font-medium text-gray-700">العنوان الاحترافي <span class="text-red-500">*</span></label>
                         <input type="text" id="headline" name="headline" placeholder="مثال: عامل ديكور" required
@@ -319,18 +419,11 @@
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="phone" class="block text-sm font-medium text-gray-700">رقم الهاتف <span class="text-red-500">*</span></label>
-                        <div class="flex flex-row-reverse gap-2 mt-1">
-                            <select id="countryCode" name="countryCode" class="w-24 border border-gray-300 rounded-lg px-2 py-2 bg-gray-50 text-center" dir="ltr">
-                                <option value="+249" selected>+249 (SD)</option>
-                                <option value="+966">+966 (SA)</option>
-                                <option value="+20">+20 (EG)</option>
-                                <option value="+971">+971 (AE)</option>
-                            </select>
-                            <input type="tel" id="phone" name="phone" placeholder="مثال: 0912345678" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-right">
+                        <label for="employeePhone" class="block text-sm font-medium text-gray-700">رقم الهاتف للتواصل</label>
+                        <div class="mt-1">
+                            <input type="tel" id="employeePhone" name="employeePhone" 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">يرجى التأكد من صحة الرقم (مثال: 09... أو 01...)</p>
                     </div>
                     <div class="mb-4">
                         <label for="state" class="block text-sm font-medium text-gray-700">الولاية <span class="text-red-500">*</span></label>
@@ -350,27 +443,29 @@
                             <option value="">اختر منطقة أو حي</option>
                         </select>
                     </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employee">
-                                السابق
-                            </button>
-                            <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employee">
-                                التالي
-                            </button>
-                        </div>
-                        <button type="button" class="w-full px-4 py-3 skip-btn rounded-lg text-sm" onclick="skipStep(2, 'employee')">
-                            تخطي هذه الخطوة وإكمالها لاحقاً
+
+                    <div class="message-container">
+                        <div id="message-step2-employee" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employee">
+                            التالي
                         </button>
                     </div>
                 </div>
 
                 <!-- Step 3 Employee -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
-                    <h2 class="text-lg font-bold mb-4 step-badge">
-                        الخطوة 3: المهارات ومستوى الخبرة
-                        <span class="optional-badge">يمكن التخطي</span>
-                    </h2>
+                    <div class="step-header">
+                        <h2 class="step-title">الخطوة 3: المهارات ومستوى الخبرة <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employee')">
+                            تخطي
+                        </button>
+                    </div>
                     <div id="skillsContainer">
                         <div class="mb-4 flex items-center">
                             <input type="text" name="skills[]" placeholder="مثال: React.js" class="skill-input w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -400,17 +495,17 @@
                             </label>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
-                                السابق
-                            </button>
-                            <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
-                                التالي
-                            </button>
-                        </div>
-                        <button type="button" class="w-full px-4 py-3 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employee')">
-                            تخطي هذه الخطوة وإكمالها لاحقاً
+
+                    <div class="message-container">
+                        <div id="message-step3-employee" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
+                            التالي
                         </button>
                     </div>
                 </div>
@@ -437,7 +532,12 @@
                         <input type="url" id="linkedinUrl" name="linkedinUrl" placeholder="مثال: https://linkedin.com/in/your-profile"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <div class="flex gap-2">
+
+                    <div class="message-container">
+                        <div id="message-step4-employee" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
                         <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employee">
                             السابق
                         </button>
@@ -470,15 +570,9 @@
                     </div>
                     <div class="mb-4">
                         <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف</label>
-                         <div class="flex flex-row-reverse gap-2 mt-1">
-                            <select id="companyCountryCode" name="companyCountryCode" class="w-24 border border-gray-300 rounded-lg px-2 py-2 bg-gray-50 text-center" dir="ltr">
-                                <option value="+249" selected>+249 (SD)</option>
-                                <option value="+966">+966 (SA)</option>
-                                <option value="+20">+20 (EG)</option>
-                                <option value="+971">+971 (AE)</option>
-                            </select>
-                            <input type="tel" id="companyPhone" name="companyPhone" placeholder="مثال: 0912345678"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-right">
+                        <div class="mt-1">
+                            <input type="tel" id="companyPhone" name="companyPhone" 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
                         </div>
                     </div>
                     <div class="mb-4">
@@ -491,7 +585,12 @@
                         <input type="text" id="businessType" name="businessType" placeholder="مثال: مطعم، برمجة، ورشة..." required
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <div class="flex gap-2">
+
+                    <div class="message-container">
+                        <div id="message-step2-employer" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
                         <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employer">
                             السابق
                         </button>
@@ -503,10 +602,12 @@
 
                 <!-- Step 3 Employer -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employer">
-                    <h2 class="text-lg font-bold mb-4 step-badge">
-                        الخطوة 3: التفاصيل
-                        <span class="optional-badge">يمكن التخطي</span>
-                    </h2>
+                    <div class="step-header">
+                        <h2 class="step-title">الخطوة 3: التفاصيل <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employer')">
+                            تخطي
+                        </button>
+                    </div>
                     <div class="mb-4">
                         <label for="companyDescription" class="block text-sm font-medium text-gray-700">نبذة عن الشركة</label>
                         <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات"
@@ -530,27 +631,29 @@
                             <option value="">اختر منطقة أو حي</option>
                         </select>
                     </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
-                                السابق
-                            </button>
-                            <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
-                                التالي
-                            </button>
-                        </div>
-                        <button type="button" class="w-full px-4 py-3 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employer')">
-                            تخطي هذه الخطوة وإكمالها لاحقاً
+
+                    <div class="message-container">
+                        <div id="message-step3-employer" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
+                            التالي
                         </button>
                     </div>
                 </div>
 
                 <!-- Step 4 Employer -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employer">
-                    <h2 class="text-lg font-bold mb-4 step-badge">
-                        الخطوة 4: التوثيق
-                        <span class="optional-badge">يمكن التخطي</span>
-                    </h2>
+                    <div class="step-header">
+                        <h2 class="step-title">الخطوة 4: التوثيق <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(4, 'employer')">
+                            تخطي
+                        </button>
+                    </div>
                     <p class="text-sm text-gray-500 mb-4">إذا قمت بتوثيق حسابك، ستحصل على شارة **"شركة موثقة ✅"**.</p>
                     <div class="mb-4">
                         <label for="commercialRegister" class="block text-sm font-medium text-gray-700">رخصة / سجل تجاري</label>
@@ -563,17 +666,17 @@
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <div id="company-photos-preview" class="flex flex-wrap mt-2"></div>
                     </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex gap-2">
-                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
-                                السابق
-                            </button>
-                            <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
-                                التالي
-                            </button>
-                        </div>
-                        <button type="button" class="w-full px-4 py-3 skip-btn rounded-lg text-sm" onclick="skipStep(4, 'employer')">
-                            تخطي هذه الخطوة وإكمالها لاحقاً
+
+                    <div class="message-container">
+                        <div id="message-step4-employer" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
+                            التالي
                         </button>
                     </div>
                 </div>
@@ -592,6 +695,11 @@
                             <span class="text-lg font-semibold mr-2">صاحب عمل فردي يبحث عن موظف أو عامل</span>
                         </label>
                     </div>
+
+                    <div class="message-container">
+                        <div id="message-step5-employer" class="message"></div>
+                    </div>
+
                     <div class="flex gap-2 mt-6">
                         <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employer">
                             السابق
@@ -630,6 +738,10 @@
                     إذا لم تجد البريد، تفقد مجلد <strong>Spam</strong> أو <strong>الرسائل غير المرغوب فيها</strong>
                 </p>
             </div>
+            
+            <!-- Modal message container -->
+            <div id="modalMessage" class="modal-message"></div>
+            
             <button id="checkVerificationBtn" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-2 flex items-center justify-center gap-2">
                 <span>لقد قمت بالتحقق</span>
             </button>
@@ -639,6 +751,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -662,11 +775,14 @@
         let currentStep = 1;
         let isEmployerFlow = false;
         const form = document.getElementById('unifiedForm');
-        const messageDiv = document.getElementById('message');
         const roleSelect = document.getElementById('role');
         let currentUser = null;
         let pendingVerificationCallback = null;
         let lastEmailSentTime = 0;
+        let countdownInterval = null;
+
+        // Intel Tel Input instances
+        let phoneInput, employeePhoneInput, companyPhoneInput;
 
         const sudanLocations = {
             "الخرطوم": {
@@ -695,6 +811,37 @@
             "وسط دارفور": ["زالنجي", "وداد", "مكجر"],
             "شرق دارفور": ["الضعين", "عديلة", "أبو كارنكا", "ياسين"],
         };
+
+        // Initialize Intel Tel Input
+        function initPhoneInputs() {
+            const commonConfig = {
+                initialCountry: "sd",
+                preferredCountries: ["sd", "sa", "eg", "ae", "qa", "kw", "bh", "om", "ly", "jo", "iq", "sy", "lb", "ps", "ye", "ma", "dz", "tn", "mr", "so", "dj", "er", "et", "ke", "ug", "cf", "td", "ne", "ng", "ml", "bf", "sn", "gm", "gw", "gn", "sl", "lr", "ci", "gh", "tg", "bj", "cm", "gq", "ga", "cg", "ao", "cd", "rw", "bi", "tz", "zm", "mw", "mz", "zw", "bw", "na", "za", "ls", "sz", "mg", "km", "mu", "sc", "mv", "lk", "in", "pk", "bd", "np", "bt", "mm", "th", "la", "kh", "vn", "my", "sg", "id", "ph", "bn", "tl", "au", "nz", "pg", "fj", "sb", "vu", "nc", "pf", "ws", "to", "ki", "tv", "nr", "fm", "mh", "pw", "us", "ca", "mx", "gt", "bz", "sv", "hn", "ni", "cr", "pa", "co", "ve", "gy", "sr", "gf", "br", "ec", "pe", "bo", "py", "cl", "ar", "uy", "fk", "gs", "aq", "gl", "is", "no", "se", "fi", "dk", "de", "nl", "be", "lu", "fr", "ch", "at", "cz", "pl", "sk", "hu", "ro", "md", "ua", "by", "ru", "kz", "uz", "tm", "kg", "tj", "af", "pk", "in", "cn", "mn", "kp", "kr", "jp", "tw", "hk", "mo", "ph", "vn", "la", "kh", "th", "mm", "bd", "np", "bt", "lk", "mv", "kg", "tj", "af", "ir", "tr", "cy", "gr", "bg", "rs", "ba", "hr", "si", "it", "mt", "sm", "va", "mc", "ad", "es", "pt", "gb", "ie", "gg", "je", "im", "fo", "ax", "ee", "lv", "lt", "by", "ua", "md", "ro", "bg", "gr", "al", "mk", "xk", "me", "rs", "ba", "hr", "si", "hu", "at", "sk", "cz", "pl", "de", "ch", "li", "it", "sm", "va", "mt", "es", "pt", "fr", "ad", "mc", "lu", "be", "nl", "dk", "no", "se", "fi", "is", "ie", "gb", "gg", "je", "im", "fo", "ax", "ee", "lv", "lt", "by", "ua", "md", "ro", "bg", "gr", "al", "mk", "xk", "me", "rs", "ba", "hr", "si", "hu", "at", "sk", "cz", "pl", "de", "ch", "li", "it", "sm", "va", "mt", "es", "pt", "fr", "ad", "mc", "lu", "be", "nl", "dk", "no", "se", "fi", "is", "ie", "gb"],
+                utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js",
+                separateDialCode: true,
+                formatOnDisplay: true,
+                nationalMode: true,
+                autoPlaceholder: "aggressive"
+            };
+
+            // Main phone input (Step 1)
+            const phoneInputElement = document.querySelector("#phone");
+            if (phoneInputElement) {
+                phoneInput = window.intlTelInput(phoneInputElement, commonConfig);
+            }
+
+            // Employee phone input (Step 2)
+            const employeePhoneElement = document.querySelector("#employeePhone");
+            if (employeePhoneElement) {
+                employeePhoneInput = window.intlTelInput(employeePhoneElement, commonConfig);
+            }
+
+            // Company phone input (Step 2 Employer)
+            const companyPhoneElement = document.querySelector("#companyPhone");
+            if (companyPhoneElement) {
+                companyPhoneInput = window.intlTelInput(companyPhoneElement, commonConfig);
+            }
+        }
 
         // --- Password Toggle Visibility ---
         window.togglePasswordVisibility = function(inputId) {
@@ -773,9 +920,17 @@
             updateStepIndicator();
         }
 
+        // Get message element for current step
+        function getMessageElement(step, role) {
+            if (step === 1) return document.getElementById('message');
+            const elementId = `message-step${step}-${role}`;
+            return document.getElementById(elementId) || document.getElementById('message');
+        }
+
         // --- Skip Step Function (Global) ---
         window.skipStep = function(stepToSkip, role) {
-            showMessage(`تم تخطي الخطوة ${stepToSkip}. يمكنك إكمالها لاحقاً من صفحة البروفايل.`, 'success');
+            const msgElement = getMessageElement(stepToSkip, role);
+            showMessageInElement(msgElement, `تم تخطي الخطوة ${stepToSkip}. يمكنك إكمالها لاحقاً من صفحة البروفايل.`, 'success');
             
             let nextStepNum;
             if (role === 'employee') {
@@ -817,20 +972,90 @@
             });
         }
 
+        // --- Message System ---
+        let messageTimeouts = {};
+        
+        function showMessageInElement(element, msg, type) {
+            const elementId = element.id || 'default';
+            
+            // Clear existing timeout for this element
+            if (messageTimeouts[elementId]) {
+                clearTimeout(messageTimeouts[elementId]);
+            }
+            
+            // Clear previous classes
+            element.className = 'message';
+            
+            // Force reflow
+            void element.offsetWidth;
+            
+            // Set new content and classes
+            element.textContent = msg;
+            element.classList.add('show', `${type}-message`);
+            
+            // Auto-hide
+            const duration = type === 'error' ? 8000 : 5000;
+            messageTimeouts[elementId] = setTimeout(() => {
+                hideMessageInElement(element);
+            }, duration);
+        }
+
+        function hideMessageInElement(element) {
+            element.classList.remove('show');
+            setTimeout(() => {
+                element.className = 'message';
+            }, 300);
+        }
+
         // --- Modal Logic for Email Verification Link ---
         const verificationModal = document.getElementById('verificationModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const checkVerificationBtn = document.getElementById('checkVerificationBtn');
         const resendLinkBtn = document.getElementById('resendLinkBtn');
         const verificationText = document.getElementById('verificationText');
+        const modalMessage = document.getElementById('modalMessage');
+
+        function showModalMessage(msg, type) {
+            modalMessage.textContent = msg;
+            modalMessage.className = `modal-message ${type} show`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                modalMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        function startCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            let remaining = 60;
+            resendLinkBtn.disabled = true;
+            
+            countdownInterval = setInterval(() => {
+                remaining--;
+                
+                if (remaining > 0) {
+                    resendLinkBtn.innerHTML = `سيتم إعادة الإرسال بعد <span class="countdown-timer">${remaining}</span> ثانية`;
+                } else {
+                    clearInterval(countdownInterval);
+                    resendLinkBtn.disabled = false;
+                    resendLinkBtn.textContent = 'إعادة إرسال الرابط';
+                }
+            }, 1000);
+        }
 
         closeModalBtn.addEventListener('click', () => {
             verificationModal.classList.remove('show');
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
         });
 
         checkVerificationBtn.addEventListener('click', async () => {
             if (!currentUser) {
-                showMessage('خطأ: لم يتم إنشاء المستخدم', 'error');
+                showModalMessage('خطأ: لم يتم إنشاء المستخدم', 'error');
                 return;
             }
 
@@ -841,29 +1066,28 @@
                 await reload(currentUser);
                 
                 if (currentUser.emailVerified) {
-                    verificationModal.classList.remove('show');
-                    showMessage('تم توثيق البريد الإلكتروني بنجاح!', 'success');
+                    showModalMessage('تم توثيق البريد الإلكتروني بنجاح!', 'success');
                     
                     setTimeout(() => {
+                        verificationModal.classList.remove('show');
                         if (pendingVerificationCallback) {
                             pendingVerificationCallback();
                             pendingVerificationCallback = null;
                         }
-                    }, 1000);
+                    }, 1500);
                 } else {
-                    showMessage('لم يتم التوثيق بعد. يرجى التحقق من بريدك والضغط على الرابط.', 'error');
+                    showModalMessage('لم يتم التوثيق بعد. يرجى التحقق من بريدك والضغط على الرابط.', 'error');
                     checkVerificationBtn.innerHTML = '<span>لقد قمت بالتحقق</span>';
                     checkVerificationBtn.disabled = false;
                 }
             } catch (error) {
                 console.error('Verification check error:', error);
-                showMessage('حدث خطأ أثناء التحقق. حاول مرة أخرى.', 'error');
+                showModalMessage('حدث خطأ أثناء التحقق. حاول مرة أخرى.', 'error');
                 checkVerificationBtn.innerHTML = '<span>لقد قمت بالتحقق</span>';
                 checkVerificationBtn.disabled = false;
             }
         });
 
-        // Fixed resend link with rate limiting
         resendLinkBtn.addEventListener('click', async () => {
             if (!currentUser) return;
             
@@ -871,26 +1095,20 @@
             const timeSinceLastSend = now - lastEmailSentTime;
             const minInterval = 60000; // 60 seconds
             
-            if (timeSinceLastSend < minInterval) {
+            if (timeSinceLastSend < minInterval && lastEmailSentTime !== 0) {
                 const remainingSeconds = Math.ceil((minInterval - timeSinceLastSend) / 1000);
-                showMessage(`يرجى الانتظار ${remainingSeconds} ثانية قبل إعادة الإرسال`, 'error');
+                showModalMessage(`يرجى الانتظار ${remainingSeconds} ثانية قبل إعادة الإرسال`, 'error');
                 return;
             }
             
             try {
                 resendLinkBtn.disabled = true;
-                resendLinkBtn.textContent = 'جاري الإرسال...';
                 
                 await sendEmailVerification(currentUser);
                 lastEmailSentTime = Date.now();
                 
-                showMessage('تم إعادة إرسال رابط التحقق بنجاح', 'success');
-                resendLinkBtn.textContent = 'إعادة إرسال الرابط';
-                
-                // Re-enable after 60 seconds
-                setTimeout(() => {
-                    resendLinkBtn.disabled = false;
-                }, minInterval);
+                showModalMessage('تم إعادة إرسال رابط التحقق بنجاح!', 'success');
+                startCountdown();
                 
             } catch (error) {
                 console.error('Resend error:', error);
@@ -898,7 +1116,7 @@
                 if (error.code === 'auth/too-many-requests') {
                     errorMsg = 'تم إرسال عدد كبير من الطلبات. يرجى المحاولة لاحقاً';
                 }
-                showMessage(errorMsg, 'error');
+                showModalMessage(errorMsg, 'error');
                 resendLinkBtn.disabled = false;
                 resendLinkBtn.textContent = 'إعادة إرسال الرابط';
             }
@@ -910,9 +1128,11 @@
             checkVerificationBtn.disabled = false;
             resendLinkBtn.disabled = false;
             resendLinkBtn.textContent = 'إعادة إرسال الرابط';
+            modalMessage.classList.remove('show');
             verificationModal.classList.add('show');
             pendingVerificationCallback = callback;
             lastEmailSentTime = Date.now();
+            startCountdown();
 
             if (currentUser && !currentUser.emailVerified) {
                 try {
@@ -925,43 +1145,19 @@
 
         document.getElementById('verifyCompanyEmailBtn').addEventListener('click', () => {
             const email = document.getElementById('companyEmail').value;
+            const msgElement = document.getElementById('message-step2-employer');
             if(email && email.includes('@')) {
                 document.getElementById('companyEmail').style.borderColor = '#10b981';
-                showMessage('تم التحقق من صحة البريد الإلكتروني', 'success');
+                showMessageInElement(msgElement, 'تم التحقق من صحة البريد الإلكتروني', 'success');
             } else {
-                showMessage('يرجى إدخال بريد إلكتروني صحيح للشركة', 'error');
+                showMessageInElement(msgElement, 'يرجى إدخال بريد إلكتروني صحيح للشركة', 'error');
             }
         });
-
-        // --- Message System ---
-        let messageTimeout;
-        function showMessage(msg, type) {
-            if (messageTimeout) {
-                clearTimeout(messageTimeout);
-            }
-            
-            messageDiv.className = 'message';
-            void messageDiv.offsetWidth;
-            
-            messageDiv.textContent = msg;
-            messageDiv.classList.add('show', `${type}-message`);
-            
-            const duration = type === 'error' ? 8000 : 5000;
-            messageTimeout = setTimeout(() => {
-                hideMessage();
-            }, duration);
-        }
-
-        function hideMessage() {
-            messageDiv.classList.remove('show');
-            setTimeout(() => {
-                messageDiv.className = 'message';
-            }, 300);
-        }
 
         async function nextStep(step) {
             let currentStepElementId;
             let nextStepElementId;
+            const msgElement = getMessageElement(step, isEmployerFlow ? 'employer' : 'employee');
 
             if (step === 1) {
                 currentStepElementId = 'step1';
@@ -975,28 +1171,36 @@
                 });
                 if (!isStepValid) return;
 
+                // Validate phone
+                if (phoneInput && !phoneInput.isValidNumber()) {
+                    showMessageInElement(msgElement, 'يرجى إدخال رقم هاتف صحيح', 'error');
+                    return;
+                }
+
                 const nameInput = document.getElementById('name');
                 if (!validateName(nameInput.value)) {
-                    showMessage('الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
+                    showMessageInElement(msgElement, 'الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
                     return;
                 }
 
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
                 if (password !== confirmPassword) {
-                    showMessage('كلمة المرور وتأكيدها غير متطابقين.', 'error');
+                    showMessageInElement(msgElement, 'كلمة المرور وتأكيدها غير متطابقين.', 'error');
                     return;
                 }
                 if (!validatePassword()) {
-                    showMessage('كلمة المرور لا تستوفي جميع المتطلبات.', 'error');
+                    showMessageInElement(msgElement, 'كلمة المرور لا تستوفي جميع المتطلبات.', 'error');
                     return;
                 }
 
                 const email = document.getElementById('email').value;
                 const name = document.getElementById('name').value;
                 
+                const nextBtn = document.getElementById('nextBtn1');
+                const originalBtnText = nextBtn.innerHTML;
+                
                 try {
-                    const nextBtn = document.getElementById('nextBtn1');
                     nextBtn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>';
                     nextBtn.disabled = true;
 
@@ -1005,7 +1209,7 @@
                     
                     await sendEmailVerification(currentUser);
                     
-                    nextBtn.innerHTML = 'التالي';
+                    nextBtn.innerHTML = originalBtnText;
                     nextBtn.disabled = false;
                     
                     openVerificationModal(email, () => {
@@ -1019,7 +1223,7 @@
                     });
 
                 } catch (error) {
-                    nextBtn.innerHTML = 'التالي';
+                    nextBtn.innerHTML = originalBtnText;
                     nextBtn.disabled = false;
                     
                     let errorMessage = 'حدث خطأ أثناء إنشاء الحساب.';
@@ -1033,8 +1237,11 @@
                         case 'auth/weak-password':
                             errorMessage = 'كلمة المرور ضعيفة جداً.';
                             break;
+                        case 'auth/network-request-failed':
+                            errorMessage = 'خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت.';
+                            break;
                     }
-                    showMessage(errorMessage, 'error');
+                    showMessageInElement(msgElement, errorMessage, 'error');
                 }
                 return;
 
@@ -1042,23 +1249,13 @@
                 const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
                 currentStepElementId = `step${step}-${stepIdSuffix}`;
                 
-                if (step === 2) {
-                    let phoneInput, countryCode;
-                    if(isEmployerFlow) {
-                         phoneInput = document.getElementById('companyPhone');
-                         countryCode = document.getElementById('companyCountryCode').value;
-                    } else {
-                         phoneInput = document.getElementById('phone');
-                         countryCode = document.getElementById('countryCode').value;
-                    }
-                    
-                    if (phoneInput.value.trim() !== "") {
-                        if (countryCode === '+249') {
-                            const phoneRegex = /^0(1|9)\d{8}$/;
-                            if (!phoneRegex.test(phoneInput.value)) {
-                                showMessage('رقم الهاتف غير صحيح. للسودان يجب أن يبدأ بـ 09 أو 01 ويتكون من 10 أرقام.', 'error');
-                                return;
-                            }
+                if (step === 2 && !isEmployerFlow) {
+                    // Validate employee phone if provided
+                    if (employeePhoneInput) {
+                        const phoneValue = employeePhoneInput.getNumber();
+                        if (phoneValue && !employeePhoneInput.isValidNumber()) {
+                            showMessageInElement(msgElement, 'رقم الهاتف للتواصل غير صحيح', 'error');
+                            return;
                         }
                     }
                 }
@@ -1095,14 +1292,16 @@
         async function submitForm(event) {
             event.preventDefault();
             const submitButton = event.target;
-            submitButton.disabled = true;
             const originalButtonText = submitButton.textContent;
+            const role = document.getElementById('role').value;
+            const msgElement = getMessageElement(isEmployerFlow ? 5 : 4, role);
+
+            submitButton.disabled = true;
             submitButton.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
 
             const formInputs = form.elements;
             const name = formInputs['name'].value;
             const email = formInputs['email'].value;
-            const role = formInputs['role'].value;
 
             try {
                 const user = auth.currentUser;
@@ -1125,7 +1324,18 @@
                     const skillInputs = document.querySelectorAll('.skill-input');
                     const skills = Array.from(skillInputs).map(input => input.value.trim()).filter(skill => skill !== '');
 
-                    const fullPhone = formInputs['countryCode'].value + formInputs['phone'].value;
+                    // Get phone from intl tel input
+                    let fullPhone = null;
+                    if (phoneInput) {
+                        fullPhone = phoneInput.getNumber();
+                    }
+
+                    // Get employee contact phone
+                    let employeeContactPhone = null;
+                    if (employeePhoneInput) {
+                        const empPhone = employeePhoneInput.getNumber();
+                        if (empPhone) employeeContactPhone = empPhone;
+                    }
 
                     userData = {
                         name: name,
@@ -1133,11 +1343,12 @@
                         role: role,
                         isProfileComplete: true,
                         createdAt: serverTimestamp(),
+                        phone: fullPhone, // Main phone from step 1
                         headline: formInputs['headline'].value || null,
                         bio: formInputs['bio'].value || null,
                         profileImageUrl,
                         contact: {
-                            phone: fullPhone || null,
+                            phone: employeeContactPhone,
                             location: { 
                                 state: formInputs['state'].value || null, 
                                 city: formInputs['city'].value || null, 
@@ -1175,7 +1386,18 @@
                         companyPhotosUrls = await Promise.all(Array.from(companyPhotosFiles).map(file => uploadFile(file, `company_photos/${user.uid}`)));
                     }
 
-                    const fullCompanyPhone = formInputs['companyCountryCode'].value + formInputs['companyPhone'].value;
+                    // Get company phone from intl tel input
+                    let fullCompanyPhone = null;
+                    if (companyPhoneInput) {
+                        const compPhone = companyPhoneInput.getNumber();
+                        if (compPhone) fullCompanyPhone = compPhone;
+                    }
+
+                    // Get main user phone
+                    let mainPhone = null;
+                    if (phoneInput) {
+                        mainPhone = phoneInput.getNumber();
+                    }
 
                     userData = {
                         name: name,
@@ -1183,10 +1405,11 @@
                         role: role,
                         isProfileComplete: true,
                         createdAt: serverTimestamp(),
+                        phone: mainPhone, // Main phone from step 1
                         companyInfo: {
                             name: formInputs['companyName'].value || null,
                             email: formInputs['companyEmail'].value || null,
-                            phone: fullCompanyPhone || null,
+                            phone: fullCompanyPhone,
                             logoUrl: companyLogoUrl,
                             businessType: formInputs['businessType'].value || null,
                             description: formInputs['companyDescription'].value || null,
@@ -1210,17 +1433,20 @@
                 const collectionName = role === 'employee' ? 'employees' : 'All_jops';
                 await setDoc(doc(db, collectionName, user.uid), userData);
 
-                showMessage('تم إنشاء حسابك بنجاح! سيتم توجيهك الآن.', 'success');
+                showMessageInElement(msgElement, 'تم إنشاء حسابك بنجاح! سيتم توجيهك الآن.', 'success');
 
+                // Redirect based on role
                 setTimeout(() => {
-                    const redirectUrl = role === 'employee' ? "profile.html" : "employer-dashboard.html";
-                    window.location.href = redirectUrl;
+                    if (role === 'employee') {
+                        window.location.href = "company_listting_page.html";
+                    } else {
+                        window.location.href = "employee_listing_page.html";
+                    }
                 }, 2000);
 
             } catch (error) {
                 console.error("خطأ في التسجيل:", error);
-                showMessage(error.message || 'حدث خطأ غير متوقع. يرجى المحاولة لاحقًا.', 'error');
-            } finally {
+                showMessageInElement(msgElement, error.message || 'حدث خطأ غير متوقع. يرجى المحاولة لاحقًا.', 'error');
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
@@ -1430,6 +1656,7 @@
             document.querySelectorAll('.form-card').forEach(el => el.classList.add('hidden'));
             document.getElementById('step1').classList.remove('hidden');
             updateStepIndicator();
+            initPhoneInputs();
         });
     </script>
 </body>
