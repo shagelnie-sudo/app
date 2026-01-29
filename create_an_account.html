@@ -139,7 +139,6 @@
                 transform: scale(1);
             }
         }
-        /* Fix for button visibility */
         #confirmVerificationBtn {
             display: block !important;
             visibility: visible !important;
@@ -157,6 +156,24 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .skip-btn {
+            background-color: transparent;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        .skip-btn:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .optional-badge {
+            display: inline-block;
+            background-color: #e5e7eb;
+            color: #6b7280;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
@@ -170,12 +187,12 @@
             <div class="step hidden" id="stepIndicator5">5</div>
         </div>
 
-        <!-- رسائل التنبيه -->
         <div id="message" class="message"></div>
 
         <form id="unifiedForm">
+            <!-- Step 1: إلزامي -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card" id="step1">
-                <h2 class="text-lg font-bold mb-4">الخطوة 1: بيانات الحساب</h2>
+                <h2 class="text-lg font-bold mb-4">الخطوة 1: بيانات الحساب <span class="text-red-500">*</span></h2>
                 <div class="space-y-6">
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">الاسم الكامل (ثلاثي أو رباعي)</label>
@@ -246,31 +263,33 @@
                         </div>
                     </div>
                 </div>
-                <button type="button" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn1">
+                <button type="button" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full" id="nextBtn1">
                     التالي
                 </button>
             </div>
 
+            <!-- Employee Steps -->
             <div class="employee-steps">
+                <!-- Step 2 Employee: إلزامي جزئياً -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step2-employee">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 2: البيانات الأساسية</h2>
+                    <h2 class="text-lg font-bold mb-4">الخطوة 2: البيانات الأساسية <span class="optional-badge">يمكن التخطي</span></h2>
                     <div class="mb-4">
-                        <label for="headline" class="block text-sm font-medium text-gray-700">العنوان الاحترافي</label>
-                        <input type="text" id="headline" name="headline" placeholder="مثال: عامل ديكور"
+                        <label for="headline" class="block text-sm font-medium text-gray-700">العنوان الاحترافي <span class="text-red-500">*</span></label>
+                        <input type="text" id="headline" name="headline" placeholder="مثال: عامل ديكور" required
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="bio" class="block text-sm font-medium text-gray-700">نبذة وظيفية عنك</label>
+                        <label for="bio" class="block text-sm font-medium text-gray-700">نبذة وظيفية عنك <span class="optional-badge">اختياري</span></label>
                         <textarea id="bio" name="bio" rows="5" placeholder="وصف مختصر عنك وعن خبراتك"
                                   class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                      <div class="mb-4">
-                        <label for="profilePhoto" class="block text-sm font-medium text-gray-700">صورة الملف الشخصي</label>
+                        <label for="profilePhoto" class="block text-sm font-medium text-gray-700">صورة الملف الشخصي <span class="optional-badge">اختياري</span></label>
                         <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="phone" class="block text-sm font-medium text-gray-700">رقم الهاتف</label>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">رقم الهاتف <span class="text-red-500">*</span></label>
                         <div class="flex flex-row-reverse gap-2 mt-1">
                             <select id="countryCode" name="countryCode" class="w-24 border border-gray-300 rounded-lg px-2 py-2 bg-gray-50 text-center" dir="ltr">
                                 <option value="+249" selected>+249 (SD)</option>
@@ -278,39 +297,45 @@
                                 <option value="+20">+20 (EG)</option>
                                 <option value="+971">+971 (AE)</option>
                             </select>
-                            <input type="tel" id="phone" name="phone" placeholder="مثال: 0912345678"
+                            <input type="tel" id="phone" name="phone" placeholder="مثال: 0912345678" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-right">
                         </div>
                         <p class="text-xs text-gray-500 mt-1">يرجى التأكد من صحة الرقم (مثال: 09... أو 01...)</p>
                     </div>
                     <div class="mb-4">
-                        <label for="state" class="block text-sm font-medium text-gray-700">الولاية</label>
-                        <select id="state" name="state" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <label for="state" class="block text-sm font-medium text-gray-700">الولاية <span class="text-red-500">*</span></label>
+                        <select id="state" name="state" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر ولاية</option>
                         </select>
                     </div>
                     <div class="mb-4 hidden" id="cityContainer">
-                        <label for="city" class="block text-sm font-medium text-gray-700">المدينة</label>
+                        <label for="city" class="block text-sm font-medium text-gray-700">المدينة <span class="optional-badge">اختياري</span></label>
                         <select id="city" name="city" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر مدينة</option>
                         </select>
                     </div>
                     <div class="mb-4 hidden" id="areaContainer">
-                        <label for="area" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
+                        <label for="area" class="block text-sm font-medium text-gray-700">المنطقة / الحي <span class="optional-badge">اختياري</span></label>
                         <select id="area" name="area" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر منطقة أو حي</option>
                         </select>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employee">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employee">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employee">
+                            التالي
+                        </button>
+                        <button type="button" class="px-4 py-2 skip-btn rounded-lg" onclick="skipStep(2, 'employee')">
+                            تخطي
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Step 3 Employee: يمكن التخطي -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 3: المهارات ومستوى الخبرة</h2>
+                    <h2 class="text-lg font-bold mb-4">الخطوة 3: المهارات ومستوى الخبرة <span class="optional-badge">يمكن التخطي</span></h2>
                     <div id="skillsContainer">
                         <div class="mb-4 flex items-center">
                             <input type="text" name="skills[]" placeholder="مثال: React.js" class="skill-input w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -319,7 +344,7 @@
                     </div>
                     <p id="skillsLimitMessage" class="text-red-500 text-sm mt-2 hidden">لا يمكنك إضافة أكثر من 6 مهارات.</p>
                     <div class="mb-4">
-                        <label for="experience" class="block text-sm font-medium text-gray-700">مستوى الخبرة</label>
+                        <label for="experience" class="block text-sm font-medium text-gray-700">مستوى الخبرة <span class="optional-badge">اختياري</span></label>
                         <select id="experience" name="experience" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر مستوى الخبرة</option>
                             <option value="مبتدئ">مبتدئ (0-2 سنوات)</option>
@@ -340,18 +365,24 @@
                             </label>
                         </div>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
+                            التالي
+                        </button>
+                        <button type="button" class="px-4 py-2 skip-btn rounded-lg" onclick="skipStep(3, 'employee')">
+                            تخطي
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Step 4 Employee: إلزامي -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employee">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 4: الملفات والروابط</h2>
+                    <h2 class="text-lg font-bold mb-4">الخطوة 4: الملفات والروابط <span class="text-red-500">*</span></h2>
                     <div class="mb-4">
-                        <label for="previousWorks" class="block text-sm font-medium text-gray-700">صور من أعمالك السابقة (5 صور على الأقل)</label>
+                        <label for="previousWorks" class="block text-sm font-medium text-gray-700">صور من أعمالك السابقة (5 صور على الأقل) <span class="text-red-500">*</span></label>
                         <input type="file" id="previousWorks" name="previousWorks" multiple accept="image/*"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                         <div id="image-preview" class="flex flex-wrap mt-2"></div>
@@ -360,34 +391,38 @@
                         </p>
                     </div>
                     <div class="mb-4">
-                        <label for="cvUrl" class="block text-sm font-medium text-gray-700">رابط السيرة الذاتية (CV) (اختياري)</label>
+                        <label for="cvUrl" class="block text-sm font-medium text-gray-700">رابط السيرة الذاتية (CV) <span class="optional-badge">اختياري</span></label>
                         <input type="url" id="cvUrl" name="cvUrl" placeholder="مثال: https://docs.google.com/your-cv"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="linkedinUrl" class="block text-sm font-medium text-gray-700">رابط لينكد إن (اختياري)</label>
+                        <label for="linkedinUrl" class="block text-sm font-medium text-gray-700">رابط لينكد إن <span class="optional-badge">اختياري</span></label>
                         <input type="url" id="linkedinUrl" name="linkedinUrl" placeholder="مثال: https://linkedin.com/in/your-profile"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employee">
-                        السابق
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employee">
-                        إنشاء الحساب
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employee">
+                            السابق
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employee">
+                            إنشاء الحساب
+                        </button>
+                    </div>
                 </div>
             </div>
 
+            <!-- Employer Steps -->
             <div class="employer-steps">
+                <!-- Step 2 Employer: إلزامي -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step2-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 2: بيانات الشركة</h2>
+                    <h2 class="text-lg font-bold mb-4">الخطوة 2: بيانات الشركة <span class="text-red-500">*</span></h2>
                     <div class="mb-4">
-                        <label for="companyName" class="block text-sm font-medium text-gray-700">اسم الشركة / النشاط التجاري</label>
+                        <label for="companyName" class="block text-sm font-medium text-gray-700">اسم الشركة / النشاط التجاري <span class="text-red-500">*</span></label>
                         <input type="text" id="companyName" name="companyName" placeholder="مثال: شركة التقنية الحديثة" required
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="companyEmail" class="block text-sm font-medium text-gray-700">البريد الإلكتروني الرسمي</label>
+                        <label for="companyEmail" class="block text-sm font-medium text-gray-700">البريد الإلكتروني الرسمي <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
                             <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com" required
                                 class="flex-1 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -397,7 +432,7 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف (اختياري)</label>
+                        <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف <span class="optional-badge">اختياري</span></label>
                          <div class="flex flex-row-reverse gap-2 mt-1">
                             <select id="companyCountryCode" name="companyCountryCode" class="w-24 border border-gray-300 rounded-lg px-2 py-2 bg-gray-50 text-center" dir="ltr">
                                 <option value="+249" selected>+249 (SD)</option>
@@ -410,77 +445,95 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="companyLogo" class="block text-sm font-medium text-gray-700">الشعار / اللوجو</label>
+                        <label for="companyLogo" class="block text-sm font-medium text-gray-700">الشعار / اللوجو <span class="optional-badge">اختياري</span></label>
                         <input type="file" id="companyLogo" name="companyLogo" accept="image/*"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="businessType" class="block text-sm font-medium text-gray-700">نوع النشاط</label>
+                        <label for="businessType" class="block text-sm font-medium text-gray-700">نوع النشاط <span class="text-red-500">*</span></label>
                         <input type="text" id="businessType" name="businessType" placeholder="مثال: مطعم، برمجة، ورشة..." required
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employer">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employer">
+                            التالي
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Step 3 Employer: يمكن التخطي -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 3: التفاصيل</h2>
+                    <h2 class="text-lg font-bold mb-4">الخطوة 3: التفاصيل <span class="optional-badge">يمكن التخطي</span></h2>
                     <div class="mb-4">
-                        <label for="companyDescription" class="block text-sm font-medium text-gray-700">نبذة عن الشركة</label>
-                        <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات" required
+                        <label for="companyDescription" class="block text-sm font-medium text-gray-700">نبذة عن الشركة <span class="optional-badge">اختياري</span></label>
+                        <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات"
                                   class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                     <div class="mb-4">
-                        <label for="companyState" class="block text-sm font-medium text-gray-700">الولاية</label>
+                        <label for="companyState" class="block text-sm font-medium text-gray-700">الولاية <span class="optional-badge">اختياري</span></label>
                         <select id="companyState" name="companyState" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر ولاية</option>
                         </select>
                     </div>
                     <div class="mb-4 hidden" id="companyCityContainer">
-                        <label for="companyCity" class="block text-sm font-medium text-gray-700">المدينة</label>
+                        <label for="companyCity" class="block text-sm font-medium text-gray-700">المدينة <span class="optional-badge">اختياري</span></label>
                         <select id="companyCity" name="companyCity" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر مدينة</option>
                         </select>
                     </div>
                     <div class="mb-4 hidden" id="companyAreaContainer">
-                        <label for="companyArea" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
+                        <label for="companyArea" class="block text-sm font-medium text-gray-700">المنطقة / الحي <span class="optional-badge">اختياري</span></label>
                         <select id="companyArea" name="companyArea" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">اختر منطقة أو حي</option>
                         </select>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
+                            التالي
+                        </button>
+                        <button type="button" class="px-4 py-2 skip-btn rounded-lg" onclick="skipStep(3, 'employer')">
+                            تخطي
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Step 4 Employer: يمكن التخطي -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 4: التوثيق (اختياري)</h2>
+                    <h2 class="text-lg font-bold mb-4">الخطوة 4: التوثيق <span class="optional-badge">يمكن التخطي</span></h2>
                     <p class="text-sm text-gray-500 mb-4">إذا قمت بتوثيق حسابك، ستحصل على شارة **"شركة موثقة ✅"**.</p>
                     <div class="mb-4">
-                        <label for="commercialRegister" class="block text-sm font-medium text-gray-700">رخصة / سجل تجاري (اختياري)</label>
+                        <label for="commercialRegister" class="block text-sm font-medium text-gray-700">رخصة / سجل تجاري <span class="optional-badge">اختياري</span></label>
                         <input type="file" id="commercialRegister" name="commercialRegister" accept=".pdf,.doc,.docx"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="companyPhotos" class="block text-sm font-medium text-gray-700">صور من مقر الشركة / النشاط (3 صور على الأقل)</label>
+                        <label for="companyPhotos" class="block text-sm font-medium text-gray-700">صور من مقر الشركة / النشاط <span class="optional-badge">اختياري</span></label>
                         <input type="file" id="companyPhotos" name="companyPhotos" multiple accept="image/*"
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <div id="company-photos-preview" class="flex flex-wrap mt-2"></div>
                     </div>
-                    <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
-                        السابق
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
-                        التالي
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
+                            التالي
+                        </button>
+                        <button type="button" class="px-4 py-2 skip-btn rounded-lg" onclick="skipStep(4, 'employer')">
+                            تخطي
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Step 5 Employer: إلزامي -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step5-employer">
-                    <h2 class="text-lg font-bold mb-4">الخطوة 5: تفعيل الحساب</h2>
+                    <h2 class="text-lg font-bold mb-4">الخطوة 5: تفعيل الحساب <span class="text-red-500">*</span></h2>
                      <p class="text-sm text-gray-500 mb-4">اختر نوع الحساب الفرعي لتفعيل حسابك:</p>
                     <div class="flex flex-col space-y-4">
                         <label class="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -492,12 +545,14 @@
                             <span class="text-lg font-semibold mr-2">صاحب عمل فردي يبحث عن موظف أو عامل</span>
                         </label>
                     </div>
-                    <button type="button" class="mt-6 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employer">
-                        السابق
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employer">
-                        إنشاء الحساب
-                    </button>
+                    <div class="flex gap-2 mt-6">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employer">
+                            السابق
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employer">
+                            إنشاء الحساب
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -670,6 +725,54 @@
             updateStepIndicator();
         }
 
+        // --- Skip Step Function (Global) ---
+        window.skipStep = function(stepToSkip, role) {
+            showMessage(`تم تخطي الخطوة ${stepToSkip}. يمكنك إكمالها لاحقاً من صفحة البروفايل.`, 'success');
+            
+            // Determine next step
+            let nextStepNum;
+            if (role === 'employee') {
+                if (stepToSkip === 2) nextStepNum = 3;
+                else if (stepToSkip === 3) nextStepNum = 4;
+            } else if (role === 'employer') {
+                if (stepToSkip === 3) nextStepNum = 4;
+                else if (stepToSkip === 4) nextStepNum = 5;
+            }
+            
+            // Clear optional fields for skipped step
+            clearOptionalFields(stepToSkip, role);
+            
+            // Move to next step
+            setTimeout(() => {
+                const stepIdSuffix = role;
+                const currentStepElementId = `step${stepToSkip}-${stepIdSuffix}`;
+                const nextStepElementId = `step${nextStepNum}-${stepIdSuffix}`;
+                
+                document.getElementById(currentStepElementId).classList.add('hidden');
+                document.getElementById(nextStepElementId).classList.remove('hidden');
+                currentStep = nextStepNum;
+                updateStepIndicator();
+            }, 1000);
+        };
+
+        function clearOptionalFields(step, role) {
+            const stepId = `step${step}-${role}`;
+            const stepElement = document.getElementById(stepId);
+            if (!stepElement) return;
+            
+            // Clear only optional inputs (not required)
+            const optionalInputs = stepElement.querySelectorAll('input:not([required]), textarea:not([required]), select:not([required])');
+            optionalInputs.forEach(input => {
+                if (input.type === 'file') {
+                    input.value = '';
+                } else if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+
         // --- Modal Logic for Email Verification Link ---
         const verificationModal = document.getElementById('verificationModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
@@ -687,19 +790,16 @@
                 return;
             }
 
-            // Show loading
             checkVerificationBtn.innerHTML = '<span class="loading-spinner"></span> جاري التحقق...';
             checkVerificationBtn.disabled = true;
 
             try {
-                // Reload user to get latest emailVerified status
                 await reload(currentUser);
                 
                 if (currentUser.emailVerified) {
                     verificationModal.classList.remove('show');
                     showMessage('تم توثيق البريد الإلكتروني بنجاح!', 'success');
                     
-                    // Execute pending logic after short delay
                     setTimeout(() => {
                         if (pendingVerificationCallback) {
                             pendingVerificationCallback();
@@ -737,7 +837,6 @@
             verificationModal.classList.add('show');
             pendingVerificationCallback = callback;
 
-            // Send verification email if user exists
             if (currentUser && !currentUser.emailVerified) {
                 try {
                     await sendEmailVerification(currentUser);
@@ -747,7 +846,6 @@
             }
         }
 
-        // Verify Company Email (simplified - just visual feedback)
         document.getElementById('verifyCompanyEmailBtn').addEventListener('click', () => {
             const email = document.getElementById('companyEmail').value;
             if(email && email.includes('@')) {
@@ -758,25 +856,19 @@
             }
         });
 
-        // --- Message System (Fixed) ---
+        // --- Message System ---
         let messageTimeout;
         function showMessage(msg, type) {
-            // Clear any existing timeout
             if (messageTimeout) {
                 clearTimeout(messageTimeout);
             }
             
-            // Clear previous classes
             messageDiv.className = 'message';
-            
-            // Force reflow to ensure animation restarts
             void messageDiv.offsetWidth;
             
-            // Set new content and classes
             messageDiv.textContent = msg;
             messageDiv.classList.add('show', `${type}-message`);
             
-            // Auto-hide after 5 seconds for success, 8 for error
             const duration = type === 'error' ? 8000 : 5000;
             messageTimeout = setTimeout(() => {
                 hideMessage();
@@ -806,7 +898,6 @@
                 });
                 if (!isStepValid) return;
 
-                // Name Validation Check
                 const nameInput = document.getElementById('name');
                 if (!validateName(nameInput.value)) {
                     showMessage('الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
@@ -824,29 +915,23 @@
                     return;
                 }
 
-                // Create user first, then send verification
                 const email = document.getElementById('email').value;
                 const name = document.getElementById('name').value;
                 
                 try {
-                    // Show loading
                     const nextBtn = document.getElementById('nextBtn1');
                     nextBtn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>';
                     nextBtn.disabled = true;
 
-                    // Create user with Firebase Auth
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     currentUser = userCredential.user;
                     
-                    // Send verification email
                     await sendEmailVerification(currentUser);
                     
-                    // Show verification modal
                     nextBtn.innerHTML = 'التالي';
                     nextBtn.disabled = false;
                     
                     openVerificationModal(email, () => {
-                        // Logic to execute AFTER verification
                         isEmployerFlow = (document.getElementById('role').value === 'employer');
                         nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
                         
@@ -880,7 +965,6 @@
                 const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
                 currentStepElementId = `step${step}-${stepIdSuffix}`;
                 
-                // Phone Validation for Step 2
                 if (step === 2) {
                     let phoneInput, countryCode;
                     if(isEmployerFlow) {
@@ -944,7 +1028,6 @@
             const role = formInputs['role'].value;
 
             try {
-                // User already created in step 1, just update data
                 const user = auth.currentUser;
                 if (!user) {
                     throw new Error('لم يتم العثور على المستخدم');
@@ -978,14 +1061,22 @@
                         profileImageUrl,
                         contact: {
                             phone: fullPhone || null,
-                            location: { state: formInputs['state'].value || null, city: formInputs['city'].value || null, area: formInputs['area'].value || null }
+                            location: { 
+                                state: formInputs['state'].value || null, 
+                                city: formInputs['city'].value || null, 
+                                area: formInputs['area'].value || null 
+                            }
                         },
-                        skills,
+                        skills: skills.length > 0 ? skills : null,
                         experience: formInputs['experience'].value || null,
                         jobStatus: formInputs['jobStatus'].value || null,
-                        links: { cv: formInputs['cvUrl'].value || null, linkedin: formInputs['linkedinUrl'].value || null },
-                        previousWorksUrls,
-                        emailVerified: user.emailVerified
+                        links: { 
+                            cv: formInputs['cvUrl'].value || null, 
+                            linkedin: formInputs['linkedinUrl'].value || null 
+                        },
+                        previousWorksUrls: previousWorksUrls.length > 0 ? previousWorksUrls : null,
+                        emailVerified: user.emailVerified,
+                        profileCompletionPercentage: calculateProfileCompletion('employee', formInputs, skills, previousWorksUrls)
                     };
 
                 } else if (role === 'employer') {
@@ -1031,10 +1122,11 @@
                         verification: {
                             isVerified: isVerified,
                             commercialRegisterUrl: commercialRegisterUrl,
-                            companyPhotosUrls: companyPhotosUrls,
+                            companyPhotosUrls: companyPhotosUrls.length > 0 ? companyPhotosUrls : null,
                         },
                         subRole: formInputs['employerType'].value,
-                        emailVerified: user.emailVerified
+                        emailVerified: user.emailVerified,
+                        profileCompletionPercentage: calculateProfileCompletion('employer', formInputs, [], companyPhotosUrls)
                     };
                 }
 
@@ -1055,6 +1147,49 @@
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
+        }
+
+        function calculateProfileCompletion(role, formInputs, skills, worksUrls) {
+            let completed = 0;
+            let total = 0;
+            
+            if (role === 'employee') {
+                // Required fields
+                if (formInputs['headline'].value) { completed++; total++; }
+                if (formInputs['phone'].value) { completed++; total++; }
+                if (formInputs['state'].value) { completed++; total++; }
+                if (worksUrls.length > 0) { completed++; total++; }
+                
+                // Optional fields (0.5 point each)
+                total += 3; // bio, profilePhoto, city, area, skills, experience, cv, linkedin
+                if (formInputs['bio'].value) completed += 0.5;
+                if (formInputs['profilePhoto'].files[0]) completed += 0.5;
+                if (formInputs['city'].value) completed += 0.5;
+                if (formInputs['area'].value) completed += 0.5;
+                if (skills.length > 0) completed += 0.5;
+                if (formInputs['experience'].value) completed += 0.5;
+                if (formInputs['cvUrl'].value) completed += 0.5;
+                if (formInputs['linkedinUrl'].value) completed += 0.5;
+            } else {
+                // Required fields
+                if (formInputs['companyName'].value) { completed++; total++; }
+                if (formInputs['companyEmail'].value) { completed++; total++; }
+                if (formInputs['businessType'].value) { completed++; total++; }
+                if (formInputs['employerType'].value) { completed++; total++; }
+                
+                // Optional fields
+                total += 3;
+                if (formInputs['companyPhone'].value) completed += 0.5;
+                if (formInputs['companyLogo'].files[0]) completed += 0.5;
+                if (formInputs['companyDescription'].value) completed += 0.5;
+                if (formInputs['companyState'].value) completed += 0.5;
+                if (formInputs['companyCity'].value) completed += 0.5;
+                if (formInputs['companyArea'].value) completed += 0.5;
+                if (formInputs['commercialRegister'].files[0]) completed += 0.5;
+                if (worksUrls.length > 0) completed += 0.5;
+            }
+            
+            return Math.round((completed / total) * 100);
         }
 
         async function uploadFile(file, filePath) {
