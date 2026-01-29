@@ -209,8 +209,6 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            font-size: 0.875rem;
-            padding: 0.5rem 1rem;
         }
         .skip-btn:hover {
             background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
@@ -244,9 +242,17 @@
         .step-title {
             font-size: 1.125rem;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        }
+
+        .optional-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #3730a3;
+            font-size: 0.7rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            border: 1px solid #a5b4fc;
         }
 
         /* Intel Tel Input customization */
@@ -392,10 +398,8 @@
                 <!-- Step 2 Employee -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step2-employee">
                     <div class="step-header">
-                        <h2 class="step-title">
-                            الخطوة 2: البيانات الأساسية
-                        </h2>
-                        <button type="button" class="skip-btn rounded-lg" onclick="skipStep(2, 'employee')">
+                        <h2 class="step-title">الخطوة 2: البيانات الأساسية <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(2, 'employee')">
                             تخطي
                         </button>
                     </div>
@@ -457,10 +461,8 @@
                 <!-- Step 3 Employee -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
                     <div class="step-header">
-                        <h2 class="step-title">
-                            الخطوة 3: المهارات ومستوى الخبرة
-                        </h2>
-                        <button type="button" class="skip-btn rounded-lg" onclick="skipStep(3, 'employee')">
+                        <h2 class="step-title">الخطوة 3: المهارات ومستوى الخبرة <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employee')">
                             تخطي
                         </button>
                     </div>
@@ -557,51 +559,30 @@
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="mb-4">
-                        <label for="businessType" class="block text-sm font-medium text-gray-700">نوع النشاط <span class="text-red-500">*</span></label>
-                        <select id="businessType" name="businessType" required
-                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">اختر نوع النشاط</option>
-                            <option value="برمجة وتطوير">برمجة وتطوير</option>
-                            <option value="مطعم">مطعم</option>
-                            <option value="مخبز">مخبز</option>
-                            <option value="مستشفى">مستشفى</option>
-                            <option value="عيادة طبية">عيادة طبية</option>
-                            <option value="صيدلية">صيدلية</option>
-                            <option value="بقالة">بقالة</option>
-                            <option value="سوبر ماركت">سوبر ماركت</option>
-                            <option value="محل ملابس">محل ملابس</option>
-                            <option value="محل أحذية">محل أحذية</option>
-                            <option value="محل إلكترونيات">محل إلكترونيات</option>
-                            <option value="محل أثاث">محل أثاث</option>
-                            <option value="ورشة نجارة">ورشة نجارة</option>
-                            <option value="ورشة حدادة">ورشة حدادة</option>
-                            <option value="ورشة ميكانيكا">ورشة ميكانيكا</option>
-                            <option value="محطة وقود">محطة وقود</option>
-                            <option value="مغسلة">مغسلة</option>
-                            <option value="كوافير">كوافير</option>
-                            <option value="صالون تجميل">صالون تجميل</option>
-                            <option value="مكتب محاسبة">مكتب محاسبة</option>
-                            <option value="مكتب محاماة">مكتب محاماة</option>
-                            <option value="مكتب عقارات">مكتب عقارات</option>
-                            <option value="مكتب سفريات">مكتب سفريات</option>
-                            <option value="مدرسة">مدرسة</option>
-                            <option value="حضانة">حضانة</option>
-                            <option value="جامعة">جامعة</option>
-                            <option value="مركز تدريب">مركز تدريب</option>
-                            <option value="فندق">فندق</option>
-                            <option value="شقق مفروشة">شقق مفروشة</option>
-                            <option value="مخازن">مخازن</option>
-                            <option value="شركة نقل">شركة نقل</option>
-                            <option value="شركة مقاولات">شركة مقاولات</option>
-                            <option value="مزرعة">مزرعة</option>
-                            <option value="مصنع">مصنع</option>
-                            <option value="شركة استيراد وتصدير">شركة استيراد وتصدير</option>
-                            <option value="أخرى">أخرى</option>
-                        </select>
+                        <label for="companyEmail" class="block text-sm font-medium text-gray-700">البريد الإلكتروني الرسمي <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com" required
+                                class="flex-1 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button type="button" id="verifyCompanyEmailBtn" class="px-3 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600">
+                                توثيق
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف</label>
+                        <div class="mt-1">
+                            <input type="tel" id="companyPhone" name="companyPhone" 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
+                        </div>
                     </div>
                     <div class="mb-4">
                         <label for="companyLogo" class="block text-sm font-medium text-gray-700">الشعار / اللوجو</label>
                         <input type="file" id="companyLogo" name="companyLogo" accept="image/*"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="businessType" class="block text-sm font-medium text-gray-700">نوع النشاط <span class="text-red-500">*</span></label>
+                        <input type="text" id="businessType" name="businessType" placeholder="مثال: مطعم، برمجة، ورشة..." required
                                class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
@@ -622,10 +603,8 @@
                 <!-- Step 3 Employer -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employer">
                     <div class="step-header">
-                        <h2 class="step-title">
-                            الخطوة 3: التفاصيل
-                        </h2>
-                        <button type="button" class="skip-btn rounded-lg" onclick="skipStep(3, 'employer')">
+                        <h2 class="step-title">الخطوة 3: التفاصيل <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employer')">
                             تخطي
                         </button>
                     </div>
@@ -670,10 +649,8 @@
                 <!-- Step 4 Employer -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employer">
                     <div class="step-header">
-                        <h2 class="step-title">
-                            الخطوة 4: التوثيق
-                        </h2>
-                        <button type="button" class="skip-btn rounded-lg" onclick="skipStep(4, 'employer')">
+                        <h2 class="step-title">الخطوة 4: التوثيق <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(4, 'employer')">
                             تخطي
                         </button>
                     </div>
@@ -779,6 +756,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, reload } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
@@ -792,6 +770,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
         let currentStep = 1;
         let isEmployerFlow = false;
@@ -803,7 +782,7 @@
         let countdownInterval = null;
 
         // Intel Tel Input instances
-        let phoneInput, employeePhoneInput;
+        let phoneInput, employeePhoneInput, companyPhoneInput;
 
         const sudanLocations = {
             "الخرطوم": {
@@ -837,7 +816,8 @@
         function initPhoneInputs() {
             const commonConfig = {
                 initialCountry: "sd",
-                preferredCountries: ["sd", "sa", "eg", "ae"],
+                preferredCountries: ["sd", "sa", "eg", "ae", "qa", "kw", "bh", "om", "ly", "jo", "iq", "sy", "lb", "ps", "ye", "ma", "dz", "tn", "mr", "so", "dj", "er", "et", "ke", "ug", "cf", "td", "ne", "ng", "ml", "bf", "sn", "gm", "gw", "gn", "sl", "lr", "ci", "gh", "tg", "bj", "cm", "gq", "ga", "cg", "ao", "cd", "rw", "bi", "tz", "zm", "mw", "mz", "zw", "bw", "na", "za", "ls", "sz", "mg", "km", "mu", "sc", "mv", "lk", "in", "pk", "bd", "np", "bt", "mm", "th", "la", "kh", "vn", "my", "sg", "id", "ph", "bn", "tl", "au", "nz", "pg", "fj", "sb", "vu", "nc", "pf", "ws", "to", "ki", "tv", "nr", "fm", "mh", "pw", "us", "ca", "mx", "gt", "bz", "sv", "hn", "ni", "cr", "pa", "co", "ve", "gy", "sr", "gf", "br", "ec", "pe", "bo", "py", "cl", "ar", "uy", "fk", "gs", "aq", "gl", "is", "no", "se", "fi", "dk", "de", "nl", "be", "lu", "fr", "ch", "at", "cz", "pl", "sk", "hu", "ro", "md", "ua", "by", "ru", "kz", "uz", "tm", "kg", "tj", "af", "pk", "in", "cn", "mn", "kp", "kr", "jp", "tw", "hk", "mo", "ph", "vn", "la", "kh", "th", "mm", "bd", "np", "bt", "lk", "mv", "kg", "tj", "af", "ir", "tr", "cy", "gr", "bg", "rs", "ba", "hr", "si", "it", "mt", "sm", "va", "mc", "ad", "es", "pt", "gb", "ie", "gg", "je", "im", "fo", "ax", "ee", "lv", "lt", "by", "ua", "md", "ro", "bg", "gr", "al", "mk", "xk", "me", "rs", "ba", "hr", "si", "hu", "at", "sk", "cz", "pl", "de", "ch", "li", "it", "sm", "va", "mt", "es", "pt", "fr", "ad", "mc", "lu", "be", "nl", "dk", "no", "se", "fi", "is", "ie", "gb", "gg", "je", "im", "fo", "ax", "ee", "lv", "lt", "by", "ua", "md", "ro", "bg", "gr", "al", "mk", "xk", "me", "rs", "ba", "hr", "si", "hu", "at", "sk", "cz", "pl", "de", "ch", "li", "it", "sm", "va", "mt", "es", "pt", "fr", "ad", "mc", "lu", "be", "nl", "dk", "no", "se", "fi", "is", "ie", "gb"],
+                utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js",
                 separateDialCode: true,
                 formatOnDisplay: true,
                 nationalMode: true,
@@ -854,6 +834,12 @@
             const employeePhoneElement = document.querySelector("#employeePhone");
             if (employeePhoneElement) {
                 employeePhoneInput = window.intlTelInput(employeePhoneElement, commonConfig);
+            }
+
+            // Company phone input (Step 2 Employer)
+            const companyPhoneElement = document.querySelector("#companyPhone");
+            if (companyPhoneElement) {
+                companyPhoneInput = window.intlTelInput(companyPhoneElement, commonConfig);
             }
         }
 
@@ -992,16 +978,22 @@
         function showMessageInElement(element, msg, type) {
             const elementId = element.id || 'default';
             
+            // Clear existing timeout for this element
             if (messageTimeouts[elementId]) {
                 clearTimeout(messageTimeouts[elementId]);
             }
             
+            // Clear previous classes
             element.className = 'message';
+            
+            // Force reflow
             void element.offsetWidth;
             
+            // Set new content and classes
             element.textContent = msg;
             element.classList.add('show', `${type}-message`);
             
+            // Auto-hide
             const duration = type === 'error' ? 8000 : 5000;
             messageTimeouts[elementId] = setTimeout(() => {
                 hideMessageInElement(element);
@@ -1027,6 +1019,7 @@
             modalMessage.textContent = msg;
             modalMessage.className = `modal-message ${type} show`;
             
+            // Auto-hide after 5 seconds
             setTimeout(() => {
                 modalMessage.classList.remove('show');
             }, 5000);
@@ -1100,7 +1093,7 @@
             
             const now = Date.now();
             const timeSinceLastSend = now - lastEmailSentTime;
-            const minInterval = 60000;
+            const minInterval = 60000; // 60 seconds
             
             if (timeSinceLastSend < minInterval && lastEmailSentTime !== 0) {
                 const remainingSeconds = Math.ceil((minInterval - timeSinceLastSend) / 1000);
@@ -1150,6 +1143,17 @@
             }
         }
 
+        document.getElementById('verifyCompanyEmailBtn').addEventListener('click', () => {
+            const email = document.getElementById('companyEmail').value;
+            const msgElement = document.getElementById('message-step2-employer');
+            if(email && email.includes('@')) {
+                document.getElementById('companyEmail').style.borderColor = '#10b981';
+                showMessageInElement(msgElement, 'تم التحقق من صحة البريد الإلكتروني', 'success');
+            } else {
+                showMessageInElement(msgElement, 'يرجى إدخال بريد إلكتروني صحيح للشركة', 'error');
+            }
+        });
+
         async function nextStep(step) {
             let currentStepElementId;
             let nextStepElementId;
@@ -1167,6 +1171,7 @@
                 });
                 if (!isStepValid) return;
 
+                // Validate phone
                 if (phoneInput && !phoneInput.isValidNumber()) {
                     showMessageInElement(msgElement, 'يرجى إدخال رقم هاتف صحيح', 'error');
                     return;
@@ -1245,6 +1250,7 @@
                 currentStepElementId = `step${step}-${stepIdSuffix}`;
                 
                 if (step === 2 && !isEmployerFlow) {
+                    // Validate employee phone if provided
                     if (employeePhoneInput) {
                         const phoneValue = employeePhoneInput.getNumber();
                         if (phoneValue && !employeePhoneInput.isValidNumber()) {
@@ -1306,6 +1312,18 @@
                 let userData;
 
                 if (role === 'employee') {
+                    const profilePhotoFile = formInputs['profilePhoto'].files[0];
+                    const previousWorksFiles = formInputs['previousWorks'].files;
+                    let profileImageUrl = null;
+                    let previousWorksUrls = [];
+                    if (profilePhotoFile) { profileImageUrl = await uploadFile(profilePhotoFile, `profile_photos/${user.uid}`); }
+                    if (previousWorksFiles.length > 0) {
+                        previousWorksUrls = await Promise.all(Array.from(previousWorksFiles).map(file => uploadFile(file, `previous_works/${user.uid}`)));
+                    }
+
+                    const skillInputs = document.querySelectorAll('.skill-input');
+                    const skills = Array.from(skillInputs).map(input => input.value.trim()).filter(skill => skill !== '');
+
                     // Get phone from intl tel input
                     let fullPhone = null;
                     if (phoneInput) {
@@ -1319,18 +1337,16 @@
                         if (empPhone) employeeContactPhone = empPhone;
                     }
 
-                    const skillInputs = document.querySelectorAll('.skill-input');
-                    const skills = Array.from(skillInputs).map(input => input.value.trim()).filter(skill => skill !== '');
-
                     userData = {
                         name: name,
                         email: user.email,
                         role: role,
                         isProfileComplete: true,
                         createdAt: serverTimestamp(),
-                        phone: fullPhone,
+                        phone: fullPhone, // Main phone from step 1
                         headline: formInputs['headline'].value || null,
                         bio: formInputs['bio'].value || null,
+                        profileImageUrl,
                         contact: {
                             phone: employeeContactPhone,
                             location: { 
@@ -1346,11 +1362,37 @@
                             cv: formInputs['cvUrl'].value || null, 
                             linkedin: formInputs['linkedinUrl'].value || null 
                         },
+                        previousWorksUrls: previousWorksUrls.length > 0 ? previousWorksUrls : null,
                         emailVerified: user.emailVerified,
-                        profileCompletionPercentage: calculateProfileCompletion('employee', formInputs, skills)
+                        profileCompletionPercentage: calculateProfileCompletion('employee', formInputs, skills, previousWorksUrls)
                     };
 
                 } else if (role === 'employer') {
+                    const companyLogoFile = formInputs['companyLogo'].files[0];
+                    const commercialRegisterFile = formInputs['commercialRegister'].files[0];
+                    const companyPhotosFiles = formInputs['companyPhotos'].files;
+
+                    let companyLogoUrl = null;
+                    let commercialRegisterUrl = null;
+                    let companyPhotosUrls = [];
+                    let isVerified = false;
+
+                    if (companyLogoFile) { companyLogoUrl = await uploadFile(companyLogoFile, `company_logos/${user.uid}`); }
+                    if (commercialRegisterFile) { 
+                        commercialRegisterUrl = await uploadFile(commercialRegisterFile, `company_documents/${user.uid}`); 
+                        isVerified = true;
+                    }
+                    if (companyPhotosFiles.length > 0) {
+                        companyPhotosUrls = await Promise.all(Array.from(companyPhotosFiles).map(file => uploadFile(file, `company_photos/${user.uid}`)));
+                    }
+
+                    // Get company phone from intl tel input
+                    let fullCompanyPhone = null;
+                    if (companyPhoneInput) {
+                        const compPhone = companyPhoneInput.getNumber();
+                        if (compPhone) fullCompanyPhone = compPhone;
+                    }
+
                     // Get main user phone
                     let mainPhone = null;
                     if (phoneInput) {
@@ -1363,9 +1405,12 @@
                         role: role,
                         isProfileComplete: true,
                         createdAt: serverTimestamp(),
-                        phone: mainPhone,
+                        phone: mainPhone, // Main phone from step 1
                         companyInfo: {
                             name: formInputs['companyName'].value || null,
+                            email: formInputs['companyEmail'].value || null,
+                            phone: fullCompanyPhone,
+                            logoUrl: companyLogoUrl,
                             businessType: formInputs['businessType'].value || null,
                             description: formInputs['companyDescription'].value || null,
                             location: {
@@ -1374,9 +1419,14 @@
                                 area: formInputs['companyArea'].value || null,
                             }
                         },
+                        verification: {
+                            isVerified: isVerified,
+                            commercialRegisterUrl: commercialRegisterUrl,
+                            companyPhotosUrls: companyPhotosUrls.length > 0 ? companyPhotosUrls : null,
+                        },
                         subRole: formInputs['employerType'].value,
                         emailVerified: user.emailVerified,
-                        profileCompletionPercentage: calculateProfileCompletion('employer', formInputs, [])
+                        profileCompletionPercentage: calculateProfileCompletion('employer', formInputs, [], companyPhotosUrls)
                     };
                 }
 
@@ -1385,6 +1435,7 @@
 
                 showMessageInElement(msgElement, 'تم إنشاء حسابك بنجاح! سيتم توجيهك الآن.', 'success');
 
+                // Redirect based on role
                 setTimeout(() => {
                     if (role === 'employee') {
                         window.location.href = "company_listting_page.html";
@@ -1401,7 +1452,7 @@
             }
         }
 
-        function calculateProfileCompletion(role, formInputs, skills) {
+        function calculateProfileCompletion(role, formInputs, skills, worksUrls) {
             let completed = 0;
             let total = 0;
             
@@ -1409,6 +1460,7 @@
                 if (formInputs['headline'].value) { completed++; total++; }
                 if (formInputs['phone'].value) { completed++; total++; }
                 if (formInputs['state'].value) { completed++; total++; }
+                if (worksUrls.length > 0) { completed++; total++; }
                 
                 total += 3;
                 if (formInputs['bio'].value) completed += 0.5;
@@ -1421,17 +1473,28 @@
                 if (formInputs['linkedinUrl'].value) completed += 0.5;
             } else {
                 if (formInputs['companyName'].value) { completed++; total++; }
+                if (formInputs['companyEmail'].value) { completed++; total++; }
                 if (formInputs['businessType'].value) { completed++; total++; }
                 if (formInputs['employerType'].value) { completed++; total++; }
                 
                 total += 3;
+                if (formInputs['companyPhone'].value) completed += 0.5;
+                if (formInputs['companyLogo'].files[0]) completed += 0.5;
                 if (formInputs['companyDescription'].value) completed += 0.5;
                 if (formInputs['companyState'].value) completed += 0.5;
                 if (formInputs['companyCity'].value) completed += 0.5;
                 if (formInputs['companyArea'].value) completed += 0.5;
+                if (formInputs['commercialRegister'].files[0]) completed += 0.5;
+                if (worksUrls.length > 0) completed += 0.5;
             }
             
             return Math.round((completed / total) * 100);
+        }
+
+        async function uploadFile(file, filePath) {
+            const storageRef = ref(storage, filePath + '/' + file.name);
+            const uploadTask = await uploadBytes(storageRef, file);
+            return await getDownloadURL(uploadTask.ref);
         }
 
         const employeeStateSelect = document.getElementById('state');
@@ -1533,6 +1596,40 @@
                 if (document.querySelectorAll('.skill-input').length < 6) {
                     messageElement.classList.add('hidden');
                 }
+            }
+        });
+
+        document.getElementById('previousWorks').addEventListener('change', function(event) {
+            const previewContainer = document.getElementById('image-preview');
+            previewContainer.innerHTML = '';
+            const files = event.target.files;
+            if (files) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        previewContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        document.getElementById('companyPhotos').addEventListener('change', function(event) {
+            const previewContainer = document.getElementById('company-photos-preview');
+            previewContainer.innerHTML = '';
+            const files = event.target.files;
+            if (files) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        previewContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
             }
         });
 
