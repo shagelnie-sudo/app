@@ -66,14 +66,31 @@
             padding: 1rem;
             border-radius: 8px;
             margin-top: 1rem;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        .message.show {
+            display: block;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .success-message {
             background-color: #dcfce7;
             color: #065f46;
+            border: 1px solid #10b981;
         }
         .error-message {
             background-color: #fee2e2;
             color: #991b1b;
+            border: 1px solid #ef4444;
         }
         .password-requirement-item {
             display: flex;
@@ -93,13 +110,13 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
-        .modal.hidden {
-            display: none;
+        .modal.show {
+            display: flex;
         }
         .modal-content {
             background-color: white;
@@ -109,6 +126,36 @@
             max-width: 400px;
             text-align: center;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        /* Fix for button visibility */
+        #confirmVerificationBtn {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -122,6 +169,9 @@
             <div class="step" id="stepIndicator4">4</div>
             <div class="step hidden" id="stepIndicator5">5</div>
         </div>
+
+        <!-- رسائل التنبيه -->
+        <div id="message" class="message"></div>
 
         <form id="unifiedForm">
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card" id="step1">
@@ -452,7 +502,6 @@
             </div>
         </form>
 
-        <div id="message" class="message hidden"></div>
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
                 هل لديك حساب بالفعل؟
@@ -463,27 +512,35 @@
         </div>
     </div>
 
-    <div id="verificationModal" class="modal hidden">
+    <!-- نافذة توثيق البريد الإلكتروني -->
+    <div id="verificationModal" class="modal">
         <div class="modal-content">
             <div class="mb-4 text-green-500">
                 <i class="fas fa-envelope-open-text text-5xl"></i>
             </div>
             <h3 class="text-xl font-bold mb-2">توثيق البريد الإلكتروني</h3>
             <p class="text-gray-600 mb-4" id="verificationText">
-                تم إرسال رمز التحقق إلى بريدك الإلكتروني. يرجى إدخاله للمتابعة.
+                تم إرسال رابط التحقق إلى بريدك الإلكتروني. يرجى الضغط على الرابط في البريد الوارد للمتابعة.
             </p>
-            <div class="mb-4">
-                 <input type="text" id="verificationCode" class="w-full px-3 py-2 border border-gray-300 rounded-md text-center text-lg tracking-widest" placeholder="XXXXXX">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-info-circle ml-2"></i>
+                    إذا لم تجد البريد، تفقد مجلد <strong>Spam</strong> أو <strong>الرسائل غير المرغوب فيها</strong>
+                </p>
             </div>
-            <button id="confirmVerificationBtn" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-2">تحقق ومتابعة</button>
-            <button id="closeModalBtn" class="text-gray-500 text-sm hover:underline">إلغاء</button>
+            <button id="checkVerificationBtn" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-2 flex items-center justify-center gap-2">
+                <span>لقد قمت بالتحقق</span>
+            </button>
+            <button id="resendLinkBtn" class="text-gray-500 text-sm hover:underline mb-2">إعادة إرسال الرابط</button>
+            <br>
+            <button id="closeModalBtn" class="text-gray-400 text-sm hover:underline">إلغاء</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, reload } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
         const firebaseConfig = {
@@ -505,6 +562,8 @@
         const form = document.getElementById('unifiedForm');
         const messageDiv = document.getElementById('message');
         const roleSelect = document.getElementById('role');
+        let currentUser = null;
+        let pendingVerificationCallback = null;
 
         const sudanLocations = {
             "الخرطوم": {
@@ -534,7 +593,7 @@
             "شرق دارفور": ["الضعين", "عديلة", "أبو كارنكا", "ياسين"],
         };
 
-        // --- NEW: Password Toggle Visibility ---
+        // --- Password Toggle Visibility ---
         window.togglePasswordVisibility = function(inputId) {
             const input = document.getElementById(inputId);
             const icon = document.getElementById(inputId + '-eye');
@@ -549,7 +608,7 @@
             }
         }
 
-        // --- NEW: Name Validation (Tripartite/Quadripartite) ---
+        // --- Name Validation ---
         function validateName(name) {
             const parts = name.trim().split(/\s+/);
             return parts.length >= 3 && parts.length <= 4;
@@ -611,52 +670,127 @@
             updateStepIndicator();
         }
 
-        // --- NEW: Modal Logic ---
+        // --- Modal Logic for Email Verification Link ---
         const verificationModal = document.getElementById('verificationModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
-        const confirmVerificationBtn = document.getElementById('confirmVerificationBtn');
+        const checkVerificationBtn = document.getElementById('checkVerificationBtn');
+        const resendLinkBtn = document.getElementById('resendLinkBtn');
         const verificationText = document.getElementById('verificationText');
-        let pendingStepLogic = null; // Store function to run after verification
 
         closeModalBtn.addEventListener('click', () => {
-            verificationModal.classList.add('hidden');
+            verificationModal.classList.remove('show');
         });
 
-        confirmVerificationBtn.addEventListener('click', () => {
-            // Here you would normally check the code against backend
-            const code = document.getElementById('verificationCode').value;
-            if(code.length > 0) {
-                verificationModal.classList.add('hidden');
-                showMessage('تم التوثيق بنجاح', 'success');
-                if (pendingStepLogic) pendingStepLogic();
-                pendingStepLogic = null;
-            } else {
-                alert('الرجاء إدخال رمز التحقق');
+        checkVerificationBtn.addEventListener('click', async () => {
+            if (!currentUser) {
+                showMessage('خطأ: لم يتم إنشاء المستخدم', 'error');
+                return;
+            }
+
+            // Show loading
+            checkVerificationBtn.innerHTML = '<span class="loading-spinner"></span> جاري التحقق...';
+            checkVerificationBtn.disabled = true;
+
+            try {
+                // Reload user to get latest emailVerified status
+                await reload(currentUser);
+                
+                if (currentUser.emailVerified) {
+                    verificationModal.classList.remove('show');
+                    showMessage('تم توثيق البريد الإلكتروني بنجاح!', 'success');
+                    
+                    // Execute pending logic after short delay
+                    setTimeout(() => {
+                        if (pendingVerificationCallback) {
+                            pendingVerificationCallback();
+                            pendingVerificationCallback = null;
+                        }
+                    }, 1000);
+                } else {
+                    showMessage('لم يتم التوثيق بعد. يرجى التحقق من بريدك والضغط على الرابط.', 'error');
+                    checkVerificationBtn.innerHTML = '<span>لقد قمت بالتحقق</span>';
+                    checkVerificationBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Verification check error:', error);
+                showMessage('حدث خطأ أثناء التحقق. حاول مرة أخرى.', 'error');
+                checkVerificationBtn.innerHTML = '<span>لقد قمت بالتحقق</span>';
+                checkVerificationBtn.disabled = false;
             }
         });
 
-        function openVerificationModal(email, callback) {
-            verificationText.textContent = `تم إرسال رمز التحقق إلى ${email}. يرجى إدخاله للمتابعة.`;
-            document.getElementById('verificationCode').value = '';
-            verificationModal.classList.remove('hidden');
-            pendingStepLogic = callback;
+        resendLinkBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            
+            try {
+                await sendEmailVerification(currentUser);
+                showMessage('تم إعادة إرسال رابط التحقق', 'success');
+            } catch (error) {
+                showMessage('خطأ في إعادة الإرسال: ' + error.message, 'error');
+            }
+        });
+
+        async function openVerificationModal(email, callback) {
+            verificationText.innerHTML = `تم إرسال رابط التحقق إلى <strong>${email}</strong>. يرجى الضغط على الرابط في البريد الوارد للمتابعة.`;
+            checkVerificationBtn.innerHTML = '<span>لقد قمت بالتحقق</span>';
+            checkVerificationBtn.disabled = false;
+            verificationModal.classList.add('show');
+            pendingVerificationCallback = callback;
+
+            // Send verification email if user exists
+            if (currentUser && !currentUser.emailVerified) {
+                try {
+                    await sendEmailVerification(currentUser);
+                } catch (error) {
+                    console.error('Error sending verification:', error);
+                }
+            }
         }
-        
-        // --- NEW: Verify Company Email Logic ---
+
+        // Verify Company Email (simplified - just visual feedback)
         document.getElementById('verifyCompanyEmailBtn').addEventListener('click', () => {
             const email = document.getElementById('companyEmail').value;
             if(email && email.includes('@')) {
-                openVerificationModal(email, () => {
-                     // Just purely for UX in this specific field
-                     document.getElementById('companyEmail').style.borderColor = '#10b981'; 
-                });
+                document.getElementById('companyEmail').style.borderColor = '#10b981';
+                showMessage('تم التحقق من صحة البريد الإلكتروني', 'success');
             } else {
                 showMessage('يرجى إدخال بريد إلكتروني صحيح للشركة', 'error');
             }
         });
 
+        // --- Message System (Fixed) ---
+        let messageTimeout;
+        function showMessage(msg, type) {
+            // Clear any existing timeout
+            if (messageTimeout) {
+                clearTimeout(messageTimeout);
+            }
+            
+            // Clear previous classes
+            messageDiv.className = 'message';
+            
+            // Force reflow to ensure animation restarts
+            void messageDiv.offsetWidth;
+            
+            // Set new content and classes
+            messageDiv.textContent = msg;
+            messageDiv.classList.add('show', `${type}-message`);
+            
+            // Auto-hide after 5 seconds for success, 8 for error
+            const duration = type === 'error' ? 8000 : 5000;
+            messageTimeout = setTimeout(() => {
+                hideMessage();
+            }, duration);
+        }
 
-        function nextStep(step) {
+        function hideMessage() {
+            messageDiv.classList.remove('show');
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 300);
+        }
+
+        async function nextStep(step) {
             let currentStepElementId;
             let nextStepElementId;
 
@@ -672,7 +806,7 @@
                 });
                 if (!isStepValid) return;
 
-                // --- NEW: Name Validation Check ---
+                // Name Validation Check
                 const nameInput = document.getElementById('name');
                 if (!validateName(nameInput.value)) {
                     showMessage('الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
@@ -690,25 +824,63 @@
                     return;
                 }
 
-                // --- NEW: Trigger Modal before proceeding ---
+                // Create user first, then send verification
                 const email = document.getElementById('email').value;
-                openVerificationModal(email, () => {
-                    // Logic to execute AFTER verification
-                    isEmployerFlow = (document.getElementById('role').value === 'employer');
-                    nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
+                const name = document.getElementById('name').value;
+                
+                try {
+                    // Show loading
+                    const nextBtn = document.getElementById('nextBtn1');
+                    nextBtn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>';
+                    nextBtn.disabled = true;
+
+                    // Create user with Firebase Auth
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    currentUser = userCredential.user;
                     
-                    document.getElementById(currentStepElementId).classList.add('hidden');
-                    document.getElementById(nextStepElementId).classList.remove('hidden');
-                    currentStep++;
-                    updateStepIndicator();
-                });
-                return; // Stop here until modal callback handles the rest
+                    // Send verification email
+                    await sendEmailVerification(currentUser);
+                    
+                    // Show verification modal
+                    nextBtn.innerHTML = 'التالي';
+                    nextBtn.disabled = false;
+                    
+                    openVerificationModal(email, () => {
+                        // Logic to execute AFTER verification
+                        isEmployerFlow = (document.getElementById('role').value === 'employer');
+                        nextStepElementId = isEmployerFlow ? 'step2-employer' : 'step2-employee';
+                        
+                        document.getElementById(currentStepElementId).classList.add('hidden');
+                        document.getElementById(nextStepElementId).classList.remove('hidden');
+                        currentStep++;
+                        updateStepIndicator();
+                    });
+
+                } catch (error) {
+                    nextBtn.innerHTML = 'التالي';
+                    nextBtn.disabled = false;
+                    
+                    let errorMessage = 'حدث خطأ أثناء إنشاء الحساب.';
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'صيغة البريد الإلكتروني غير صحيحة.';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'كلمة المرور ضعيفة جداً.';
+                            break;
+                    }
+                    showMessage(errorMessage, 'error');
+                }
+                return;
 
             } else {
                 const stepIdSuffix = isEmployerFlow ? 'employer' : 'employee';
                 currentStepElementId = `step${step}-${stepIdSuffix}`;
                 
-                // --- NEW: Phone Validation for Step 2 ---
+                // Phone Validation for Step 2
                 if (step === 2) {
                     let phoneInput, countryCode;
                     if(isEmployerFlow) {
@@ -719,10 +891,7 @@
                          countryCode = document.getElementById('countryCode').value;
                     }
                     
-                    // Basic validation: If there is a number, it should be valid format
                     if (phoneInput.value.trim() !== "") {
-                        // Regex: Start with 0, 10 digits total usually for Sudan like 0912345678
-                        // Or just checking length. Let's strict it a bit to Sudan format if code is +249
                         if (countryCode === '+249') {
                             const phoneRegex = /^0(1|9)\d{8}$/;
                             if (!phoneRegex.test(phoneInput.value)) {
@@ -767,17 +936,20 @@
             const submitButton = event.target;
             submitButton.disabled = true;
             const originalButtonText = submitButton.textContent;
-            submitButton.textContent = 'جاري الحفظ...';
+            submitButton.innerHTML = '<span class="loading-spinner"></span> جاري الحفظ...';
 
             const formInputs = form.elements;
             const name = formInputs['name'].value;
             const email = formInputs['email'].value;
-            const password = formInputs['password'].value;
             const role = formInputs['role'].value;
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+                // User already created in step 1, just update data
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('لم يتم العثور على المستخدم');
+                }
+
                 let userData;
 
                 if (role === 'employee') {
@@ -793,7 +965,6 @@
                     const skillInputs = document.querySelectorAll('.skill-input');
                     const skills = Array.from(skillInputs).map(input => input.value.trim()).filter(skill => skill !== '');
 
-                    // Collect Full Phone with code
                     const fullPhone = formInputs['countryCode'].value + formInputs['phone'].value;
 
                     userData = {
@@ -806,7 +977,7 @@
                         bio: formInputs['bio'].value || null,
                         profileImageUrl,
                         contact: {
-                            phone: fullPhone || null, // Updated to include full number
+                            phone: fullPhone || null,
                             location: { state: formInputs['state'].value || null, city: formInputs['city'].value || null, area: formInputs['area'].value || null }
                         },
                         skills,
@@ -814,6 +985,7 @@
                         jobStatus: formInputs['jobStatus'].value || null,
                         links: { cv: formInputs['cvUrl'].value || null, linkedin: formInputs['linkedinUrl'].value || null },
                         previousWorksUrls,
+                        emailVerified: user.emailVerified
                     };
 
                 } else if (role === 'employer') {
@@ -835,7 +1007,6 @@
                         companyPhotosUrls = await Promise.all(Array.from(companyPhotosFiles).map(file => uploadFile(file, `company_photos/${user.uid}`)));
                     }
 
-                    // Collect Company Phone with code
                     const fullCompanyPhone = formInputs['companyCountryCode'].value + formInputs['companyPhone'].value;
 
                     userData = {
@@ -847,7 +1018,7 @@
                         companyInfo: {
                             name: formInputs['companyName'].value || null,
                             email: formInputs['companyEmail'].value || null,
-                            phone: fullCompanyPhone || null, // Updated
+                            phone: fullCompanyPhone || null,
                             logoUrl: companyLogoUrl,
                             businessType: formInputs['businessType'].value || null,
                             description: formInputs['companyDescription'].value || null,
@@ -862,11 +1033,11 @@
                             commercialRegisterUrl: commercialRegisterUrl,
                             companyPhotosUrls: companyPhotosUrls,
                         },
-                        subRole: formInputs['employerType'].value
+                        subRole: formInputs['employerType'].value,
+                        emailVerified: user.emailVerified
                     };
                 }
 
-                // تم تغيير اسم المجموعة (Collection) من 'employers' إلى 'All_jops'
                 const collectionName = role === 'employee' ? 'employees' : 'All_jops';
                 await setDoc(doc(db, collectionName, user.uid), userData);
 
@@ -879,19 +1050,7 @@
 
             } catch (error) {
                 console.error("خطأ في التسجيل:", error);
-                let errorMessage = 'حدث خطأ غير متوقع. يرجى المحاولة لاحقًا.';
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'صيغة البريد الإلكتروني غير صحيحة.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'كلمة المرور ضعيفة جداً.';
-                        break;
-                }
-                showMessage(errorMessage, 'error');
+                showMessage(error.message || 'حدث خطأ غير متوقع. يرجى المحاولة لاحقًا.', 'error');
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
@@ -902,12 +1061,6 @@
             const storageRef = ref(storage, filePath + '/' + file.name);
             const uploadTask = await uploadBytes(storageRef, file);
             return await getDownloadURL(uploadTask.ref);
-        }
-
-        function showMessage(msg, type) {
-            messageDiv.textContent = msg;
-            messageDiv.className = `message ${type}-message`;
-            messageDiv.classList.remove('hidden');
         }
 
         const employeeStateSelect = document.getElementById('state');
