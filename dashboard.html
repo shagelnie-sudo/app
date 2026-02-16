@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - شغلني</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        
+        * { font-family: 'Tajawal', sans-serif; }
+        
+        body { background-color: #f8fafc; }
+        
+        .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
+        
+        /* البطاقات الإحصائية */
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
+        }
+        
+        .stat-card.green::before { background: linear-gradient(to bottom, #10b981, #059669); }
+        .stat-card.orange::before { background: linear-gradient(to bottom, #f59e0b, #d97706); }
+        .stat-card.purple::before { background: linear-gradient(to bottom, #8b5cf6, #7c3aed); }
+        
+        /* شريط التقدم الدائري */
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        /* بطاقات الوظائف */
+        .job-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .job-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+        
+        .job-card.featured {
+            border-right: 4px solid #3b82f6;
+        }
+        
+        /* الإشعارات */
+        .notification-item {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            transition: all 0.2s;
+        }
+        
+        .notification-item:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .notification-item.success { background-color: #f0fdf4; border-right: 3px solid #10b981; }
+        .notification-item.info { background-color: #eff6ff; border-right: 3px solid #3b82f6; }
+        .notification-item.warning { background-color: #fffbeb; border-right: 3px solid #f59e0b; }
+        
+        /* القائمة الجانبية */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            border-radius: 0.75rem;
+            color: #64748b;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+        
+        .sidebar-item.active {
+            font-weight: 700;
+        }
+        
+        .badge {
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 700;
+        }
+        
+        /* زر التقديم */
+        .apply-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .apply-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* الهيدر */
+        .dashboard-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        /* تأثيرات الحركة */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.5s ease forwards;
+        }
+        
+        /* التحميل */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* شاشة تسجيل الدخول المطلوبة */
+        .auth-required {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- شاشة التحميل -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- المحتوى الرئيسي (يظهر بعد تسجيل الدخول) -->
+    <div id="main-content" style="display: none;">
+        
+        <!-- الهيدر -->
+        <header class="dashboard-header flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="index.html">
+                    <img src="shagelnie.png.png" alt="شغلني" class="h-10">
+                </a>
+                <h1 class="text-xl font-bold text-gray-800 hidden md:block">لوحة التحكم</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 text-gray-500 hover:text-blue-600 transition" onclick="showNotifications()">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span id="notif-count" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+                
+                <div class="flex items-center gap-3 border-r pr-4 border-gray-200 cursor-pointer" onclick="toggleUserMenu()">
+                    <div class="text-right hidden sm:block">
+                        <p id="user-name" class="font-bold text-sm">جار التحميل...</p>
+                        <p id="user-role" class="text-xs text-gray-500">...</p>
+                    </div>
+                    <img id="user-avatar" src="https://via.placeholder.com/100" alt="الصورة" class="w-10 h-10 rounded-full border-2 border-blue-100 object-cover">
+                </div>
+                
+                <button class="md:hidden text-gray-600" onclick="toggleSidebar()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- قائمة المستخدم المنسدلة -->
+        <div id="user-menu" class="hidden absolute top-16 left-4 bg-white rounded-xl shadow-lg border border-gray-200 p-2 z-50 w-48">
+            <a href="profile.html" class="block px-4 py-2 hover:bg-gray-50 rounded-lg text-sm">ملفي الشخصي</a>
+            <a href="settings.html" class="block px-4 py-2 hover:bg-gray-50 rounded-lg text-sm">الإعدادات</a>
+            <hr class="my-2">
+            <button onclick="logout()" class="block w-full text-right px-4 py-2 hover:bg-red-50 text-red-600 rounded-lg text-sm">تسجيل الخروج</button>
+        </div>
+
+        <div class="flex min-h-screen">
+            <!-- القائمة الجانبية -->
+            <aside id="sidebar" class="w-64 bg-white border-l border-gray-200 p-4 fixed md:sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto transform translate-x-full md:translate-x-0 transition-transform z-40">
+                <div class="mb-6">
+                    <div class="sidebar-item active" onclick="showSection('dashboard')">
+                        <i class="fas fa-home w-5"></i>
+                        <span>لوحة التحكم الرئيسية</span>
+                    </div>
+                    <div class="sidebar-item" onclick="window.location.href='profile.html'">
+                        <i class="fas fa-user w-5"></i>
+                        <span>ملفي الشخصي</span>
+                    </div>
+                    <div class="sidebar-item" onclick="window.location.href='job_listing_page.html'">
+                        <i class="fas fa-search w-5"></i>
+                        <span>البحث عن وظيفة</span>
+                    </div>
+                    <div class="sidebar-item" onclick="showSection('applications')">
+                        <i class="fas fa-paper-plane w-5"></i>
+                        <span>طلبات التقديم</span>
+                        <span id="sidebar-badge" class="badge mr-auto hidden">0</span>
+                    </div>
+                    <div class="sidebar-item" onclick="showSection('saved')">
+                        <i class="fas fa-bookmark w-5"></i>
+                        <span>وظائف محفوظة</span>
+                    </div>
+                </div>
+                
+                <div class="border-t pt-4 mt-4">
+                    <div class="sidebar-item text-gray-600 hover:bg-gray-50" onclick="window.location.href='settings.html'">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>الإعدادات</span>
+                    </div>
+                    <div class="sidebar-item text-red-600 hover:bg-red-50" onclick="logout()">
+                        <i class="fas fa-sign-out-alt w-5"></i>
+                        <span>تسجيل الخروج</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- المحتوى الرئيسي -->
+            <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+                
+                <!-- الترحيب -->
+                <div class="mb-8 animate-slide-in">
+                    <h2 class="text-2xl font-black text-gray-800 mb-2">مرحباً بك يا <span id="welcome-name">...</span>! 👋</h2>
+                    <p class="text-gray-500">لديك <span class="text-blue-600 font-bold" id="new-jobs-count">0 وظائف</span> جديدة تطابق مهاراتك</p>
+                </div>
+
+                <!-- الإحصائيات -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="stat-card orange animate-slide-in" style="animation-delay: 0.1s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">عرض العمل/القبول</p>
+                                <p class="text-3xl font-black text-gray-800" id="offers-count">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
+                                <i class="fas fa-check-circle text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">وظيفتان في مرحلة المقابلة</p>
+                    </div>
+
+                    <div class="stat-card green animate-slide-in" style="animation-delay: 0.2s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">مشاهدات ملفك هذا الأسبوع</p>
+                                <p class="text-3xl font-black text-gray-800" id="views-count">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                                <i class="fas fa-eye text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-green-600 mt-2 font-bold">+12% عن الأسبوع الماضي</p>
+                    </div>
+
+                    <div class="stat-card purple animate-slide-in" style="animation-delay: 0.3s">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm mb-1">عدد الطلبات المرسلة</p>
+                                <p class="text-3xl font-black text-gray-800" id="applications-count">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                                <i class="fas fa-paper-plane text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2" id="pending-text">0 في انتظار الرد</p>
+                    </div>
+                </div>
+
+                <!-- حالة الملف الشخصي -->
+                <div class="bg-white rounded-2xl p-6 mb-8 border border-gray-200 animate-slide-in" style="animation-delay: 0.4s">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="relative w-20 h-20">
+                                <svg class="progress-ring w-20 h-20">
+                                    <circle class="text-gray-200" stroke-width="6" stroke="currentColor" fill="transparent" r="32" cx="40" cy="40"/>
+                                    <circle id="progress-circle" class="text-blue-600 progress-ring-circle" stroke-width="6" stroke-linecap="round" stroke="currentColor" fill="transparent" r="32" cx="40" cy="40" 
+                                        stroke-dasharray="201.06" stroke-dashoffset="201.06"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-lg font-bold text-blue-600" id="profile-percent">0%</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-1">حالة الملف الشخصي</h3>
+                                <p class="text-gray-500 text-sm" id="profile-hint">أكمل بياناتك لزيادة فرصك</p>
+                            </div>
+                        </div>
+                        <a href="profile.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition w-full md:w-auto text-center">
+                            تحديث ملفي الآن
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- آخر التنبيهات -->
+                    <div class="lg:col-span-1 animate-slide-in" style="animation-delay: 0.5s">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i class="fas fa-bell text-blue-600"></i>
+                            آخر التنبيهات
+                        </h3>
+                        
+                        <div class="bg-white rounded-2xl p-4 border border-gray-200" id="notifications-container">
+                            <p class="text-gray-400 text-center py-4">لا توجد إشعارات جديدة</p>
+                        </div>
+                    </div>
+
+                    <!-- الوظائف المقترحة -->
+                    <div class="lg:col-span-2 animate-slide-in" style="animation-delay: 0.6s">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg flex items-center gap-2">
+                                <i class="fas fa-briefcase text-blue-600"></i>
+                                الوظائف المقترحة لك
+                            </h3>
+                            <a href="job_listing_page.html" class="text-blue-600 text-sm font-bold hover:underline flex items-center gap-1">
+                                عرض الكل
+                                <i class="fas fa-arrow-left text-xs"></i>
+                            </a>
+                        </div>
+
+                        <div class="space-y-4" id="jobs-container">
+                            <!-- سيتم ملؤها من Firebase -->
+                            <div class="text-center py-8">
+                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+                                <p class="text-gray-400 mt-2">جاري تحميل الوظائف...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- شاشة تسجيل الدخول المطلوبة -->
+    <div id="auth-required" class="auth-required hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-md mx-4">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-lock text-3xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">تسجيل الدخول مطلوب</h2>
+            <p class="text-gray-600 mb-6">يجب تسجيل الدخول للوصول إلى لوحة التحكم</p>
+            <div class="flex gap-3">
+                <a href="login.html" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">تسجيل الدخول</a>
+                <a href="index.html" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition">العودة للرئيسية</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // نفس إعدادات Firebase في index.html
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+            authDomain: "shaglni-c64c0.firebaseapp.com",
+            projectId: "shaglni-c64c0",
+            storageBucket: "shaglni-c64c0.firebasestorage.app",
+            messagingSenderId: "768887356636",
+            appId: "1:768887356636:web:11ec1d6991add3309c8819"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let userData = null;
+
+        // التحقق من حالة المصادقة
+        onAuthStateChanged(auth, async (user) => {
+            document.getElementById('loading').style.display = 'none';
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('auth-required').classList.add('hidden');
+                
+                await loadUserData(user.uid);
+                await loadDashboardData(user.uid);
+            } else {
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('auth-required').classList.remove('hidden');
+            }
+        });
+
+        async function loadUserData(userId) {
+            try {
+                // جلب بيانات المستخدم من Firestore
+                const userDoc = await getDoc(doc(db, "users", userId));
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    
+                    // تحديث واجهة المستخدم
+                    document.getElementById('user-name').textContent = userData.name || userData.email || 'مستخدم';
+                    document.getElementById('welcome-name').textContent = userData.name || 'زائر';
+                    document.getElementById('user-role').textContent = userData.headline || userData.userType || 'باحث عن عمل';
+                    
+                    if (userData.profileImageUrl) {
+                        document.getElementById('user-avatar').src = userData.profileImageUrl;
+                    }
+                    
+                    // تحديث نسبة إكمال الملف
+                    const completion = calculateProfileCompletion(userData);
+                    updateProgressCircle(completion);
+                }
+            } catch (error) {
+                console.error("Error loading user data:", error);
+            }
+        }
+
+        function calculateProfileCompletion(data) {
+            let fields = 0;
+            let completed = 0;
+            
+            const requiredFields = ['name', 'email', 'phone', 'headline', 'skills', 'profileImageUrl', 'bio'];
+            requiredFields.forEach(field => {
+                fields++;
+                if (data[field] && (Array.isArray(data[field]) ? data[field].length > 0 : true)) {
+                    completed++;
+                }
+            });
+            
+            return Math.round((completed / fields) * 100);
+        }
+
+        function updateProgressCircle(percent) {
+            const circle = document.getElementById('progress-circle');
+            const radius = 32;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percent / 100) * circumference;
+            
+            circle.style.strokeDashoffset = offset;
+            document.getElementById('profile-percent').textContent = percent + '%';
+            
+            const hint = document.getElementById('profile-hint');
+            if (percent < 50) {
+                hint.textContent = 'أضف المزيد من البيانات لزيادة فرصك';
+                circle.classList.remove('text-green-500');
+                circle.classList.add('text-blue-600');
+            } else if (percent < 80) {
+                hint.textContent = 'ملفك جيد، أضف بعض التفاصيل';
+                circle.classList.remove('text-blue-600');
+                circle.classList.add('text-yellow-500');
+            } else {
+                hint.textContent = 'ملفك مكتمل وممتاز!';
+                circle.classList.remove('text-yellow-500');
+                circle.classList.add('text-green-500');
+            }
+        }
+
+        async function loadDashboardData(userId) {
+            try {
+                // 1. جلب الإحصائيات
+                await loadStats(userId);
+                
+                // 2. جلب الإشعارات
+                await loadNotifications(userId);
+                
+                // 3. جلب الوظائف المقترحة
+                if (userData && userData.skills) {
+                    await loadRecommendedJobs(userData.skills);
+                } else {
+                    await loadAllJobs();
+                }
+                
+            } catch (error) {
+                console.error("Error loading dashboard:", error);
+            }
+        }
+
+        async function loadStats(userId) {
+            // عدد الطلبات المرسلة
+            const appsQuery = query(collection(db, "applications"), where("userId", "==", userId));
+            const appsSnapshot = await getDocs(appsQuery);
+            document.getElementById('applications-count').textContent = appsSnapshot.size;
+            
+            // عدد المعلق منها
+            const pending = appsSnapshot.docs.filter(d => d.data().status === 'pending').length;
+            document.getElementById('pending-text').textContent = `${pending} في انتظار الرد`;
+            
+            // عدد مشاهدات الملف (إذا كان موجوداً)
+            try {
+                const viewsDoc = await getDoc(doc(db, "profileViews", userId));
+                document.getElementById('views-count').textContent = viewsDoc.exists() ? viewsDoc.data().count : 0;
+            } catch (e) {
+                document.getElementById('views-count').textContent = '0';
+            }
+            
+            // عروض العمل
+            const offersQuery = query(collection(db, "jobOffers"), where("userId", "==", userId), where("status", "==", "pending"));
+            const offersSnapshot = await getDocs(offersQuery);
+            document.getElementById('offers-count').textContent = offersSnapshot.size;
+            
+            // تحديث الشارة في القائمة
+            if (appsSnapshot.size > 0) {
+                const badge = document.getElementById('sidebar-badge');
+                badge.textContent = appsSnapshot.size;
+                badge.classList.remove('hidden');
+            }
+        }
+
+        async function loadNotifications(userId) {
+            const notifQuery = query(
+                collection(db, "notifications"), 
+                where("userId", "==", userId),
+                orderBy("createdAt", "desc"),
+                limit(5)
+            );
+            
+            const container = document.getElementById('notifications-container');
+            
+            onSnapshot(notifQuery, (snapshot) => {
+                const count = snapshot.size;
+                const countBadge = document.getElementById('notif-count');
+                
+                if (count > 0) {
+                    countBadge.textContent = count;
+                    countBadge.classList.remove('hidden');
+                }
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-gray-400 text-center py-4">لا توجد إشعارات جديدة</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const notif = doc.data();
+                    const div = document.createElement('div');
+                    div.className = `notification-item ${notif.type || 'info'}`;
+                    div.innerHTML = `
+                        <div class="w-10 h-10 bg-${getNotifColor(notif.type)}-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas ${getNotifIcon(notif.type)} text-${getNotifColor(notif.type)}-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-bold text-gray-800 mb-1">${notif.title}</p>
+                            <p class="text-xs text-gray-600">${notif.message}</p>
+                            <p class="text-xs text-gray-400 mt-1">${formatTime(notif.createdAt)}</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        function getNotifIcon(type) {
+            const icons = {
+                'success': 'fa-check',
+                'message': 'fa-envelope',
+                'warning': 'fa-star',
+                'info': 'fa-info'
+            };
+            return icons[type] || 'fa-bell';
+        }
+
+        function getNotifColor(type) {
+            const colors = {
+                'success': 'green',
+                'message': 'blue',
+                'warning': 'yellow',
+                'info': 'blue'
+            };
+            return colors[type] || 'gray';
+        }
+
+        async function loadRecommendedJobs(skills) {
+            const container = document.getElementById('jobs-container');
+            container.innerHTML = '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div></div>';
+            
+            try {
+                // البحث عن وظائف تتطلب مهارات المستخدم
+                const jobsQuery = query(
+                    collection(db, "jobs"),
+                    where("skills", "array-contains-any", skills.slice(0, 10)),
+                    where("status", "==", "active"),
+                    limit(5)
+                );
+                
+                const snapshot = await getDocs(jobsQuery);
+                renderJobs(snapshot);
+                
+                document.getElementById('new-jobs-count').textContent = snapshot.size + ' وظائف';
+                
+            } catch (error) {
+                // إذا فشل الاستعلام المعقد، جلب جميع الوظائف
+                await loadAllJobs();
+            }
+        }
+
+        async function loadAllJobs() {
+            const jobsQuery = query(collection(db, "jobs"), where("status", "==", "active"), limit(5));
+            const snapshot = await getDocs(jobsQuery);
+            renderJobs(snapshot);
+            document.getElementById('new-jobs-count').textContent = snapshot.size + ' وظائف';
+        }
+
+        function renderJobs(snapshot) {
+            const container = document.getElementById('jobs-container');
+            container.innerHTML = '';
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<p class="text-gray-400 text-center py-4">لا توجد وظائف متاحة حالياً</p>';
+                return;
+            }
+            
+            snapshot.forEach((doc) => {
+                const job = doc.data();
+                const card = createJobCard(job, doc.id);
+                container.innerHTML += card;
+            });
+        }
+
+        function createJobCard(job, jobId) {
+            const isFeatured = job.featured || false;
+            const salary = job.salary ? `${job.salary.min} - ${job.salary.max} ${job.salary.currency || '$'}` : 'غير محدد';
+            
+            return `
+                <div class="job-card ${isFeatured ? 'featured' : ''}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex gap-3">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
+                                ${job.companyLogo ? `<img src="${job.companyLogo}" class="w-full h-full object-cover rounded-xl">` : '<i class="fas fa-building text-xl"></i>'}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 mb-1">${job.title}</h4>
+                                <p class="text-blue-600 text-sm font-medium">${job.companyName}</p>
+                            </div>
+                        </div>
+                        <button onclick="saveJob('${jobId}')" class="text-gray-400 hover:text-blue-600 transition">
+                            <i class="far fa-bookmark text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-3 text-xs text-gray-500">
+                        <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg">
+                            <i class="fas fa-map-marker-alt"></i> ${job.location || 'غير محدد'}
+                        </span>
+                        <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg">
+                            <i class="fas fa-clock"></i> ${job.type === 'full-time' ? 'دوام كامل' : job.type === 'part-time' ? 'دوام جزئي' : 'مشروع'}
+                        </span>
+                        <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg">
+                            <i class="fas fa-briefcase"></i> ${job.experience || 'غير محدد'}
+                        </span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-green-600 font-bold">${salary} / شهر</span>
+                        <button onclick="applyJob('${jobId}')" class="apply-btn">التقديم الآن</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return 'الآن';
+            const date = timestamp.toDate();
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000 / 60); // دقائق
+            
+            if (diff < 1) return 'الآن';
+            if (diff < 60) return `منذ ${diff} دقيقة`;
+            if (diff < 1440) return `منذ ${Math.floor(diff/60)} ساعة`;
+            return `منذ ${Math.floor(diff/1440)} يوم`;
+        }
+
+        // الوظائف العامة
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('translate-x-full');
+        };
+
+        window.toggleUserMenu = function() {
+            document.getElementById('user-menu').classList.toggle('hidden');
+        };
+
+        window.showNotifications = function() {
+            // الانتقال لصفحة الإشعارات أو عرضها في modal
+            alert('سيتم فتح صفحة الإشعارات');
+        };
+
+        window.saveJob = async function(jobId) {
+            if (!currentUser) return;
+            
+            try {
+                await addDoc(collection(db, "savedJobs"), {
+                    userId: currentUser.uid,
+                    jobId: jobId,
+                    savedAt: new Date()
+                });
+                alert('تم حفظ الوظيفة بنجاح!');
+            } catch (error) {
+                console.error("Error saving job:", error);
+            }
+        };
+
+        window.applyJob = async function(jobId) {
+            if (!currentUser) {
+                alert('يجب تسجيل الدخول أولاً');
+                return;
+            }
+            
+            try {
+                await addDoc(collection(db, "applications"), {
+                    userId: currentUser.uid,
+                    jobId: jobId,
+                    status: 'pending',
+                    appliedAt: new Date()
+                });
+                alert('تم التقديم بنجاح!');
+            } catch (error) {
+                console.error("Error applying:", error);
+            }
+        };
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        };
+
+        window.showSection = function(section) {
+            // يمكن إضافة منطق لإظهار أقسام مختلفة
+            console.log('Showing section:', section);
+        };
+
+        // إغلاق القوائم عند النقر خارجها
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('user-menu');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (!event.target.closest('#user-menu') && !event.target.closest('.cursor-pointer')) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // استيراد الدوال المطلوبة
+        import { addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    </script>
+</body>
+</html>
