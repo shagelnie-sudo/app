@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إنشاء بيانات - شغلني</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8 text-center">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
+        <h1 class="text-2xl font-bold mb-4">إنشاء بيانات تجريبية</h1>
+        <p class="text-gray-600 mb-4">اضغط الزر لإنشاء بياناتك في Firebase</p>
+        <button id="createBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+            إنشاء البيانات
+        </button>
+        <div id="status" class="mt-4 text-sm"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+            authDomain: "shaglni-c64c0.firebaseapp.com",
+            projectId: "shaglni-c64c0",
+            storageBucket: "shaglni-c64c0.firebasestorage.app",
+            messagingSenderId: "768887356636",
+            appId: "1:768887356636:web:11ec1d6991add3309c8819"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const btn = document.getElementById('createBtn');
+        const status = document.getElementById('status');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                status.innerHTML = '<span class="text-red-600">❌ سجل الدخول أولاً من <a href="login.html" class="underline">هنا</a></span>';
+                btn.disabled = true;
+                return;
+            }
+
+            btn.onclick = async () => {
+                btn.disabled = true;
+                status.innerHTML = '<span class="text-blue-600">⏳ جاري الإنشاء...</span>';
+
+                try {
+                    // 1. إنشاء بيانات الموظف
+                    await setDoc(doc(db, 'employees', user.uid), {
+                        name: 'أحمد علي محمد',
+                        email: user.email,
+                        headline: 'مطور ويب Full Stack',
+                        bio: 'مطور ويب ذو خبرة 3 سنوات في بناء تطبيقات الويب باستخدام React, Node.js, و Firebase. أبحث عن فرصة عمل في شركة تقنية.',
+                        phone: '+249912345678',
+                        profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
+                        skills: ['JavaScript', 'React', 'Node.js', 'Firebase', 'Tailwind CSS', 'MongoDB'],
+                        experience: 'متوسط (2-5 سنوات)',
+                        jobStatus: 'متاح للعمل',
+                        profileCompletionPercentage: 85,
+                        profileViews: 45,
+                        applications: 12,
+                        jobOffers: 2,
+                        bookmarkedJobs: [],
+                        location: {
+                            state: 'الخرطوم',
+                            city: 'الخرطوم',
+                            area: 'الرياض'
+                        },
+                        links: {
+                            cv: 'https://example.com/cv.pdf',
+                            linkedin: 'https://linkedin.com/in/ahmed-ali',
+                            github: 'https://github.com/ahmedali'
+                        },
+                        previousWorksUrls: [
+                            'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400',
+                            'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400',
+                            'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400',
+                            'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400',
+                            'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400'
+                        ],
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp()
+                    });
+
+                    // 2. إنشاء إشعارات
+                    await addDoc(collection(db, 'notifications'), {
+                        userId: user.uid,
+                        type: 'message',
+                        message: 'شركة المستقبل للتقنية أرسلت لك رسالة جديدة بشأن طلبك لوظيفة مطور ويب',
+                        read: false,
+                        timestamp: serverTimestamp()
+                    });
+
+                    await addDoc(collection(db, 'notifications'), {
+                        userId: user.uid,
+                        type: 'application_accepted',
+                        message: 'تم قبول طلبك المبدئي لوظيفة مطور ويب في شركة التقنية الحديثة',
+                        read: true,
+                        timestamp: serverTimestamp()
+                    });
+
+                    await addDoc(collection(db, 'notifications'), {
+                        userId: user.uid,
+                        type: 'job_match',
+                        message: 'تم نشر 3 وظائف جديدة تطابق مهاراتك (React, Node.js)',
+                        read: true,
+                        timestamp: serverTimestamp()
+                    });
+
+                    // 3. إنشاء وظائف مقترحة
+                    await setDoc(doc(db, 'jobs', 'job_1'), {
+                        title: 'فني تكييف وتبريد',
+                        companyName: 'مؤسسة الأمان للصيانة',
+                        companyId: 'company_1',
+                        location: { city: 'ود مدني', state: 'الجزيرة', area: 'وسط المدينة' },
+                        type: 'جزئي/مشاريع',
+                        experience: 'مبتدئ (0-2 سنوات)',
+                        salary: '5000 - 8000 جنيه',
+                        description: 'نبحث عن فني تكييف وتبريد للعمل في مشاريع صيانة متنوعة',
+                        requirements: ['خبرة في التكييف', 'رخصة قيادة'],
+                        employerId: 'employer_1',
+                        timestamp: serverTimestamp()
+                    });
+
+                    await setDoc(doc(db, 'jobs', 'job_2'), {
+                        title: 'مشرف عمال بناء',
+                        companyName: 'مجموعة الفرسان للمقاولات',
+                        companyId: 'company_2',
+                        location: { city: 'الرياض', state: 'الخرطوم', area: 'الصناعات' },
+                        type: 'دوام كامل',
+                        experience: 'خبرة (+5 سنوات)',
+                        salary: '15000 - 20000 جنيه',
+                        description: 'مطلوب مشرف عمال بناء ذو خبرة واسعة في إدارة فرق العمل',
+                        requirements: ['خبرة 5+ سنوات', 'إدارة فرق', 'قراءة مخططات'],
+                        employerId: 'employer_2',
+                        timestamp: serverTimestamp()
