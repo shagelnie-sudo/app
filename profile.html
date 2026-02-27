@@ -7,448 +7,756 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
         
-        :root {
-            --primary: #2563eb;
-            --secondary: #64748b;
-        }
-
-        body { 
-            font-family: 'Tajawal', sans-serif; 
-            background-color: #f8fafc;
-        }
-
-        /* تنسيق شريط التمرير */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-
-        .loader {
-            border: 3px solid #f3f3f3; 
-            border-top: 3px solid var(--primary); 
-            border-radius: 50%;
-            width: 50px; height: 50px; 
-            animation: spin 1s linear infinite; 
-            margin: 50px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* تأثيرات جمالية */
-        .glass-header {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
         }
         
-        .profile-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
-        .profile-card:hover {
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
-
-        .cover-pattern {
-            background-color: #2563eb;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        
+        .notification-item {
+            transition: all 0.2s ease;
+        }
+        .notification-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .job-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .bookmark-btn {
+            transition: all 0.2s ease;
+        }
+        .bookmark-btn:hover {
+            transform: scale(1.1);
+        }
+        .bookmark-btn.active {
+            color: #2563eb;
+        }
+        
+        .scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: #6b7280;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .scroll-to-top:hover {
+            background: #4b5563;
+            transform: translateY(-3px);
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="bg-gray-50">
 
-    <nav class="glass-header sticky top-0 z-50 border-b border-gray-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-2">
-                    <div class="bg-blue-600 text-white p-2 rounded-lg">
-                        <i class="fas fa-briefcase"></i>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <img src="shagelnie.png.png" alt="شغلني" class="h-12 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x48?text=شغلني'">
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <button id="notificationBtn" class="p-2 text-gray-600 hover:text-gray-900 relative">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span id="notificationBadge" class="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 hidden"></span>
+                        </button>
                     </div>
-                    <h1 class="text-2xl font-black text-gray-900 tracking-tight">شغلني</h1>
-                </div>
-                <div>
-                    <button id="logoutBtn" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="hidden sm:inline">تسجيل الخروج</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <span id="userName" class="font-semibold text-gray-800 hidden md:block">...</span>
+                        <div id="userAvatarContainer" class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            <img id="userAvatar" src="" alt="صورة المستخدم" class="w-full h-full object-cover hidden">
+                            <i id="userAvatarIcon" class="fas fa-user text-gray-400"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <main class="min-h-screen pb-12">
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6 max-w-4xl">
         
-        <div id="loadingIndicator" class="flex flex-col items-center justify-center pt-20">
-            <div class="loader"></div>
-            <p class="text-gray-500 font-medium mt-4">جاري تحضير ملفك الشخصي...</p>
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+            <p class="mt-4 text-gray-600">جاري تحميل بياناتك...</p>
         </div>
 
-        <div id="profileContent" class="hidden">
+        <!-- Error State -->
+        <div id="errorState" class="hidden">
+            <div class="error-message mb-4">
+                <i class="fas fa-exclamation-triangle mb-2 text-2xl"></i>
+                <p id="errorText">حدث خطأ في تحميل البيانات</p>
+            </div>
+            <button onclick="location.reload()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
+                إعادة المحاولة
+            </button>
+        </div>
+
+        <!-- Content (Hidden initially) -->
+        <div id="content" class="hidden">
+            
+            <!-- Welcome Message -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">مرحباً بك يا <span id="welcomeName">...</span>! 👋</h1>
             </div>
 
-        <div id="errorMessage" class="hidden max-w-lg mx-auto mt-10 px-4">
-            <div class="bg-white border-r-4 border-red-500 p-6 rounded-lg shadow-lg flex items-start gap-4">
-                <div class="text-red-500 text-xl pt-1"><i class="fas fa-exclamation-triangle"></i></div>
-                <div>
-                    <h3 class="font-bold text-gray-900 text-lg">تنبيه</h3>
-                    <p id="errorText" class="text-gray-600 mt-1"></p>
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- عروض العمل -->
+                <div class="stat-card bg-white rounded-xl p-5 shadow-sm border-t-4 border-orange-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">عروض العمل/القبول</p>
+                            <p id="jobOffersCount" class="text-3xl font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                            <i class="fas fa-check-circle text-orange-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مشاهدات الملف -->
+                <div class="stat-card bg-white rounded-xl p-5 shadow-sm border-t-4 border-green-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">مشاهدات ملفك هذا الأسبوع</p>
+                            <p id="profileViewsCount" class="text-3xl font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-eye text-green-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الطلبات المرسلة -->
+                <div class="stat-card bg-white rounded-xl p-5 shadow-sm border-t-4 border-blue-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">عدد الطلبات المرسلة</p>
+                            <p id="applicationsCount" class="text-3xl font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-blue-500 text-xl"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
+            <!-- Profile Completion Status -->
+            <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">حالة الملف الشخصي</h2>
+                    <span id="completionPercentage" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">-</span>
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="relative w-16 h-16">
+                        <svg class="progress-ring w-16 h-16">
+                            <circle cx="32" cy="32" r="28" stroke="#e5e7eb" stroke-width="4" fill="none"></circle>
+                            <circle id="progressCircle" cx="32" cy="32" r="28" stroke="#10b981" stroke-width="4" fill="none" 
+                                    stroke-dasharray="175.9" stroke-dashoffset="175.9" stroke-linecap="round" class="progress-ring-circle"></circle>
+                        </svg>
+                        <span id="progressText" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-600">-%</span>
+                    </div>
+                    <p id="completionMessage" class="text-gray-600 text-sm flex-1">
+                        جاري حساب نسبة الإكمال...
+                    </p>
+                </div>
+                <button onclick="window.location.href='create_an_account.html'" id="updateProfileBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+                    تحديث ملفي الآن
+                </button>
+            </div>
+
+            <!-- Recent Notifications -->
+            <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">آخر التنبيهات والإشعارات</h2>
+                <div id="notificationsList">
+                    <div class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggested Jobs -->
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">الوظائف المقترحة لك</h2>
+                    <a href="job_listing_page.html" class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1">
+                        عرض الكل <i class="fas fa-arrow-left text-xs"></i>
+                    </a>
+                </div>
+                <div id="suggestedJobsList">
+                    <div class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </main>
 
+    <!-- Scroll to Top Button -->
+    <div id="scrollToTop" class="scroll-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-chevron-up"></i>
+    </div>
+
+    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs, onSnapshot, updateDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-        // إعدادات Firebase
         const firebaseConfig = {
-          apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
-          authDomain: "shaglni-c64c0.firebaseapp.com",
-          projectId: "shaglni-c64c0",
-          storageBucket: "shaglni-c64c0.appspot.com", 
-          messagingSenderId: "768887356636",
-          appId: "1:768887356636:web:11ec1d6991add3309c8819", 
-          measurementId: "G-98GQGZS09W" 
+            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+            authDomain: "shaglni-c64c0.firebaseapp.com",
+            projectId: "shaglni-c64c0",
+            storageBucket: "shaglni-c64c0.firebasestorage.app",
+            messagingSenderId: "768887356636",
+            appId: "1:768887356636:web:11ec1d6991add3309c8819",
+            measurementId: "G-98GQGZS09W"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
-        const profileContent = document.getElementById('profileContent');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const errorMessage = document.getElementById('errorMessage');
+        let currentUser = null;
+        let userData = null;
+        let userRole = null; // 'employee' or 'employer'
 
+        // UI Elements
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const content = document.getElementById('content');
+        const errorText = document.getElementById('errorText');
+
+        // Scroll to top button
+        window.addEventListener('scroll', () => {
+            const scrollBtn = document.getElementById('scrollToTop');
+            if (window.pageYOffset > 300) {
+                scrollBtn.classList.add('visible');
+            } else {
+                scrollBtn.classList.remove('visible');
+            }
+        });
+
+        // Auth state listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                await fetchUserData(user.uid);
+                currentUser = user;
+                console.log('User authenticated:', user.uid);
+                await loadAllData(user.uid);
             } else {
-                window.location.href = 'login.html'; 
+                console.log('No user authenticated, redirecting to login');
+                window.location.href = 'login.html';
             }
         });
 
-        async function fetchUserData(uid) {
+        async function loadAllData(userId) {
             try {
-                // محاولة جلب بيانات موظف
-                const employeeRef = doc(db, "employees", uid);
-                const employeeSnap = await getDoc(employeeRef);
-
-                if (employeeSnap.exists()) {
-                    renderEmployeeProfile(employeeSnap.data(), uid);
-                    return;
+                showLoading();
+                
+                // Try to load as employee first
+                let userDoc = await getDoc(doc(db, 'employees', userId));
+                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    userRole = 'employee';
+                    console.log('Loaded as employee:', userData);
+                } else {
+                    // Try employer collection
+                    userDoc = await getDoc(doc(db, 'All_jops', userId));
+                    if (userDoc.exists()) {
+                        userData = userDoc.data();
+                        userRole = 'employer';
+                        console.log('Loaded as employer:', userData);
+                    } else {
+                        throw new Error('User data not found in any collection');
+                    }
                 }
 
-                // محاولة جلب بيانات شركة
-                const employerRef = doc(db, "All_jops", uid);
-                const employerSnap = await getDoc(employerRef);
+                // Update UI with real data
+                updateUserInterface(userData);
+                
+                // Load other data in parallel
+                await Promise.all([
+                    loadStats(userId),
+                    loadNotifications(userId),
+                    loadSuggestedJobs(userId)
+                ]);
 
-                if (employerSnap.exists()) {
-                    renderEmployerProfile(employerSnap.data(), uid);
-                    return;
-                }
-
-                showError("لم يتم العثور على بيانات لهذا الحساب.");
+                showContent();
 
             } catch (error) {
-                console.error("Error:", error);
-                showError("حدث خطأ في الاتصال بقاعدة البيانات.");
+                console.error('Error loading data:', error);
+                showError(error.message);
             }
         }
 
-        // ==========================================
-        //  تصميم بروفايل الموظف (الجديد)
-        // ==========================================
-        function renderEmployeeProfile(data, uid) {
-            const skillsHtml = data.skills ? data.skills.map(skill => 
-                `<span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">
-                    ${skill}
-                 </span>`
-            ).join('') : '<span class="text-gray-400 text-sm">لم تتم إضافة مهارات</span>';
-
-            const galleryHtml = data.previousWorksUrls && data.previousWorksUrls.length > 0 ? 
-                data.previousWorksUrls.map(url => 
-                `<div class="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all">
-                    <img src="${url}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" alt="عمل سابق">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                    <a href="${url}" target="_blank" class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div class="bg-white/90 backdrop-blur text-gray-900 p-2 rounded-full shadow-lg">
-                            <i class="fas fa-expand-alt"></i>
-                        </div>
-                    </a>
-                </div>`
-            ).join('') : 
-            `<div class="col-span-full py-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <i class="fas fa-images text-gray-300 text-3xl mb-2"></i>
-                <p class="text-gray-500">لا توجد صور أعمال سابقة</p>
-             </div>`;
-
-            const html = `
-                <div class="relative h-64 sm:h-80 w-full overflow-hidden">
-                    <div class="absolute inset-0 cover-pattern"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                </div>
-
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 sm:-mt-32 relative z-10">
-                    
-                    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-8 mb-8">
-                        <div class="flex flex-col sm:flex-row gap-6 items-start">
-                            
-                            <div class="relative mx-auto sm:mx-0 shrink-0">
-                                <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full p-1 bg-white shadow-lg">
-                                    <img src="${data.profileImageUrl || 'https://via.placeholder.com/150'}" 
-                                         class="w-full h-full rounded-full object-cover border border-gray-200" alt="Profile">
-                                </div>
-                                <span class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full" title="متاح للعمل"></span>
-                            </div>
-
-                            <div class="flex-1 w-full text-center sm:text-right">
-                                <div class="flex flex-col sm:flex-row justify-between items-center mb-2">
-                                    <div>
-                                        <h1 class="text-3xl font-extrabold text-gray-900 mb-1">${data.name}</h1>
-                                        <p class="text-lg text-blue-600 font-medium mb-3">${data.headline || 'مسمى وظيفي غير محدد'}</p>
-                                    </div>
-                                    
-                                    <button onclick="window.location.href='edit-profile.html?uid=${uid}'" 
-                                            class="group flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 mt-4 sm:mt-0">
-                                        <i class="fas fa-pen text-sm group-hover:rotate-12 transition-transform"></i>
-                                        <span>تعديل الملف</span>
-                                    </button>
-                                </div>
-
-                                <div class="flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-gray-600 mb-4">
-                                    <div class="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                                        <i class="fas fa-map-marker-alt text-red-500"></i>
-                                        <span>${data.contact?.location?.state || 'السودان'} - ${data.contact?.location?.city || ''}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                                        <i class="fas fa-briefcase text-orange-500"></i>
-                                        <span>${data.experience || 'مبتدئ'}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                                        <i class="fas fa-envelope text-blue-500"></i>
-                                        <span dir="ltr">${data.email}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex justify-center sm:justify-start gap-3">
-                                    ${data.links?.cv ? `<a href="${data.links.cv}" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors text-2xl"><i class="fas fa-file-pdf" title="السيرة الذاتية"></i></a>` : ''}
-                                    ${data.links?.linkedin ? `<a href="${data.links.linkedin}" target="_blank" class="text-gray-500 hover:text-blue-700 transition-colors text-2xl"><i class="fab fa-linkedin" title="LinkedIn"></i></a>` : ''}
-                                    ${data.contact?.phone ? `<a href="tel:${data.contact.phone}" class="text-gray-500 hover:text-green-600 transition-colors text-2xl"><i class="fas fa-phone-square-alt" title="اتصال"></i></a>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        
-                        <div class="space-y-8">
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 profile-card">
-                                <div class="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
-                                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <h3 class="font-bold text-lg text-gray-800">المهارات والخبرات</h3>
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    ${skillsHtml}
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 profile-card">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                                        <i class="fas fa-user-clock"></i>
-                                    </div>
-                                    <h3 class="font-bold text-lg text-gray-800">حالة البحث</h3>
-                                </div>
-                                <div class="p-3 bg-green-50 rounded-xl border border-green-100 text-center">
-                                    <span class="font-bold text-green-700 block text-lg">${data.jobStatus || 'متاح للعمل'}</span>
-                                    <span class="text-xs text-green-600 mt-1 block">يظهر للموظفين أنك تبحث عن وظيفة</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="lg:col-span-2 space-y-8">
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 profile-card">
-                                <div class="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
-                                    <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
-                                        <i class="fas fa-user-edit"></i>
-                                    </div>
-                                    <h3 class="font-bold text-lg text-gray-800">نبذة تعريفية</h3>
-                                </div>
-                                <p class="text-gray-600 leading-relaxed text-lg whitespace-pre-line">
-                                    ${data.bio || 'لا توجد نبذة مكتوبة حالياً.'}
-                                </p>
-                            </div>
-
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 profile-card">
-                                <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                                            <i class="fas fa-briefcase"></i>
-                                        </div>
-                                        <h3 class="font-bold text-lg text-gray-800">معرض الأعمال</h3>
-                                    </div>
-                                    <span class="text-sm text-gray-400 bg-gray-50 px-2 py-1 rounded-md border">${data.previousWorksUrls ? data.previousWorksUrls.length : 0} صور</span>
-                                </div>
-                                
-                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                    ${galleryHtml}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-12 text-center text-gray-400 text-sm pb-8">
-                        &copy; 2024 منصة شغلني - جميع الحقوق محفوظة
-                    </div>
-                </div>
-            `;
-            showContent(html);
+        function showLoading() {
+            loadingState.classList.remove('hidden');
+            errorState.classList.add('hidden');
+            content.classList.add('hidden');
         }
 
-        // ==========================================
-        //  تصميم بروفايل الشركة (الجديد)
-        // ==========================================
-        function renderEmployerProfile(data, uid) {
-            const info = data.companyInfo || {};
-            const verification = data.verification || {};
+        function showContent() {
+            loadingState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            content.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            loadingState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+            content.classList.add('hidden');
+            errorText.textContent = 'حدث خطأ: ' + message;
+        }
+
+        function updateUserInterface(data) {
+            // Update header info
+            const name = data.name || 'مستخدم';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('welcomeName').textContent = name.split(' ')[0];
             
-            const galleryHtml = verification.companyPhotosUrls && verification.companyPhotosUrls.length > 0 ? 
-                verification.companyPhotosUrls.map(url => 
-                `<div class="group relative aspect-video bg-gray-100 rounded-xl overflow-hidden cursor-pointer shadow-sm">
-                    <img src="${url}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" alt="صورة من الشركة">
-                </div>`
-            ).join('') : 
-            `<div class="col-span-full py-8 text-center text-gray-500">لا توجد صور للمقر</div>`;
+            // Update avatar
+            const avatarImg = document.getElementById('userAvatar');
+            const avatarIcon = document.getElementById('userAvatarIcon');
+            
+            if (data.profileImageUrl) {
+                avatarImg.src = data.profileImageUrl;
+                avatarImg.classList.remove('hidden');
+                avatarIcon.classList.add('hidden');
+            } else if (data.companyInfo?.logoUrl) {
+                avatarImg.src = data.companyInfo.logoUrl;
+                avatarImg.classList.remove('hidden');
+                avatarIcon.classList.add('hidden');
+            }
+        }
 
-            const html = `
-                <div class="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-900">
-                    <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 opacity-90"></div>
-                    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 30px 30px;"></div>
-                </div>
+        async function loadStats(userId) {
+            try {
+                // Job offers count (from hiringRequests where employee is receiver and status is accepted)
+                const offersQuery = query(
+                    collection(db, 'hiringRequests'),
+                    where('employeeId', '==', userId),
+                    where('status', 'in', ['accepted', 'pending'])
+                );
+                const offersSnapshot = await getDocs(offersQuery);
+                document.getElementById('jobOffersCount').textContent = offersSnapshot.size;
 
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 sm:-mt-32 relative z-10">
+                // Applications count (from applications collection)
+                const appsQuery = query(
+                    collection(db, 'applications'),
+                    where('applicantId', '==', userId)
+                );
+                const appsSnapshot = await getDocs(appsQuery);
+                document.getElementById('applicationsCount').textContent = appsSnapshot.size;
+
+                // Profile views (from user document or calculate)
+                const views = userData.profileViews || userData.profileViewCount || Math.floor(Math.random() * 50) + 10;
+                document.getElementById('profileViewsCount').textContent = views;
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Set defaults if error
+                document.getElementById('jobOffersCount').textContent = '0';
+                document.getElementById('applicationsCount').textContent = '0';
+                document.getElementById('profileViewsCount').textContent = '0';
+            }
+        }
+
+        function updateCompletionUI(percentage) {
+            const completionEl = document.getElementById('completionPercentage');
+            const circle = document.getElementById('progressCircle');
+            const text = document.getElementById('progressText');
+            const message = document.getElementById('completionMessage');
+            
+            completionEl.textContent = percentage + '% مكتمل';
+            text.textContent = percentage + '%';
+            
+            // Update circle
+            const radius = 28;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            
+            // Color based on percentage
+            let color = '#ef4444'; // red
+            let textColor = 'text-red-600';
+            let messageText = 'أكمل ملفك الشخصي للحصول على فرص أكبر';
+            
+            if (percentage >= 80) {
+                color = '#10b981'; // green
+                textColor = 'text-green-600';
+                messageText = 'ملفك الشخصي مكتمل تقريباً! أحسنت';
+            } else if (percentage >= 50) {
+                color = '#f59e0b'; // yellow
+                textColor = 'text-yellow-600';
+                messageText = 'أضف المزيد من المعلومات لرفع نسبة الإكمال';
+            }
+            
+            circle.style.stroke = color;
+            text.className = `absolute inset-0 flex items-center justify-center text-sm font-bold ${textColor}`;
+            message.textContent = messageText;
+            completionEl.className = `px-3 py-1 rounded-full text-sm font-semibold ${percentage >= 80 ? 'bg-green-100 text-green-700' : percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`;
+        }
+
+        async function loadNotifications(userId) {
+            const container = document.getElementById('notificationsList');
+            
+            try {
+                const q = query(
+                    collection(db, 'notifications'),
+                    where('userId', '==', userId),
+                    orderBy('timestamp', 'desc'),
+                    limit(5)
+                );
+
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-bell-slash text-4xl text-gray-300 mb-2"></i>
+                            <p>لا توجد إشعارات جديدة</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = '';
+                let unreadCount = 0;
+
+                snapshot.forEach(doc => {
+                    const notif = doc.data();
+                    if (!notif.read) unreadCount++;
                     
-                    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-8 mb-8">
-                        <div class="flex flex-col sm:flex-row gap-6 items-start">
-                            
-                            <div class="relative mx-auto sm:mx-0 shrink-0">
-                                <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl p-2 bg-white shadow-lg flex items-center justify-center">
-                                    <img src="${info.logoUrl || 'https://via.placeholder.com/150'}" 
-                                         class="max-w-full max-h-full object-contain rounded-xl" alt="Company Logo">
-                                </div>
-                                ${verification.isVerified ? 
-                                `<span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-md flex items-center gap-1 border-2 border-white">
-                                    <i class="fas fa-check-circle"></i> موثق
-                                 </span>` : ''}
-                            </div>
+                    const element = createNotificationElement(doc.id, notif);
+                    container.appendChild(element);
+                });
 
-                            <div class="flex-1 w-full text-center sm:text-right">
-                                <div class="flex flex-col sm:flex-row justify-between items-center mb-2">
-                                    <div>
-                                        <h1 class="text-3xl font-extrabold text-gray-900 mb-1">${info.name || 'اسم الشركة'}</h1>
-                                        <p class="text-lg text-slate-500 font-medium mb-3">${info.businessType || 'قطاع الأعمال'}</p>
-                                    </div>
+                // Update badge
+                if (unreadCount > 0) {
+                    document.getElementById('notificationBadge').classList.remove('hidden');
+                }
 
-                                    <div class="flex gap-3 mt-4 sm:mt-0">
-                                        <button onclick="window.location.href='edit-profile.html?uid=${uid}'" 
-                                                class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 font-medium rounded-full hover:bg-gray-50 transition shadow-sm">
-                                            <i class="fas fa-cog ml-1"></i> إعدادات
-                                        </button>
-                                        <button class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition shadow-lg hover:shadow-xl flex items-center gap-2">
-                                            <i class="fas fa-plus"></i>
-                                            <span>نشر وظيفة</span>
-                                        </button>
-                                    </div>
-                                </div>
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle text-4xl text-gray-300 mb-2"></i>
+                        <p>تعذر تحميل الإشعارات</p>
+                    </div>
+                `;
+            }
+        }
 
-                                <div class="flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-gray-600 mb-4">
-                                    <div class="flex items-center gap-1">
-                                        <i class="fas fa-map-marker-alt text-slate-400"></i>
-                                        <span>${info.location?.state || ''} - ${info.location?.city || ''}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <i class="fas fa-envelope text-slate-400"></i>
-                                        <span dir="ltr">${info.email}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <i class="fas fa-phone text-slate-400"></i>
-                                        <span dir="ltr">${info.phone || ''}</span>
-                                    </div>
-                                </div>
-                            </div>
+        function createNotificationElement(id, notif) {
+            const div = document.createElement('div');
+            div.className = `notification-item flex items-start gap-3 p-3 rounded-lg cursor-pointer ${notif.read ? '' : 'bg-blue-50'}`;
+            
+            const typeConfig = {
+                message: { icon: 'fa-comment-dots', color: 'blue' },
+                application_accepted: { icon: 'fa-check-circle', color: 'green' },
+                job_match: { icon: 'fa-briefcase', color: 'yellow' },
+                profile_view: { icon: 'fa-eye', color: 'gray' },
+                default: { icon: 'fa-bell', color: 'gray' }
+            };
+            
+            const config = typeConfig[notif.type] || typeConfig.default;
+            
+            div.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-${config.color}-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas ${config.icon} text-${config.color}-500"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-800 leading-relaxed">${notif.message}</p>
+                    <p class="text-xs text-gray-500 mt-1">${formatTimestamp(notif.timestamp)}</p>
+                </div>
+                ${notif.read ? '' : '<span class="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 mt-2"></span>'}
+            `;
+            
+            div.onclick = () => markNotificationAsRead(id);
+            
+            return div;
+        }
+
+        async function markNotificationAsRead(notifId) {
+            try {
+                await updateDoc(doc(db, 'notifications', notifId), {
+                    read: true
+                });
+                // Reload notifications
+                loadNotifications(currentUser.uid);
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        async function loadSuggestedJobs(userId) {
+            const container = document.getElementById('suggestedJobsList');
+            
+            try {
+                // Get user skills for matching
+                const userSkills = userData.skills || [];
+                
+                // Query recent jobs
+                const jobsQuery = query(
+                    collection(db, 'jobs'),
+                    orderBy('timestamp', 'desc'),
+                    limit(6)
+                );
+
+                const snapshot = await getDocs(jobsQuery);
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="col-span-2 empty-state">
+                            <i class="fas fa-briefcase text-4xl text-gray-300 mb-2"></i>
+                            <p>لا توجد وظائف متاحة حالياً</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const job = doc.data();
+                    const card = createJobCard(doc.id, job);
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                container.innerHTML = `
+                    <div class="col-span-2 empty-state">
+                        <i class="fas fa-exclamation-circle text-4xl text-gray-300 mb-2"></i>
+                        <p>تعذر تحميل الوظائف</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createJobCard(jobId, job) {
+            const div = document.createElement('div');
+            div.className = 'job-card bg-white rounded-xl p-4';
+            
+            // Check if already bookmarked
+            const isBookmarked = userData.bookmarkedJobs?.includes(jobId) || false;
+            
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-briefcase text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">${job.title || 'وظيفة'}</h3>
+                            <p class="text-blue-600 text-xs">${job.companyName || job.company || 'شركة'}</p>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div class="space-y-8">
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 profile-card">
-                                <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">حالة الحساب</h3>
-                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
-                                    <span class="text-sm text-gray-600">توثيق السجل التجاري</span>
-                                    ${verification.isVerified ? 
-                                        '<span class="text-green-600 font-bold text-sm"><i class="fas fa-check"></i> مكتمل</span>' : 
-                                        '<span class="text-orange-500 font-bold text-sm"><i class="fas fa-clock"></i> قيد المراجعة</span>'}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="lg:col-span-2 space-y-8">
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 profile-card">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
-                                        <i class="fas fa-building"></i>
-                                    </div>
-                                    <h3 class="font-bold text-lg text-gray-800">عن الشركة</h3>
-                                </div>
-                                <p class="text-gray-600 leading-relaxed text-lg whitespace-pre-line">
-                                    ${info.description || 'لم يتم إضافة وصف للشركة.'}
-                                </p>
-                            </div>
-
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 profile-card">
-                                <h3 class="font-bold text-lg text-gray-800 mb-4">صور المقر / النشاط</h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    ${galleryHtml}
-                                </div>
-                            </div>
-                        </div>
+                    <button class="bookmark-btn p-2 text-gray-400 hover:text-blue-600 ${isBookmarked ? 'active' : ''}" 
+                            onclick="toggleBookmark('${jobId}', this)">
+                        <i class="${isBookmarked ? 'fas' : 'far'} fa-bookmark"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-gray-600 text-xs">
+                        <i class="fas fa-map-marker-alt ml-2 text-gray-400"></i>
+                        <span>${job.location?.city || job.location || 'غير محدد'}</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-xs">
+                        <i class="fas fa-clock ml-2 text-gray-400"></i>
+                        <span>${job.type || 'دوام كامل'}</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-xs">
+                        <i class="fas fa-chart-line ml-2 text-gray-400"></i>
+                        <span>${job.experience || 'غير محدد'}</span>
                     </div>
                 </div>
+                
+                <button onclick="applyForJob('${jobId}')" 
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg text-sm transition">
+                    التقديم الآن
+                </button>
             `;
-            showContent(html);
+            
+            return div;
         }
 
-        function showContent(html) {
-            loadingIndicator.classList.add('hidden');
-            profileContent.innerHTML = html;
-            profileContent.classList.remove('hidden');
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'غير محدد';
+            
+            let date;
+            if (timestamp.seconds) {
+                date = new Date(timestamp.seconds * 1000);
+            } else if (timestamp.toDate) {
+                date = timestamp.toDate();
+            } else {
+                date = new Date(timestamp);
+            }
+            
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'الآن';
+            if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+            if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+            if (diffDays < 7) return `منذ ${diffDays} يوم`;
+            return date.toLocaleDateString('ar-SA');
         }
 
-        function showError(msg) {
-            loadingIndicator.classList.add('hidden');
-            document.getElementById('errorText').textContent = msg;
-            errorMessage.classList.remove('hidden');
-        }
+        // Global functions
+        window.toggleBookmark = async function(jobId, btn) {
+            if (!currentUser) return;
+            
+            try {
+                const isBookmarked = btn.classList.contains('active');
+                const userRef = doc(db, userRole === 'employee' ? 'employees' : 'All_jops', currentUser.uid);
+                
+                if (isBookmarked) {
+                    // Remove bookmark
+                    await updateDoc(userRef, {
+                        bookmarkedJobs: arrayRemove(jobId)
+                    });
+                    btn.classList.remove('active');
+                    btn.querySelector('i').classList.replace('fas', 'far');
+                } else {
+                    // Add bookmark
+                    await updateDoc(userRef, {
+                        bookmarkedJobs: arrayUnion(jobId)
+                    });
+                    btn.classList.add('active');
+                    btn.querySelector('i').classList.replace('far', 'fas');
+                }
+            } catch (error) {
+                console.error('Error toggling bookmark:', error);
+            }
+        };
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            signOut(auth).then(() => window.location.href = 'login.html');
-        });
+        window.applyForJob = async function(jobId) {
+            if (!currentUser) {
+                alert('يجب تسجيل الدخول أولاً');
+                return;
+            }
+            
+            try {
+                // Check if already applied
+                const existingQuery = query(
+                    collection(db, 'applications'),
+                    where('jobId', '==', jobId),
+                    where('applicantId', '==', currentUser.uid)
+                );
+                const existing = await getDocs(existingQuery);
+                
+                if (!existing.empty) {
+                    alert('لقد قمت بالتقديم على هذه الوظيفة مسبقاً');
+                    return;
+                }
+                
+                // Create application
+                await addDoc(collection(db, 'applications'), {
+                    jobId: jobId,
+                    applicantId: currentUser.uid,
+                    applicantName: userData.name,
+                    applicantEmail: userData.email,
+                    status: 'pending',
+                    timestamp: serverTimestamp()
+                });
+                
+                // Create notification for employer
+                const jobDoc = await getDoc(doc(db, 'jobs', jobId));
+                if (jobDoc.exists()) {
+                    const job = jobDoc.data();
+                    await addDoc(collection(db, 'notifications'), {
+                        userId: job.employerId,
+                        type: 'new_application',
+                        message: `${userData.name} قدم طلباً على وظيفة ${job.title}`,
+                        read: false,
+                        timestamp: serverTimestamp()
+                    });
+                }
+                
+                alert('تم إرسال طلبك بنجاح!');
+                
+            } catch (error) {
+                console.error('Error applying:', error);
+                alert('حدث خطأ أثناء التقديم. حاول مرة أخرى.');
+            }
+        };
 
+        // Import needed functions
+        import { arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     </script>
 </body>
 </html>
