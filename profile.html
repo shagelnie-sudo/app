@@ -758,5 +758,124 @@
         // Import needed functions
         import { arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     </script>
+
+
+<!-- زر إنشاء البيانات - أضف قبل </body> -->
+<button onclick="createMyData()" style="position:fixed; bottom:100px; right:20px; z-index:9999; background:#2563eb; color:white; padding:15px 25px; border-radius:10px; border:none; cursor:pointer; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+    <i class="fas fa-magic ml-2"></i> إنشاء بياناتي
+</button>
+
+<script type="module">
+    import { getFirestore, doc, setDoc, serverTimestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
+    const db = getFirestore();
+    const auth = getAuth();
+    
+    window.createMyData = async function() {
+        const user = auth.currentUser;
+        if (!user) {
+            alert('سجل الدخول أولاً');
+            return;
+        }
+        
+        try {
+            // إنشاء بيانات الموظف
+            await setDoc(doc(db, 'employees', user.uid), {
+                name: 'أحمد علي',
+                email: user.email,
+                headline: 'مطور ويب محترف',
+                bio: 'مطور ويب ذو خبرة في تطوير التطبيقات',
+                phone: '+249123456789',
+                skills: ['JavaScript', 'React', 'Node.js', 'Firebase', 'HTML', 'CSS'],
+                experience: 'متوسط (2-5 سنوات)',
+                jobStatus: 'متاح للعمل',
+                profileCompletionPercentage: 75,
+                profileViews: 45,
+                jobOffers: 2,
+                applications: 12,
+                location: {
+                    state: 'الخرطوم',
+                    city: 'الخرطوم',
+                    area: 'الرياض'
+                },
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+            
+            // إنشاء إشعارات
+            await addDoc(collection(db, 'notifications'), {
+                userId: user.uid,
+                type: 'message',
+                message: 'شركة المستقبل للتقنية أرسلت لك رسالة جديدة بشأن طلبك لوظيفة مبرمج',
+                read: false,
+                timestamp: serverTimestamp()
+            });
+            
+            await addDoc(collection(db, 'notifications'), {
+                userId: user.uid,
+                type: 'application_accepted',
+                message: 'تم قبول طلبك المبدئي لوظيفة عامل ديكور',
+                read: true,
+                timestamp: serverTimestamp()
+            });
+            
+            await addDoc(collection(db, 'notifications'), {
+                userId: user.uid,
+                type: 'job_match',
+                message: 'تم نشر 3 وظائف جديدة تطابق مهاراتك (لحام، مشاهدة الوظائف)',
+                read: true,
+                timestamp: serverTimestamp()
+            });
+            
+            // إنشاء وظائف مقترحة
+            await setDoc(doc(db, 'jobs', 'job_1'), {
+                title: 'فني تكييف وتبريد',
+                companyName: 'مؤسسة الأمان للصيانة',
+                location: { city: 'ود مدني', state: 'الجزيرة', area: 'جزئي/مشاريع' },
+                type: 'جزئي/مشاريع',
+                experience: 'مبتدئ (0-2 سنوات)',
+                description: 'نبحث عن فني تكييف ذو خبرة',
+                employerId: 'employer_1',
+                timestamp: serverTimestamp()
+            });
+            
+            await setDoc(doc(db, 'jobs', 'job_2'), {
+                title: 'مشرف عمال بناء',
+                companyName: 'مجموعة الفرسان للمقاولات',
+                location: { city: 'الخرطوم', state: 'الخرطوم', area: 'الرياض' },
+                type: 'دوام كامل',
+                experience: 'خبرة (+5 سنوات)',
+                description: 'مشرف متمرس في أعمال البناء',
+                employerId: 'employer_2',
+                timestamp: serverTimestamp()
+            });
+            
+            await setDoc(doc(db, 'jobs', 'job_3'), {
+                title: 'نجار أثاث منزلي',
+                companyName: 'ورشة الإبداع للخشب',
+                location: { city: 'أم درمان', state: 'الخرطوم', area: 'الثورة' },
+                type: 'دوام كامل',
+                experience: 'متوسط (2-5 سنوات)',
+                description: 'نجار ماهر في أعمال الأثاث',
+                employerId: 'employer_3',
+                timestamp: serverTimestamp()
+            });
+            
+            alert('✅ تم إنشاء جميع بياناتك بنجاح! سيتم تحديث الصفحة...');
+            location.reload();
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ خطأ: ' + error.message);
+        }
+    };
+</script>
+
+
+
+
+
+
 </body>
 </html>
