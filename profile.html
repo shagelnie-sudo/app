@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -24,3 +23,877 @@
         }
         
         .sidebar-item.active {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .profile-section {
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-section:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .skill-tag {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            color: #1e40af;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.25rem;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .work-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .work-image:hover {
+            transform: scale(1.05);
+            border-color: #2563eb;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .edit-btn {
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .profile-section:hover .edit-btn {
+            opacity: 1;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+        
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 500;
+            z-index: 100;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .image-upload-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px dashed #d1d5db;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .image-upload-preview:hover {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-l border-gray-200 flex flex-col h-full">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">ش</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">شغلني</h1>
+                        <p class="text-xs text-gray-500">بوابة التوظيف السودانية</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mb-2">
+                    <span class="text-xs font-semibold text-gray-400 uppercase">القائمة</span>
+                </div>
+                
+                <a href="dashboard.html" class="sidebar-item flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-gray-700">
+                    <i class="fas fa-home"></i>
+                    <span>الرئيسية</span>
+                </a>
+                
+                <a href="profile.html" class="sidebar-item active flex items-center gap-3 px-4 py-3 mx-2 rounded-lg">
+                    <i class="fas fa-user"></i>
+                    <span>ملفي الشخصي</span>
+                </a>
+                
+                <a href="job_listing_page.html" class="sidebar-item flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-gray-700">
+                    <i class="fas fa-search"></i>
+                    <span>البحث عن وظيفة</span>
+                </a>
+                
+                <a href="applications.html" class="sidebar-item flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-gray-700">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>طلبات التقديم</span>
+                </a>
+                
+                <a href="saved_jobs.html" class="sidebar-item flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-gray-700">
+                    <i class="fas fa-bookmark"></i>
+                    <span>وظائف محفوظة</span>
+                </a>
+
+                <div class="px-4 mt-6 mb-2">
+                    <span class="text-xs font-semibold text-gray-400 uppercase">الإعدادات</span>
+                </div>
+                
+                <a href="settings.html" class="sidebar-item flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-gray-700">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+                
+                <button onclick="logout()" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-red-600 hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>تسجيل الخروج</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+                <div class="flex items-center justify-between px-8 py-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">ملفي الشخصي</h2>
+                        <p class="text-gray-500 text-sm mt-1">إدارة بياناتك الشخصية والمهنية</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <span id="profileStatus" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                        <button onclick="openEditModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i class="fas fa-edit"></i>
+                            تعديل الملف
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-5xl mx-auto">
+                <!-- Profile Header -->
+                <div class="profile-section p-8 mb-6">
+                    <div class="flex flex-col md:flex-row items-start gap-6">
+                        <div class="relative">
+                            <img id="profileImage" src="https://via.placeholder.com/150" alt="Profile" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                            <button onclick="document.getElementById('photoInput').click()" class="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-lg">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event)">
+                        </div>
+                        
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h1 id="profileName" class="text-2xl font-bold text-gray-900 mb-1">...</h1>
+                                    <p id="profileHeadline" class="text-blue-600 font-medium mb-2">...</p>
+                                    <div class="flex items-center gap-4 text-gray-500 text-sm">
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span id="profileLocation">...</span>
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-envelope"></i>
+                                            <span id="profileEmail">...</span>
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-phone"></i>
+                                            <span id="profilePhone">...</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <span id="jobStatus" class="px-4 py-2 rounded-full text-sm font-semibold"></span>
+                            </div>
+                            
+                            <p id="profileBio" class="text-gray-600 mt-4 leading-relaxed">...</p>
+                            
+                            <div class="flex gap-3 mt-4">
+                                <a id="cvLink" href="#" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition">
+                                    <i class="fas fa-file-pdf"></i>
+                                    السيرة الذاتية
+                                </a>
+                                <a id="linkedinLink" href="#" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 transition">
+                                    <i class="fab fa-linkedin"></i>
+                                    لينكد إن
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Section -->
+                <div class="profile-section p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">المهارات</h3>
+                        <button onclick="openSkillsModal()" class="edit-btn text-blue-600 hover:text-blue-700">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <div id="skillsContainer" class="flex flex-wrap gap-2">
+                        <!-- Skills will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Experience Section -->
+                <div class="profile-section p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">مستوى الخبرة</h3>
+                        <button onclick="openExperienceModal()" class="edit-btn text-blue-600 hover:text-blue-700">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-briefcase text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p id="experienceLevel" class="font-semibold text-gray-900">...</p>
+                            <p class="text-sm text-gray-500">سنوات الخبرة في المجال</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Works Section -->
+                <div class="profile-section p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">أعمالي السابقة</h3>
+                        <div class="flex gap-2">
+                            <button onclick="document.getElementById('worksInput').click()" class="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                <i class="fas fa-plus"></i>
+                                إضافة صور
+                            </button>
+                            <input type="file" id="worksInput" accept="image/*" multiple class="hidden" onchange="uploadWorks(event)">
+                        </div>
+                    </div>
+                    <div id="worksContainer" class="flex flex-wrap gap-4">
+                        <!-- Works will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Account Info Section -->
+                <div class="profile-section p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">معلومات الحساب</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">تاريخ الانضمام</span>
+                            <span id="joinDate" class="font-medium">...</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">نسبة اكتمال الملف</span>
+                            <span id="completionRate" class="font-medium text-blue-600">...</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">حالة التوثيق</span>
+                            <span id="verificationStatus" class="font-medium">...</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-100">
+                            <span class="text-gray-500">عدد مشاهدات الملف</span>
+                            <span id="profileViews" class="font-medium">...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">تعديل الملف الشخصي</h3>
+                <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="editForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                    <input type="text" id="editName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">العنوان الوظيفي</label>
+                    <input type="text" id="editHeadline" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">نبذة شخصية</label>
+                    <textarea id="editBio" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                    <input type="tel" id="editPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">رابط السيرة الذاتية</label>
+                    <input type="url" id="editCvUrl" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">رابط لينكد إن</label>
+                    <input type="url" id="editLinkedin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition">
+                        حفظ التغييرات
+                    </button>
+                    <button type="button" onclick="closeModal('editModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold transition">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Skills Modal -->
+    <div id="skillsModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">تعديل المهارات</h3>
+                <button onclick="closeModal('skillsModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="editSkillsContainer" class="flex flex-wrap gap-2 mb-4">
+                    <!-- Skills will be loaded here -->
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="newSkill" placeholder="أضف مهارة جديدة" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <button onclick="addSkill()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">يمكنك إضافة حتى 10 مهارات</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal('imageModal')">
+        <div class="max-w-4xl max-h-[90vh] p-4" onclick="event.stopPropagation()">
+            <img id="previewImage" src="" alt="Preview" class="max-w-full max-h-[80vh] rounded-lg shadow-2xl">
+            <button onclick="closeModal('imageModal')" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            updateDoc,
+            arrayUnion,
+            arrayRemove,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+            authDomain: "shaglni-c64c0.firebaseapp.com",
+            projectId: "shaglni-c64c0",
+            storageBucket: "shaglni-c64c0.appspot.com",
+            messagingSenderId: "768887356636",
+            appId: "1:768887356636:web:11ec1d6991add3309c8819"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+
+        let currentUser = null;
+        let userData = null;
+        let currentSkills = [];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadProfile();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        async function loadProfile() {
+            try {
+                showLoading(true);
+                
+                const docRef = doc(db, 'employees', currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    userData = docSnap.data();
+                    currentSkills = userData.skills || [];
+                    updateProfileUI();
+                } else {
+                    // Try employer collection
+                    const employerRef = doc(db, 'All_jops', currentUser.uid);
+                    const employerSnap = await getDoc(employerRef);
+                    
+                    if (employerSnap.exists()) {
+                        userData = employerSnap.data();
+                        updateEmployerUI();
+                    } else {
+                        showToast('لم يتم العثور على بيانات المستخدم', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showToast('حدث خطأ في تحميل البيانات', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function updateProfileUI() {
+            // Basic Info
+            document.getElementById('profileName').textContent = userData.name || 'غير محدد';
+            document.getElementById('profileHeadline').textContent = userData.headline || 'بدون عنوان وظيفي';
+            document.getElementById('profileBio').textContent = userData.bio || 'لا توجد نبذة شخصية';
+            document.getElementById('profileEmail').textContent = userData.email || 'غير محدد';
+            document.getElementById('profilePhone').textContent = userData.contact?.phone || userData.phone || 'غير محدد';
+            
+            // Location
+            const location = userData.contact?.location;
+            const locationText = location ? 
+                `${location.city || ''}، ${location.state || ''}` : 
+                'غير محدد';
+            document.getElementById('profileLocation').textContent = locationText;
+            
+            // Profile Image
+            if (userData.profileImageUrl) {
+                document.getElementById('profileImage').src = userData.profileImageUrl;
+            }
+            
+            // Job Status
+            const statusEl = document.getElementById('jobStatus');
+            const status = userData.jobStatus || 'غير محدد';
+            statusEl.textContent = status;
+            if (status === 'متاح للعمل') {
+                statusEl.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700';
+            } else {
+                statusEl.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700';
+            }
+            
+            // Links
+            const cvLink = document.getElementById('cvLink');
+            if (userData.links?.cv) {
+                cvLink.href = userData.links.cv;
+                cvLink.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                cvLink.classList.add('opacity-50', 'pointer-events-none');
+            }
+            
+            const linkedinLink = document.getElementById('linkedinLink');
+            if (userData.links?.linkedin) {
+                linkedinLink.href = userData.links.linkedin;
+                linkedinLink.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                linkedinLink.classList.add('opacity-50', 'pointer-events-none');
+            }
+            
+            // Skills
+            renderSkills();
+            
+            // Experience
+            document.getElementById('experienceLevel').textContent = userData.experience || 'غير محدد';
+            
+            // Previous Works
+            renderWorks();
+            
+            // Account Info
+            const joinDate = userData.createdAt?.toDate ? 
+                userData.createdAt.toDate().toLocaleDateString('ar-SD') : 
+                'غير محدد';
+            document.getElementById('joinDate').textContent = joinDate;
+            document.getElementById('completionRate').textContent = `${userData.profileCompletionPercentage || 0}%`;
+            document.getElementById('profileViews').textContent = userData.profileViews || 0;
+            
+            const verificationEl = document.getElementById('verificationStatus');
+            if (userData.emailVerified) {
+                verificationEl.textContent = 'موثق';
+                verificationEl.className = 'font-medium text-green-600';
+            } else {
+                verificationEl.textContent = 'غير موثق';
+                verificationEl.className = 'font-medium text-yellow-600';
+            }
+            
+            // Profile Status Badge
+            const profileStatus = document.getElementById('profileStatus');
+            const completion = userData.profileCompletionPercentage || 0;
+            if (completion >= 80) {
+                profileStatus.textContent = 'ملف مكتمل';
+                profileStatus.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700';
+            } else if (completion >= 50) {
+                profileStatus.textContent = 'ملف جيد';
+                profileStatus.className = 'px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700';
+            } else {
+                profileStatus.textContent = 'يحتاج إكمال';
+                profileStatus.className = 'px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700';
+            }
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('skillsContainer');
+            container.innerHTML = '';
+            
+            if (currentSkills.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">لا توجد مهارات مضافة</p>';
+                return;
+            }
+            
+            currentSkills.forEach(skill => {
+                const tag = document.createElement('span');
+                tag.className = 'skill-tag';
+                tag.innerHTML = `
+                    ${skill}
+                    <button onclick="removeSkill('${skill}')" class="text-blue-400 hover:text-red-500 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        function renderWorks() {
+            const container = document.getElementById('worksContainer');
+            container.innerHTML = '';
+            
+            const works = userData.previousWorksUrls || [];
+            
+            if (works.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 w-full">لا توجد أعمال مضافة. أضف صوراً من أعمالك السابقة.</p>';
+                return;
+            }
+            
+            works.forEach((url, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative group';
+                wrapper.innerHTML = `
+                    <img src="${url}" alt="Work ${index + 1}" class="work-image" onclick="previewImage('${url}')">
+                    <button onclick="deleteWork('${url}')" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                `;
+                container.appendChild(wrapper);
+            });
+        }
+
+        // Edit Profile
+        window.openEditModal = function() {
+            document.getElementById('editName').value = userData.name || '';
+            document.getElementById('editHeadline').value = userData.headline || '';
+            document.getElementById('editBio').value = userData.bio || '';
+            document.getElementById('editPhone').value = userData.contact?.phone || userData.phone || '';
+            document.getElementById('editCvUrl').value = userData.links?.cv || '';
+            document.getElementById('editLinkedin').value = userData.links?.linkedin || '';
+            
+            document.getElementById('editModal').classList.add('show');
+        };
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const updates = {
+                    name: document.getElementById('editName').value,
+                    headline: document.getElementById('editHeadline').value,
+                    bio: document.getElementById('editBio').value,
+                    'contact.phone': document.getElementById('editPhone').value,
+                    'links.cv': document.getElementById('editCvUrl').value,
+                    'links.linkedin': document.getElementById('editLinkedin').value,
+                    updatedAt: serverTimestamp()
+                };
+                
+                await updateDoc(doc(db, 'employees', currentUser.uid), updates);
+                
+                showToast('تم تحديث الملف بنجاح', 'success');
+                closeModal('editModal');
+                await loadProfile();
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showToast('حدث خطأ أثناء التحديث', 'error');
+            }
+        });
+
+        // Skills Management
+        window.openSkillsModal = function() {
+            renderEditSkills();
+            document.getElementById('skillsModal').classList.add('show');
+        };
+
+        function renderEditSkills() {
+            const container = document.getElementById('editSkillsContainer');
+            container.innerHTML = '';
+            
+            currentSkills.forEach(skill => {
+                const tag = document.createElement('span');
+                tag.className = 'skill-tag';
+                tag.innerHTML = `
+                    ${skill}
+                    <button onclick="removeSkill('${skill}')" class="text-blue-400 hover:text-red-500 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        window.addSkill = async function() {
+            const input = document.getElementById('newSkill');
+            const skill = input.value.trim();
+            
+            if (!skill) return;
+            if (currentSkills.length >= 10) {
+                showToast('لا يمكن إضافة أكثر من 10 مهارات', 'warning');
+                return;
+            }
+            if (currentSkills.includes(skill)) {
+                showToast('المهارة موجودة مسبقاً', 'warning');
+                return;
+            }
+            
+            try {
+                await updateDoc(doc(db, 'employees', currentUser.uid), {
+                    skills: arrayUnion(skill),
+                    updatedAt: serverTimestamp()
+                });
+                
+                currentSkills.push(skill);
+                renderEditSkills();
+                renderSkills();
+                input.value = '';
+                showToast('تم إضافة المهارة بنجاح', 'success');
+            } catch (error) {
+                showToast('حدث خطأ', 'error');
+            }
+        };
+
+        window.removeSkill = async function(skill) {
+            try {
+                await updateDoc(doc(db, 'employees', currentUser.uid), {
+                    skills: arrayRemove(skill),
+                    updatedAt: serverTimestamp()
+                });
+                
+                currentSkills = currentSkills.filter(s => s !== skill);
+                renderEditSkills();
+                renderSkills();
+                showToast('تم حذف المهارة', 'success');
+            } catch (error) {
+                showToast('حدث خطأ', 'error');
+            }
+        };
+
+        // File Uploads
+        window.uploadProfilePhoto = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                showLoading(true);
+                
+                const storageRef = ref(storage, `profile_photos/${currentUser.uid}/${file.name}`);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                
+                await updateDoc(doc(db, 'employees', currentUser.uid), {
+                    profileImageUrl: url,
+                    updatedAt: serverTimestamp()
+                });
+                
+                document.getElementById('profileImage').src = url;
+                showToast('تم تحديث الصورة بنجاح', 'success');
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                showToast('حدث خطأ أثناء رفع الصورة', 'error');
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        window.uploadWorks = async function(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+            
+            try {
+                showLoading(true);
+                const uploadPromises = files.map(async (file) => {
+                    const storageRef = ref(storage, `previous_works/${currentUser.uid}/${Date.now()}_${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    return getDownloadURL(storageRef);
+                });
+                
+                const urls = await Promise.all(uploadPromises);
+                
+                const currentWorks = userData.previousWorksUrls || [];
+                const newWorks = [...currentWorks, ...urls];
+                
+                await updateDoc(doc(db, 'employees', currentUser.uid), {
+                    previousWorksUrls: newWorks,
+                    updatedAt: serverTimestamp()
+                });
+                
+                userData.previousWorksUrls = newWorks;
+                renderWorks();
+                showToast(`تم رفع ${files.length} صورة بنجاح`, 'success');
+            } catch (error) {
+                console.error('Error uploading works:', error);
+                showToast('حدث خطأ أثناء رفع الصور', 'error');
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        window.deleteWork = async function(url) {
+            if (!confirm('هل أنت متأكد من حذف هذه الصورة؟')) return;
+            
+            try {
+                const currentWorks = userData.previousWorksUrls || [];
+                const newWorks = currentWorks.filter(w => w !== url);
+                
+                await updateDoc(doc(db, 'employees', currentUser.uid), {
+                    previousWorksUrls: newWorks,
+                    updatedAt: serverTimestamp()
+                });
+                
+                userData.previousWorksUrls = newWorks;
+                renderWorks();
+                showToast('تم حذف الصورة', 'success');
+            } catch (error) {
+                showToast('حدث خطأ', 'error');
+            }
+        };
+
+        // Image Preview
+        window.previewImage = function(url) {
+            document.getElementById('previewImage').src = url;
+            document.getElementById('imageModal').classList.add('show');
+        };
+
+        // Modal Management
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        };
+
+        // Utility Functions
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            toast.className = `toast ${colors[type]} show`;
+            toast.textContent = message;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showLoading(show) {
+            // You can add a global loading spinner here
+        }
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                showToast('حدث خطأ أثناء تسجيل الخروج', 'error');
+            }
+        };
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.remove('show');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
