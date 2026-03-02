@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل حساب جديد - شغلني</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        * { font-family: 'Tajawal', sans-serif; }
+        
+        body { background-color: #f5f7fa; }
+        
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #6b7280;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .step.active { background-color: #10b981; }
+
+        .step-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .form-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 2px solid transparent;
+        }
+
+        .message-container {
+            margin-top: 1rem;
+            min-height: 60px;
+        }
+        
+        .message {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+            margin-bottom: 1rem;
+        }
+        
+        .message.show { display: block; }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success-message {
+            background-color: #dcfce7;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        
+        .error-message {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .password-requirement-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+        
+        .password-requirement-item.valid {
+            color: #10b981;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal.show { display: flex; }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .skip-btn {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #6b7280;
+            border: 2px dashed #d1d5db;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            color: #4b5563;
+            border-color: #9ca3af;
+            transform: translateY(-2px);
+        }
+
+        .optional-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #3730a3;
+            font-size: 0.7rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            border: 1px solid #a5b4fc;
+        }
+
+        .iti { width: 100%; display: block; }
+        .iti__flag-container { left: auto; right: 0; }
+        .iti__selected-flag { border-radius: 0 0.375rem 0.375rem 0; border-left: 1px solid #d1d5db; }
+        .iti__country-list { text-align: right; }
+        .iti__country { display: flex; flex-direction: row-reverse; justify-content: flex-end; }
+        .iti__flag-box { margin-left: 0.5rem; margin-right: 0; }
+        .iti__country-name { margin-left: 0; margin-right: 0.5rem; }
+        .iti__dial-code { margin-left: 0.5rem; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-6">إنشاء حساب جديد</h2>
+        
+        <!-- Debug Info (Hidden by default) -->
+        <div id="debugInfo" class="hidden bg-gray-100 p-4 rounded-lg mb-4 text-sm text-gray-700">
+            <p class="font-bold mb-2">معلومات التصحيح:</p>
+            <pre id="debugContent"></pre>
+        </div>
+
+        <div class="step-container" id="stepContainer">
+            <div class="step active" id="stepIndicator1">1</div>
+            <div class="step" id="stepIndicator2">2</div>
+            <div class="step" id="stepIndicator3">3</div>
+            <div class="step" id="stepIndicator4">4</div>
+            <div class="step hidden" id="stepIndicator5">5</div>
+        </div>
+
+        <form id="unifiedForm">
+            <!-- Step 1: إلزامي -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card" id="step1">
+                <h2 class="text-lg font-bold mb-4">الخطوة 1: بيانات الحساب <span class="text-red-500">*</span></h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">الاسم الكامل (ثلاثي أو رباعي)</label>
+                        <div class="mt-1">
+                            <input id="name" name="name" type="text" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
+                                placeholder="أدخل اسمك الثلاثي أو الرباعي">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                        <div class="mt-1">
+                            <input id="email" name="email" type="email" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right"
+                                placeholder="أدخل بريدك الإلكتروني">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">رقم الهاتف <span class="text-red-500">*</span></label>
+                        <div class="mt-1">
+                            <input id="phone" name="phone" type="tel" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">يرجى اختيار كود الدولة وإدخال رقم الهاتف</p>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+                        <div class="mt-1 relative">
+                            <input id="password" name="password" type="password" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right pl-10"
+                                placeholder="أدخل كلمة مرور قوية">
+                            <button type="button" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none" onclick="togglePasswordVisibility('password')">
+                                <i class="far fa-eye" id="password-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-requirements mt-2" id="passwordRequirements">
+                            <p class="text-gray-500 text-sm">يجب أن تحتوي كلمة المرور على:</p>
+                            <div id="min-length" class="password-requirement-item">
+                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                                <span>6 أحرف على الأقل</span>
+                            </div>
+                            <div id="has-upper" class="password-requirement-item">
+                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                                <span>حرف كبير واحد على الأقل</span>
+                            </div>
+                            <div id="has-lower" class="password-requirement-item">
+                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                                <span>حرف صغير واحد على الأقل</span>
+                            </div>
+                            <div id="has-number" class="password-requirement-item">
+                                <i class="fas fa-check-circle ml-2 text-red-500"></i>
+                                <span>رقم واحد على الأقل</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">تأكيد كلمة المرور</label>
+                        <div class="mt-1 relative">
+                            <input id="confirmPassword" name="confirmPassword" type="password" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right pl-10"
+                                placeholder="أعد إدخال كلمة المرور">
+                            <button type="button" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none" onclick="togglePasswordVisibility('confirmPassword')">
+                                <i class="far fa-eye" id="confirmPassword-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700">نوع الحساب</label>
+                        <div class="mt-1">
+                            <select id="role" name="role" required
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
+                                <option value="" disabled selected>اختر نوع الحساب</option>
+                                <option value="employee">موظف</option>
+                                <option value="employer">شركة / صاحب عمل</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-container">
+                    <div id="message" class="message"></div>
+                </div>
+
+                <button type="button" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full" id="nextBtn1">
+                    التالي
+                </button>
+            </div>
+
+            <!-- Employee Steps -->
+            <div class="employee-steps">
+                <!-- Step 2 Employee -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step2-employee">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold">الخطوة 2: البيانات الأساسية <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(2, 'employee')">
+                            تخطي
+                        </button>
+                    </div>
+                    <div class="mb-4">
+                        <label for="headline" class="block text-sm font-medium text-gray-700">العنوان الاحترافي <span class="text-red-500">*</span></label>
+                        <input type="text" id="headline" name="headline" placeholder="مثال: عامل ديكور" required
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="bio" class="block text-sm font-medium text-gray-700">نبذة وظيفية عنك</label>
+                        <textarea id="bio" name="bio" rows="5" placeholder="وصف مختصر عنك وعن خبراتك"
+                                  class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                     <div class="mb-4">
+                        <label for="profilePhoto" class="block text-sm font-medium text-gray-700">صورة الملف الشخصي</label>
+                        <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="employeePhone" class="block text-sm font-medium text-gray-700">رقم الهاتف للتواصل</label>
+                        <div class="mt-1">
+                            <input type="tel" id="employeePhone" name="employeePhone" 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="state" class="block text-sm font-medium text-gray-700">الولاية <span class="text-red-500">*</span></label>
+                        <select id="state" name="state" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر ولاية</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 hidden" id="cityContainer">
+                        <label for="city" class="block text-sm font-medium text-gray-700">المدينة</label>
+                        <select id="city" name="city" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر مدينة</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 hidden" id="areaContainer">
+                        <label for="area" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
+                        <select id="area" name="area" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر منطقة أو حي</option>
+                        </select>
+                    </div>
+
+                    <div class="message-container">
+                        <div id="message-step2-employee" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employee">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3 Employee -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employee">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold">الخطوة 3: المهارات ومستوى الخبرة <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employee')">
+                            تخطي
+                        </button>
+                    </div>
+                    <div id="skillsContainer">
+                        <div class="mb-4 flex items-center">
+                            <input type="text" name="skills[]" placeholder="مثال: React.js" class="skill-input w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button type="button" class="add-skill-btn mr-2 p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <p id="skillsLimitMessage" class="text-red-500 text-sm mt-2 hidden">لا يمكنك إضافة أكثر من 6 مهارات.</p>
+                    <div class="mb-4">
+                        <label for="experience" class="block text-sm font-medium text-gray-700">مستوى الخبرة</label>
+                        <select id="experience" name="experience" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر مستوى الخبرة</option>
+                            <option value="مبتدئ">مبتدئ (0-2 سنوات)</option>
+                            <option value="متوسط">متوسط (2-5 سنوات)</option>
+                            <option value="خبير">خبير (5+ سنوات)</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">حالة البحث عن عمل</label>
+                        <div class="flex gap-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="jobStatus" value="متاح للعمل" class="form-radio text-blue-600" checked>
+                                <span class="mr-2">متاح للعمل</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="jobStatus" value="لا أبحث حالياً" class="form-radio text-blue-600">
+                                <span class="mr-2">لا أبحث حالياً</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="message-container">
+                        <div id="message-step3-employee" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employee">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employee">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4 Employee -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employee">
+                    <h2 class="text-lg font-bold mb-4">الخطوة 4: الملفات والروابط <span class="text-red-500">*</span></h2>
+                    <div class="mb-4">
+                        <label for="previousWorks" class="block text-sm font-medium text-gray-700">صور من أعمالك السابقة (5 صور على الأقل) <span class="text-red-500">*</span></label>
+                        <input type="file" id="previousWorks" name="previousWorks" multiple accept="image/*"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        <div id="image-preview" class="flex flex-wrap mt-2"></div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            **مطلوب:** تحميل 5 صور على الأقل.
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <label for="cvUrl" class="block text-sm font-medium text-gray-700">رابط السيرة الذاتية (CV)</label>
+                        <input type="url" id="cvUrl" name="cvUrl" placeholder="مثال: https://docs.google.com/your-cv"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="linkedinUrl" class="block text-sm font-medium text-gray-700">رابط لينكد إن</label>
+                        <input type="url" id="linkedinUrl" name="linkedinUrl" placeholder="مثال: https://linkedin.com/in/your-profile"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div class="message-container">
+                        <div id="message-step4-employee" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employee">
+                            السابق
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employee">
+                            إنشاء الحساب
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employer Steps -->
+            <div class="employer-steps">
+                <!-- Step 2 Employer -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step2-employer">
+                    <h2 class="text-lg font-bold mb-4">الخطوة 2: بيانات الشركة <span class="text-red-500">*</span></h2>
+                    <div class="mb-4">
+                        <label for="companyName" class="block text-sm font-medium text-gray-700">اسم الشركة / النشاط التجاري <span class="text-red-500">*</span></label>
+                        <input type="text" id="companyName" name="companyName" placeholder="مثال: شركة التقنية الحديثة" required
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="companyEmail" class="block text-sm font-medium text-gray-700">البريد الإلكتروني الرسمي <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <input type="email" id="companyEmail" name="companyEmail" placeholder="مثال: info@company.com" required
+                                class="flex-1 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button type="button" id="verifyCompanyEmailBtn" class="px-3 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600">
+                                توثيق
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="companyPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف</label>
+                        <div class="mt-1">
+                            <input type="tel" id="companyPhone" name="companyPhone" 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-right">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="companyLogo" class="block text-sm font-medium text-gray-700">الشعار / اللوجو</label>
+                        <input type="file" id="companyLogo" name="companyLogo" accept="image/*"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="businessType" class="block text-sm font-medium text-gray-700">نوع النشاط <span class="text-red-500">*</span></label>
+                        <input type="text" id="businessType" name="businessType" placeholder="مثال: مطعم، برمجة، ورشة..." required
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div class="message-container">
+                        <div id="message-step2-employer" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn2-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn2-employer">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3 Employer -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step3-employer">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold">الخطوة 3: التفاصيل <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(3, 'employer')">
+                            تخطي
+                        </button>
+                    </div>
+                    <div class="mb-4">
+                        <label for="companyDescription" class="block text-sm font-medium text-gray-700">نبذة عن الشركة</label>
+                        <textarea id="companyDescription" name="companyDescription" rows="5" placeholder="وصف مختصر وعدد الموظفين/الخدمات"
+                                  class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="companyState" class="block text-sm font-medium text-gray-700">الولاية</label>
+                        <select id="companyState" name="companyState" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر ولاية</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 hidden" id="companyCityContainer">
+                        <label for="companyCity" class="block text-sm font-medium text-gray-700">المدينة</label>
+                        <select id="companyCity" name="companyCity" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر مدينة</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 hidden" id="companyAreaContainer">
+                        <label for="companyArea" class="block text-sm font-medium text-gray-700">المنطقة / الحي</label>
+                        <select id="companyArea" name="companyArea" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">اختر منطقة أو حي</option>
+                        </select>
+                    </div>
+
+                    <div class="message-container">
+                        <div id="message-step3-employer" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn3-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn3-employer">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4 Employer -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step4-employer">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold">الخطوة 4: التوثيق <span class="optional-badge">يمكن التخطي</span></h2>
+                        <button type="button" class="px-3 py-1.5 skip-btn rounded-lg text-sm" onclick="skipStep(4, 'employer')">
+                            تخطي
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-4">إذا قمت بتوثيق حسابك، ستحصل على شارة **"شركة موثقة ✅"**.</p>
+                    <div class="mb-4">
+                        <label for="commercialRegister" class="block text-sm font-medium text-gray-700">رخصة / سجل تجاري</label>
+                        <input type="file" id="commercialRegister" name="commercialRegister" accept=".pdf,.doc,.docx"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="companyPhotos" class="block text-sm font-medium text-gray-700">صور من مقر الشركة / النشاط</label>
+                        <input type="file" id="companyPhotos" name="companyPhotos" multiple accept="image/*"
+                               class="w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <div id="company-photos-preview" class="flex flex-wrap mt-2"></div>
+                    </div>
+
+                    <div class="message-container">
+                        <div id="message-step4-employer" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn4-employer">
+                            السابق
+                        </button>
+                        <button type="button" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="nextBtn4-employer">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 5 Employer -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6 form-card hidden" id="step5-employer">
+                    <h2 class="text-lg font-bold mb-4">الخطوة 5: تفعيل الحساب <span class="text-red-500">*</span></h2>
+                     <p class="text-sm text-gray-500 mb-4">اختر نوع الحساب الفرعي لتفعيل حسابك:</p>
+                    <div class="flex flex-col space-y-4">
+                        <label class="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="radio" name="employerType" value="hiring" class="form-radio text-blue-600" checked>
+                            <span class="text-lg font-semibold mr-2">شركة لديها شواغر وتريد التوظيف</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="radio" name="employerType" value="individual" class="form-radio text-blue-600">
+                            <span class="text-lg font-semibold mr-2">صاحب عمل فردي يبحث عن موظف أو عامل</span>
+                        </label>
+                    </div>
+
+                    <div class="message-container">
+                        <div id="message-step5-employer" class="message"></div>
+                    </div>
+
+                    <div class="flex gap-2 mt-6">
+                        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300" id="prevBtn5-employer">
+                            السابق
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="submitBtn-employer">
+                            إنشاء الحساب
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                هل لديك حساب بالفعل؟
+                <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">
+                    تسجيل الدخول
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+          authDomain: "shaglni-c64c0.firebaseapp.com",
+          projectId: "shaglni-c64c0",
+          storageBucket: "shaglni-c64c0.appspot.com",
+          messagingSenderId: "768887356636",
+          appId: "1:768887356636:web:11ec1d6991add3309c8819",
+          measurementId: "G-98GQGZS09W"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+
+        let currentStep = 1;
+        let isEmployerFlow = false;
+        let currentUser = null;
+
+        // Intel Tel Input instances
+        let phoneInput, employeePhoneInput, companyPhoneInput;
+
+        const sudanLocations = {
+            "الخرطوم": {
+                "الخرطوم": ["السجانة", "العمارات", "الرياض", "الطائف", "المنشية", "بري", "الخرطوم 2", "الخرطوم 3", "السوق العربي", "حي المطار", "الشجرة", "جبرة", "الأزهري", "الصحافة", "الكلاكلة"],
+                "أم درمان": ["العباسية", "بيت المال", "الملازمين", "أبو روف", "الموردة", "الهاشماب", "العرضة", "ود نوباوي", "حي العرب", "الشهداء", "المسالمة", "بانت", "الثورة", "الحتانة", "الفتيحاب", "الواحة", "أم بدة", "السلام", "الفتح", "دار السلام"],
+                "الخرطوم بحري": ["كافوري", "شمبات", "الشعبية", "الدناقلة", "الخوجلاب", "الصافية", "كوبر", "الحلفايا", "الدروشاب", "الحاج يوسف", "سوبا شرق", "العيلفون", "أم ضوا بان", "أم دوم", "الشقلة", "النصر", "الوادي الأخضر"],
+                "شرق النيل": ["شرق النيل"],
+                "جبل أولياء": ["جبل أولياء"],
+                "كرري": ["كرري"]
+            },
+            "الجزيرة": ["ود مدني", "الحصاحيصا", "المناقل", "رفاعة"],
+            "البحر الأحمر": ["بورتسودان", "سواكن", "طوكر", "هيا"],
+            "كسلا": ["كسلا", "حلفا الجديدة", "القضارف", "همشكوريب"],
+            "القضارف": ["القضارف", "الفشقة", "القلابات", "الرهد"],
+            "سنار": ["سنار", "سنجة", "التينا", "الدندر"],
+            "النيل الأبيض": ["ربك", "كوستي", "الدويّم", "تندلتي"],
+            "النيل الأزرق": ["الدمازين", "الروصيرص", "الكرمك", "باو"],
+            "شمال كردفان": ["الأبيض", "أم روابة", "بارا", "سودري"],
+            "جنوب كردفان": ["كادقلي", "تلودي", "العباسية", "أبو جبيهة"],
+            "غرب كردفان": ["الفولة", "لقاوة", "الميرم", "أبو زبد"],
+            "الشمالية": ["دنقلا", "حلفا", "مروي", "القولد"],
+            "نهر النيل": ["الدامر", "عطبرة", "شندي", "بربر"],
+            "شمال دارفور": ["الفاشر", "كبكابية", "المالحة", "كتم"],
+            "جنوب دارفور": ["نيالا", "الضعين", "رهيد البردي", "كاس"],
+            "غرب دارفور": ["الجنينة", "سرف عمرة", "كرينك", "كلبس"],
+            "وسط دارفور": ["زالنجي", "وداد", "مكجر"],
+            "شرق دارفور": ["الضعين", "عديلة", "أبو كارنكا", "ياسين"],
+        };
+
+        // Initialize Intel Tel Input
+        function initPhoneInputs() {
+            const commonConfig = {
+                initialCountry: "sd",
+                preferredCountries: ["sd", "sa", "eg", "ae", "qa", "kw"],
+                utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js",
+                separateDialCode: true,
+                formatOnDisplay: true,
+                nationalMode: true,
+                autoPlaceholder: "aggressive"
+            };
+
+            const phoneInputElement = document.querySelector("#phone");
+            if (phoneInputElement) {
+                phoneInput = window.intlTelInput(phoneInputElement, commonConfig);
+            }
+
+            const employeePhoneElement = document.querySelector("#employeePhone");
+            if (employeePhoneElement) {
+                employeePhoneInput = window.intlTelInput(employeePhoneElement, commonConfig);
+            }
+
+            const companyPhoneElement = document.querySelector("#companyPhone");
+            if (companyPhoneElement) {
+                companyPhoneInput = window.intlTelInput(companyPhoneElement, commonConfig);
+            }
+        }
+
+        // Password Toggle
+        window.togglePasswordVisibility = function(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(inputId + '-eye');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Validation Functions
+        function validateName(name) {
+            const parts = name.trim().split(/\\s+/);
+            return parts.length >= 3 && parts.length <= 4;
+        }
+
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const checks = {
+                minLength: password.length >= 6,
+                hasUpper: /[A-Z]/.test(password),
+                hasLower: /[a-z]/.test(password),
+                hasNumber: /[0-9]/.test(password)
+            };
+            
+            const requirements = {
+                minLength: document.getElementById('min-length'),
+                hasUpper: document.getElementById('has-upper'),
+                hasLower: document.getElementById('has-lower'),
+                hasNumber: document.getElementById('has-number'),
+            };
+            
+            for (const key in checks) {
+                const element = requirements[key];
+                if (checks[key]) {
+                    element.classList.add('valid');
+                    element.querySelector('i').className = 'fas fa-check-circle ml-2 text-green-500';
+                } else {
+                    element.classList.remove('valid');
+                    element.querySelector('i').className = 'fas fa-times-circle ml-2 text-red-500';
+                }
+            }
+            return Object.values(checks).every(Boolean);
+        }
+
+        document.getElementById('password').addEventListener('input', validatePassword);
+
+        // Role Change Handler
+        document.getElementById('role').addEventListener('change', () => {
+            isEmployerFlow = (document.getElementById('role').value === 'employer');
+            updateStepIndicator();
+        });
+
+        function updateStepIndicator() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(stepEl => stepEl.classList.remove('active'));
+            for (let i = 1; i <= currentStep; i++) {
+                const indicator = document.getElementById(`stepIndicator${i}`);
+                if (indicator) indicator.classList.add('active');
+            }
+            document.getElementById('stepIndicator5').classList.add('hidden');
+            if (isEmployerFlow) {
+                document.getElementById('stepIndicator5').classList.remove('hidden');
+            }
+        }
+
+        function showStep(stepNumber, role) {
+            const stepId = role === 'employer' ? `step${stepNumber}-employer` : `step${stepNumber}-employee`;
+            const allSteps = document.querySelectorAll('.form-card');
+            allSteps.forEach(el => el.classList.add('hidden'));
+            document.getElementById(stepId).classList.remove('hidden');
+            currentStep = stepNumber;
+            updateStepIndicator();
+        }
+
+        // Message System
+        function showMessage(elementId, msg, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = msg;
+            element.className = `message show ${type}-message`;
+            setTimeout(() => {
+                element.classList.remove('show');
+            }, 5000);
+        }
+
+        // Skip Step
+        window.skipStep = function(stepToSkip, role) {
+            const msgElement = role === 'employee' ? `message-step${stepToSkip}-employee` : `message-step${stepToSkip}-employer`;
+            showMessage(msgElement, `تم تخطي الخطوة ${stepToSkip}. يمكنك إكمالها لاحقاً من صفحة البروفايل.`, 'success');
+            
+            let nextStepNum;
+            if (role === 'employee') {
+                if (stepToSkip === 2) nextStepNum = 3;
+                else if (stepToSkip === 3) nextStepNum = 4;
+            } else if (role === 'employer') {
+                if (stepToSkip === 3) nextStepNum = 4;
+                else if (stepToSkip === 4) nextStepNum = 5;
+            }
+            
+            setTimeout(() => {
+                showStep(nextStepNum, role);
+            }, 1000);
+        };
+
+        // Navigation Functions
+        async function nextStep(step) {
+            const role = document.getElementById('role').value;
+            
+            if (step === 1) {
+                // Validate Step 1
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (!validateName(name)) {
+                    showMessage('message', 'الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showMessage('message', 'كلمة المرور وتأكيدها غير متطابقين.', 'error');
+                    return;
+                }
+                
+                if (!validatePassword()) {
+                    showMessage('message', 'كلمة المرور لا تستوفي جميع المتطلبات.', 'error');
+                    return;
+                }
+                
+                if (phoneInput && !phoneInput.isValidNumber()) {
+                    showMessage('message', 'يرجى إدخال رقم هاتف صحيح', 'error');
+                    return;
+                }
+                
+                // Create Firebase Auth User
+                const nextBtn = document.getElementById('nextBtn1');
+                nextBtn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span> جاري إنشاء الحساب...';
+                nextBtn.disabled = true;
+                
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    currentUser = userCredential.user;
+                    
+                    // Send verification email
+                    await sendEmailVerification(currentUser);
+                    
+                    showMessage('message', 'تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني.', 'success');
+                    
+                    // Move to next step
+                    isEmployerFlow = (role === 'employer');
+                    showStep(2, isEmployerFlow ? 'employer' : 'employee');
+                    
+                } catch (error) {
+                    console.error('Error creating user:', error);
+                    let errorMessage = 'حدث خطأ أثناء إنشاء الحساب.';
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'صيغة البريد الإلكتروني غير صحيحة.';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'كلمة المرور ضعيفة جداً.';
+                            break;
+                    }
+                    showMessage('message', errorMessage, 'error');
+                    nextBtn.innerHTML = 'التالي';
+                    nextBtn.disabled = false;
+                }
+            } else {
+                showStep(step + 1, role);
+            }
+        }
+
+        function prevStep(step) {
+            const role = isEmployerFlow ? 'employer' : 'employee';
+            if (step === 2) {
+                showStep(1, role);
+            } else {
+                showStep(step - 1, role);
+            }
+        }
+
+        // Submit Form
+        async function submitForm(event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                showMessage('message', 'خطأ: لم يتم إنشاء المستخدم. يرجى تحديث الصفحة والمحاولة مرة أخرى.', 'error');
+                return;
+            }
+            
+            const submitBtn = event.target;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span> جاري الحفظ...';
+            submitBtn.disabled = true;
+            
+            try {
+                const role = document.getElementById('role').value;
+                const formData = new FormData(document.getElementById('unifiedForm'));
+                
+                let userData = {
+                    name: formData.get('name'),
+                    email: currentUser.email,
+                    role: role,
+                    isProfileComplete: true,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                    emailVerified: currentUser.emailVerified,
+                    profileViews: 0,
+                    applicationsCount: 0
+                };
+                
+                if (role === 'employee') {
+                    // Handle employee data
+                    const profilePhoto = formData.get('profilePhoto');
+                    const previousWorks = formData.getAll('previousWorks');
+                    
+                    let profileImageUrl = null;
+                    let previousWorksUrls = [];
+                    
+                    // Upload profile photo
+                    if (profilePhoto && profilePhoto.size > 0) {
+                        const photoRef = ref(storage, `profile_photos/${currentUser.uid}/profile`);
+                        await uploadBytes(photoRef, profilePhoto);
+                        profileImageUrl = await getDownloadURL(photoRef);
+                    }
+                    
+                    // Upload previous works
+                    for (let i = 0; i < previousWorks.length; i++) {
+                        if (previousWorks[i].size > 0) {
+                            const workRef = ref(storage, `previous_works/${currentUser.uid}/${Date.now()}_${i}`);
+                            await uploadBytes(workRef, previousWorks[i]);
+                            const url = await getDownloadURL(workRef);
+                            previousWorksUrls.push(url);
+                        }
+                    }
+                    
+                    // Get skills
+                    const skills = [];
+                    document.querySelectorAll('.skill-input').forEach(input => {
+                        if (input.value.trim()) skills.push(input.value.trim());
+                    });
+                    
+                    userData = {
+                        ...userData,
+                        phone: phoneInput ? phoneInput.getNumber() : '',
+                        headline: formData.get('headline') || '',
+                        bio: formData.get('bio') || '',
+                        profileImageUrl,
+                        contact: {
+                            phone: formData.get('employeePhone') || '',
+                            location: {
+                                state: formData.get('state') || '',
+                                city: formData.get('city') || '',
+                                area: formData.get('area') || ''
+                            }
+                        },
+                        skills,
+                        experience: formData.get('experience') || '',
+                        jobStatus: formData.get('jobStatus') || 'متاح للعمل',
+                        links: {
+                            cv: formData.get('cvUrl') || '',
+                            linkedin: formData.get('linkedinUrl') || ''
+                        },
+                        previousWorksUrls,
+                        profileCompletionPercentage: calculateCompletion('employee', formData, skills, previousWorksUrls)
+                    };
+                    
+                    // Save to Firestore
+                    await setDoc(doc(db, 'employees', currentUser.uid), userData);
+                    
+                    showMessage('message-step4-employee', 'تم إنشاء الحساب بنجاح! جاري التوجيه...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                    
+                } else if (role === 'employer') {
+                    // Handle employer data
+                    const companyLogo = formData.get('companyLogo');
+                    const commercialRegister = formData.get('commercialRegister');
+                    const companyPhotos = formData.getAll('companyPhotos');
+                    
+                    let companyLogoUrl = null;
+                    let commercialRegisterUrl = null;
+                    let companyPhotosUrls = [];
+                    
+                    if (companyLogo && companyLogo.size > 0) {
+                        const logoRef = ref(storage, `company_logos/${currentUser.uid}/logo`);
+                        await uploadBytes(logoRef, companyLogo);
+                        companyLogoUrl = await getDownloadURL(logoRef);
+                    }
+                    
+                    if (commercialRegister && commercialRegister.size > 0) {
+                        const regRef = ref(storage, `company_documents/${currentUser.uid}/register`);
+                        await uploadBytes(regRef, commercialRegister);
+                        commercialRegisterUrl = await getDownloadURL(regRef);
+                    }
+                    
+                    for (let i = 0; i < companyPhotos.length; i++) {
+                        if (companyPhotos[i].size > 0) {
+                            const photoRef = ref(storage, `company_photos/${currentUser.uid}/${Date.now()}_${i}`);
+                            await uploadBytes(photoRef, companyPhotos[i]);
+                            const url = await getDownloadURL(photoRef);
+                            companyPhotosUrls.push(url);
+                        }
+                    }
+                    
+                    userData = {
+                        ...userData,
+                        phone: phoneInput ? phoneInput.getNumber() : '',
+                        companyInfo: {
+                            name: formData.get('companyName') || '',
+                            email: formData.get('companyEmail') || '',
+                            phone: formData.get('companyPhone') || '',
+                            logoUrl: companyLogoUrl,
+                            businessType: formData.get('businessType') || '',
+                            description: formData.get('companyDescription') || '',
+                            location: {
+                                state: formData.get('companyState') || '',
+                                city: formData.get('companyCity') || '',
+                                area: formData.get('companyArea') || ''
+                            }
+                        },
+                        verification: {
+                            isVerified: !!commercialRegisterUrl,
+                            commercialRegisterUrl,
+                            companyPhotosUrls
+                        },
+                        subRole: formData.get('employerType') || 'hiring',
+                        profileCompletionPercentage: calculateCompletion('employer', formData, [], companyPhotosUrls)
+                    };
+                    
+                    // Save to Firestore
+                    await setDoc(doc(db, 'All_jops', currentUser.uid), userData);
+                    
+                    showMessage('message-step5-employer', 'تم إنشاء الحساب بنجاح! جاري التوجيه...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                }
+                
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                showMessage('message', `حدث خطأ: ${error.message}. يرجى المحاولة مرة أخرى.`, 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function calculateCompletion(role, formData, skills, works) {
+            let completed = 0;
+            let total = 5;
+            
+            if (role === 'employee') {
+                if (formData.get('headline')) completed++;
+                if (formData.get('state')) completed++;
+                if (works.length >= 5) completed++;
+                if (skills.length > 0) completed++;
+                if (formData.get('experience')) completed++;
+            } else {
+                if (formData.get('companyName')) completed++;
+                if (formData.get('companyEmail')) completed++;
+                if (formData.get('businessType')) completed++;
+                if (formData.get('employerType')) completed++;
+                if (works.length > 0) completed++;
+            }
+            
+            return Math.round((completed / total) * 100);
+        }
+
+        // Event Listeners
+        document.getElementById('nextBtn1').addEventListener('click', () => nextStep(1));
+        document.getElementById('nextBtn2-employee').addEventListener('click', () => nextStep(2));
+        document.getElementById('nextBtn3-employee').addEventListener('click', () => nextStep(3));
+        document.getElementById('nextBtn2-employer').addEventListener('click', () => nextStep(2));
+        document.getElementById('nextBtn3-employer').addEventListener('click', () => nextStep(3));
+        document.getElementById('nextBtn4-employer').addEventListener('click', () => nextStep(4));
+
+        document.getElementById('prevBtn2-employee').addEventListener('click', () => prevStep(2));
+        document.getElementById('prevBtn3-employee').addEventListener('click', () => prevStep(3));
+        document.getElementById('prevBtn4-employee').addEventListener('click', () => prevStep(4));
+        document.getElementById('prevBtn2-employer').addEventListener('click', () => prevStep(2));
+        document.getElementById('prevBtn3-employer').addEventListener('click', () => prevStep(3));
+        document.getElementById('prevBtn4-employer').addEventListener('click', () => prevStep(4));
+        document.getElementById('prevBtn5-employer').addEventListener('click', () => prevStep(5));
+
+        document.getElementById('submitBtn-employee').addEventListener('click', submitForm);
+        document.getElementById('submitBtn-employer').addEventListener('click', submitForm);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.form-card').forEach(el => el.classList.add('hidden'));
+            document.getElementById('step1').classList.remove('hidden');
+            updateStepIndicator();
+            initPhoneInputs();
+            populateStates();
+        });
+
+        // Populate States
+        function populateStates() {
+            const states = Object.keys(sudanLocations);
+            const stateSelects = ['state', 'companyState'];
+            
+            stateSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    states.forEach(state => {
+                        const option = document.createElement('option');
+                        option.value = state;
+                        option.textContent = state;
+                        select.appendChild(option);
+                    });
+                    
+                    select.addEventListener('change', function() {
+                        const cities = sudanLocations[this.value];
+                        const citySelectId = selectId === 'state' ? 'city' : 'companyCity';
+                        const cityContainerId = selectId === 'state' ? 'cityContainer' : 'companyCityContainer';
+                        const citySelect = document.getElementById(citySelectId);
+                        const cityContainer = document.getElementById(cityContainerId);
+                        
+                        citySelect.innerHTML = '<option value="">اختر مدينة</option>';
+                        
+                        if (cities) {
+                            if (Array.isArray(cities)) {
+                                cities.forEach(city => {
+                                    const option = document.createElement('option');
+                                    option.value = city;
+                                    option.textContent = city;
+                                    citySelect.appendChild(option);
+                                });
+                            } else {
+                                Object.keys(cities).forEach(city => {
+                                    const option = document.createElement('option');
+                                    option.value = city;
+                                    option.textContent = city;
+                                    citySelect.appendChild(option);
+                                });
+                            }
+                            cityContainer.classList.remove('hidden');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
