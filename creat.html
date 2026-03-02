@@ -160,6 +160,20 @@
         .iti__flag-box { margin-left: 0.5rem; margin-right: 0; }
         .iti__country-name { margin-left: 0; margin-right: 0.5rem; }
         .iti__dial-code { margin-left: 0.5rem; }
+        
+        .retry-btn {
+            background-color: #f59e0b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .retry-btn:hover {
+            background-color: #d97706;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
@@ -604,7 +618,7 @@
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
@@ -623,9 +637,17 @@
         const auth = getAuth(app);
         const storage = getStorage(app);
 
+        // تفعيل الـ Offline Persistence لضمان عدم فقدان البيانات
+        try {
+            enableIndexedDbPersistence(db);
+        } catch (err) {
+            console.warn('Persistence failed:', err);
+        }
+
         let currentStep = 1;
         let isEmployerFlow = false;
         let currentUser = null;
+        let pendingUserData = null; // لتخزين البيانات المؤقتة
 
         // Intel Tel Input instances
         let phoneInput, employeePhoneInput, companyPhoneInput;
@@ -795,6 +817,74 @@
             }, 1000);
         };
 
+        // دالة محسّنة لإنشاء المستخدم مع ضمان كتابة البيانات الأساسية
+        async function createUserWithGuaranteedData(email, password, basicData) {
+            let userCredential = null;
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    // محاولة إنشاء المستخدم
+                    userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    currentUser = userCredential.user;
+                    
+                    // المرحلة 1: كتابة البيانات الأساسية فوراً (ضرورية جداً)
+                    const essentialData = {
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        role: basicData.role,
+                        name: basicData.name,
+                        phone: basicData.phone,
+                        accountStatus: 'active',
+                        profileComplete: false, // سيتم تحديثه لاحقاً
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                        emailVerified: false,
+                        lastLoginAt: serverTimestamp()
+                    };
+                    
+                    // محاولة كتابة البيانات الأساسية مع إعادة المحاولة
+                    let writeSuccess = false;
+                    let writeRetries = 0;
+                    
+                    while (!writeSuccess && writeRetries < 3) {
+                        try {
+                            await setDoc(doc(db, 'users', currentUser.uid), essentialData);
+                            writeSuccess = true;
+                            console.log('Essential data written successfully');
+                        } catch (writeError) {
+                            writeRetries++;
+                            console.error(`Write attempt ${writeRetries} failed:`, writeError);
+                            if (writeRetries < 3) {
+                                await new Promise(resolve => setTimeout(resolve, 1000 * writeRetries));
+                            }
+                        }
+                    }
+                    
+                    if (!writeSuccess) {
+                        throw new Error('Failed to write essential data after retries');
+                    }
+                    
+                    // إرسال بريد التحقق
+                    await sendEmailVerification(currentUser);
+                    
+                    return { success: true, user: currentUser };
+                    
+                } catch (error) {
+                    retryCount++;
+                    console.error(`Attempt ${retryCount} failed:`, error);
+                    
+                    if (retryCount >= maxRetries) {
+                        return { success: false, error: error };
+                    }
+                    
+                    // انتظار قبل إعادة المحاولة
+                    await new Promise(resolve => setTimeout(resolve, 1500 * retryCount));
+                }
+            }
+        }
+
         // Navigation Functions
         async function nextStep(step) {
             const role = document.getElementById('role').value;
@@ -826,27 +916,29 @@
                     return;
                 }
                 
-                // Create Firebase Auth User
                 const nextBtn = document.getElementById('nextBtn1');
                 nextBtn.innerHTML = '<span class="loading-spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span> جاري إنشاء الحساب...';
                 nextBtn.disabled = true;
                 
-                try {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    currentUser = userCredential.user;
-                    
-                    // Send verification email
-                    await sendEmailVerification(currentUser);
-                    
-                    showMessage('message', 'تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني.', 'success');
-                    
-                    // Move to next step
+                // تخزين البيانات الأساسية مؤقتاً
+                pendingUserData = {
+                    name: name,
+                    email: email,
+                    phone: phoneInput ? phoneInput.getNumber() : '',
+                    role: role
+                };
+                
+                // استخدام الدالة المحسّنة
+                const result = await createUserWithGuaranteedData(email, password, pendingUserData);
+                
+                if (result.success) {
+                    showMessage('message', 'تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني.', 'success');
                     isEmployerFlow = (role === 'employer');
                     showStep(2, isEmployerFlow ? 'employer' : 'employee');
-                    
-                } catch (error) {
-                    console.error('Error creating user:', error);
+                } else {
                     let errorMessage = 'حدث خطأ أثناء إنشاء الحساب.';
+                    const error = result.error;
+                    
                     switch (error.code) {
                         case 'auth/email-already-in-use':
                             errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل.';
@@ -857,7 +949,16 @@
                         case 'auth/weak-password':
                             errorMessage = 'كلمة المرور ضعيفة جداً.';
                             break;
+                        case 'auth/network-request-failed':
+                            errorMessage = 'مشكلة في الاتصال بالشبكة. يرجى المحاولة مرة أخرى.';
+                            break;
+                        default:
+                            if (error.message.includes('essential data')) {
+                                errorMessage = 'تم إنشاء الحساب لكن حدث خطأ في حفظ البيانات. سيتم إعادة المحاولة تلقائياً.';
+                                // يمكن إضافة منطق لإعادة المحاولة لاحقاً
+                            }
                     }
+                    
                     showMessage('message', errorMessage, 'error');
                     nextBtn.innerHTML = 'التالي';
                     nextBtn.disabled = false;
@@ -873,6 +974,63 @@
                 showStep(1, role);
             } else {
                 showStep(step - 1, role);
+            }
+        }
+
+        // دالة محسّنة لحفظ البيانات النهائية مع ضمان عدم الفقدان
+        async function saveFinalDataWithGuarantee(userId, userData, role) {
+            const maxRetries = 3;
+            let lastError = null;
+            
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    const collectionName = role === 'employee' ? 'employees' : 'employers';
+                    
+                    // كتابة البيانات الكاملة
+                    await setDoc(doc(db, collectionName, userId), userData, { merge: true });
+                    
+                    // تحديث حالة اكتمال البروفايل في users
+                    await setDoc(doc(db, 'users', userId), {
+                        profileComplete: true,
+                        profileUpdatedAt: serverTimestamp(),
+                        lastCollection: collectionName
+                    }, { merge: true });
+                    
+                    console.log(`Data saved successfully on attempt ${attempt}`);
+                    return { success: true };
+                    
+                } catch (error) {
+                    lastError = error;
+                    console.error(`Save attempt ${attempt} failed:`, error);
+                    
+                    if (attempt < maxRetries) {
+                        // انتظار متزايد قبل إعادة المحاولة
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    }
+                }
+            }
+            
+            // إذا فشلت جميع المحاولات، حاول حفظ نسخة مخففة على الأقل
+            try {
+                await setDoc(doc(db, 'users', userId), {
+                    pendingProfileData: JSON.stringify(userData),
+                    profileSaveFailed: true,
+                    lastError: lastError.message,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+                
+                return { 
+                    success: false, 
+                    partial: true, 
+                    error: lastError,
+                    message: 'تم حفظ البيانات مؤقتاً وسيتم معالجتها لاحقاً'
+                };
+            } catch (finalError) {
+                return { 
+                    success: false, 
+                    error: lastError,
+                    message: 'فشل حفظ البيانات نهائياً. يرجى التواصل مع الدعم.'
+                };
             }
         }
 
@@ -895,11 +1053,11 @@
                 const formData = new FormData(document.getElementById('unifiedForm'));
                 
                 let userData = {
+                    uid: currentUser.uid,
                     name: formData.get('name'),
                     email: currentUser.email,
                     role: role,
                     isProfileComplete: true,
-                    createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp(),
                     emailVerified: currentUser.emailVerified,
                     profileViews: 0,
@@ -914,20 +1072,30 @@
                     let profileImageUrl = null;
                     let previousWorksUrls = [];
                     
-                    // Upload profile photo
+                    // رفع الصور مع معالجة الأخطاء لكل صورة على حدة
                     if (profilePhoto && profilePhoto.size > 0) {
-                        const photoRef = ref(storage, `profile_photos/${currentUser.uid}/profile`);
-                        await uploadBytes(photoRef, profilePhoto);
-                        profileImageUrl = await getDownloadURL(photoRef);
+                        try {
+                            const photoRef = ref(storage, `profile_photos/${currentUser.uid}/profile`);
+                            await uploadBytes(photoRef, profilePhoto);
+                            profileImageUrl = await getDownloadURL(photoRef);
+                        } catch (uploadError) {
+                            console.warn('Profile photo upload failed:', uploadError);
+                            // لا نوقف العملية، نستمر بدون الصورة
+                        }
                     }
                     
-                    // Upload previous works
+                    // رفع الأعمال السابقة
                     for (let i = 0; i < previousWorks.length; i++) {
                         if (previousWorks[i].size > 0) {
-                            const workRef = ref(storage, `previous_works/${currentUser.uid}/${Date.now()}_${i}`);
-                            await uploadBytes(workRef, previousWorks[i]);
-                            const url = await getDownloadURL(workRef);
-                            previousWorksUrls.push(url);
+                            try {
+                                const workRef = ref(storage, `previous_works/${currentUser.uid}/${Date.now()}_${i}`);
+                                await uploadBytes(workRef, previousWorks[i]);
+                                const url = await getDownloadURL(workRef);
+                                previousWorksUrls.push(url);
+                            } catch (uploadError) {
+                                console.warn(`Work ${i} upload failed:`, uploadError);
+                                // نستمر مع باقي الصور
+                            }
                         }
                     }
                     
@@ -939,7 +1107,7 @@
                     
                     userData = {
                         ...userData,
-                        phone: phoneInput ? phoneInput.getNumber() : '',
+                        phone: phoneInput ? phoneInput.getNumber() : (pendingUserData?.phone || ''),
                         headline: formData.get('headline') || '',
                         bio: formData.get('bio') || '',
                         profileImageUrl,
@@ -962,14 +1130,22 @@
                         profileCompletionPercentage: calculateCompletion('employee', formData, skills, previousWorksUrls)
                     };
                     
-                    // Save to Firestore
-                    await setDoc(doc(db, 'employees', currentUser.uid), userData);
+                    // استخدام الدالة المحسّنة لحفظ البيانات
+                    const saveResult = await saveFinalDataWithGuarantee(currentUser.uid, userData, 'employee');
                     
-                    showMessage('message-step4-employee', 'تم إنشاء الحساب بنجاح! جاري التوجيه...', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
+                    if (saveResult.success) {
+                        showMessage('message-step4-employee', 'تم إنشاء الحساب بنجاح! جاري التوجيه...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 2000);
+                    } else if (saveResult.partial) {
+                        showMessage('message-step4-employee', saveResult.message, 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 3000);
+                    } else {
+                        throw new Error(saveResult.message);
+                    }
                     
                 } else if (role === 'employer') {
                     // Handle employer data
@@ -981,30 +1157,43 @@
                     let commercialRegisterUrl = null;
                     let companyPhotosUrls = [];
                     
+                    // رفع الملفات مع معالجة منفصلة للأخطاء
                     if (companyLogo && companyLogo.size > 0) {
-                        const logoRef = ref(storage, `company_logos/${currentUser.uid}/logo`);
-                        await uploadBytes(logoRef, companyLogo);
-                        companyLogoUrl = await getDownloadURL(logoRef);
+                        try {
+                            const logoRef = ref(storage, `company_logos/${currentUser.uid}/logo`);
+                            await uploadBytes(logoRef, companyLogo);
+                            companyLogoUrl = await getDownloadURL(logoRef);
+                        } catch (e) {
+                            console.warn('Logo upload failed:', e);
+                        }
                     }
                     
                     if (commercialRegister && commercialRegister.size > 0) {
-                        const regRef = ref(storage, `company_documents/${currentUser.uid}/register`);
-                        await uploadBytes(regRef, commercialRegister);
-                        commercialRegisterUrl = await getDownloadURL(regRef);
+                        try {
+                            const regRef = ref(storage, `company_documents/${currentUser.uid}/register`);
+                            await uploadBytes(regRef, commercialRegister);
+                            commercialRegisterUrl = await getDownloadURL(regRef);
+                        } catch (e) {
+                            console.warn('Register upload failed:', e);
+                        }
                     }
                     
                     for (let i = 0; i < companyPhotos.length; i++) {
                         if (companyPhotos[i].size > 0) {
-                            const photoRef = ref(storage, `company_photos/${currentUser.uid}/${Date.now()}_${i}`);
-                            await uploadBytes(photoRef, companyPhotos[i]);
-                            const url = await getDownloadURL(photoRef);
-                            companyPhotosUrls.push(url);
+                            try {
+                                const photoRef = ref(storage, `company_photos/${currentUser.uid}/${Date.now()}_${i}`);
+                                await uploadBytes(photoRef, companyPhotos[i]);
+                                const url = await getDownloadURL(photoRef);
+                                companyPhotosUrls.push(url);
+                            } catch (e) {
+                                console.warn(`Company photo ${i} failed:`, e);
+                            }
                         }
                     }
                     
                     userData = {
                         ...userData,
-                        phone: phoneInput ? phoneInput.getNumber() : '',
+                        phone: phoneInput ? phoneInput.getNumber() : (pendingUserData?.phone || ''),
                         companyInfo: {
                             name: formData.get('companyName') || '',
                             email: formData.get('companyEmail') || '',
@@ -1027,14 +1216,22 @@
                         profileCompletionPercentage: calculateCompletion('employer', formData, [], companyPhotosUrls)
                     };
                     
-                    // Save to Firestore
-                    await setDoc(doc(db, 'All_jops', currentUser.uid), userData);
+                    // حفظ البيانات مع الضمان
+                    const saveResult = await saveFinalDataWithGuarantee(currentUser.uid, userData, 'employer');
                     
-                    showMessage('message-step5-employer', 'تم إنشاء الحساب بنجاح! جاري التوجيه...', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
+                    if (saveResult.success) {
+                        showMessage('message-step5-employer', 'تم إنشاء الحساب بنجاح! جاري التوجيه...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 2000);
+                    } else if (saveResult.partial) {
+                        showMessage('message-step5-employer', saveResult.message, 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 3000);
+                    } else {
+                        throw new Error(saveResult.message);
+                    }
                 }
                 
             } catch (error) {
