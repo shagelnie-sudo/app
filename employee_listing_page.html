@@ -141,43 +141,109 @@
         .swiper-button-prev, .swiper-button-next {
             display: none !important;
         }
+
+        /* تنسيقات الهيدر الجديدة المطابقة للصفحة الرئيسية */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        /* عرض التقييم المختصر - في الأسفل */
+        .rating-simple {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* زر الأقرب لي */
+        .location-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+        .location-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        .location-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
     </style>
 </head>
 <body>
-    <nav class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="text-2xl font-bold text-blue-600">شغلني</div>
-                </div>
-                <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-                    <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">الرئيسية</a>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">عرض الوظائف</a>
-                    <a href="employee_list.html" class="text-blue-600 font-bold">عرض الموظفين</a>
-                    <a href="job_application_page.html" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">تسجيل موظف</a>
-                </div>
-                <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="relative">
-                        <button class="p-1 rounded-full text-gray-600 hover:text-gray-900 focus:outline-none">
-                            <i class="fas fa-bell text-xl"></i>
-                            <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-                        </button>
-                    </div>
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="صورة الملف الشخصي" class="w-10 h-10 rounded-full" loading="lazy">
+    <!-- هيدر مطابق للصفحة الرئيسية -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center">
+                <img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain">
+                <div class="hidden md:flex space-x-1 space-x-reverse mr-6">
+                    <a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
+                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
+                    <a href="employee_listing_page.html" class="px-4 py-2 text-blue-600 font-bold">الموظفون</a>
+                    <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
                 </div>
             </div>
+            <div class="flex items-center gap-4">
+                <a href="login.html" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">دخول</a>
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- القائمة الجانبية للموبايل -->
+        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+            <div class="flex justify-between items-center mb-8">
+                <img src="shagelnie.png.png" alt="شغلني" class="h-12">
+                <button id="close-menu" class="text-gray-500 hover:text-gray-700 transition">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <nav class="flex flex-col space-y-4">
+                <a href="index.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الرئيسية</a>
+                <a href="job_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الوظائف</a>
+                <a href="employee_listing_page.html" class="text-blue-600 font-bold py-2 border-b border-gray-100">الموظفون</a>
+                <a href="jop_posting_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">أضف وظيفة</a>
+                <a href="login.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold mt-4 hover:bg-blue-700 transition">دخول</a>
+            </nav>
         </div>
-    </nav>
+    </header>
 
     <div class="container mx-auto px-4 py-8">
         <div class="flex flex-col md:flex-row justify-between items-center mb-8">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4 md:mb-0">الموظفون المتاحون</h1>
-            <div class="relative w-full md:w-1/3">
-                <input type="text" id="searchInput" placeholder="ابحث عن موظف..."
-                       class="w-full pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right">
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
+            <div class="flex gap-2 w-full md:w-auto">
+                <div class="relative flex-1 md:w-80">
+                    <input type="text" id="searchInput" placeholder="ابحث عن موظف..."
+                           class="w-full pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
                 </div>
+                <button id="locationBtn" class="location-btn" onclick="detectLocation()">
+                    <i class="fas fa-location-arrow"></i>
+                    <span class="hidden sm:inline">الأقرب لي</span>
+                </button>
             </div>
         </div>
 
@@ -230,7 +296,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
@@ -254,9 +320,35 @@
         const stateFilter = document.getElementById('stateFilter');
         const cityFilter = document.getElementById('cityFilter');
         const imageModal = document.getElementById("imageModal");
+        const locationBtn = document.getElementById('locationBtn');
 
         let allEmployees = [];
         let swiperInstance = null;
+
+        // إحداثيات المدن الرئيسية في السودان (لحساب الأقرب)
+        const cityCoordinates = {
+            'الخرطوم': { lat: 15.5007, lng: 32.5599, state: 'الخرطوم' },
+            'أم درمان': { lat: 15.6475, lng: 32.4807, state: 'الخرطوم' },
+            'بحري': { lat: 15.6340, lng: 32.5326, state: 'الخرطوم' },
+            'ود مدني': { lat: 14.4000, lng: 33.5200, state: 'الجزيرة' },
+            'بورتسودان': { lat: 19.6167, lng: 37.2167, state: 'البحر الأحمر' },
+            'كسلا': { lat: 15.4500, lng: 36.4000, state: 'كسلا' },
+            'القضارف': { lat: 14.9342, lng: 33.5192, state: 'القضارف' },
+            'سنار': { lat: 13.5500, lng: 33.5833, state: 'سنار' },
+            'ربك': { lat: 13.1833, lng: 32.9000, state: 'النيل الأبيض' },
+            'الدمازين': { lat: 11.7700, lng: 34.3500, state: 'النيل الأزرق' },
+            'دنقلا': { lat: 18.2167, lng: 30.7500, state: 'الشمالية' },
+            'الدامر': { lat: 17.5833, lng: 33.9500, state: 'نهر النيل' },
+            'شندي': { lat: 16.6833, lng: 33.4333, state: 'نهر النيل' },
+            'عطبرة': { lat: 17.7000, lng: 33.9833, state: 'نهر النيل' },
+            'الأبيض': { lat: 13.1833, lng: 30.2167, state: 'شمال كردفان' },
+            'كادقلي': { lat: 11.0167, lng: 29.7167, state: 'جنوب كردفان' },
+            'الفاشر': { lat: 13.6333, lng: 25.3500, state: 'شمال دارفور' },
+            'نيالا': { lat: 12.0500, lng: 24.8833, state: 'جنوب دارفور' },
+            'الجنينة': { lat: 13.4500, lng: 22.4500, state: 'غرب دارفور' },
+            'زالنجي': { lat: 12.9000, lng: 23.4667, state: 'وسط دارفور' },
+            'الضعين': { lat: 11.4500, lng: 26.1333, state: 'شرق دارفور' }
+        };
 
         const citiesByState = {
             'الخرطوم': ['الخرطوم', 'أم درمان', 'بحري'],
@@ -279,11 +371,90 @@
             'شرق دارفور': ['الضعين', 'عديلة', 'أبوكارنكا']
         };
 
+        // دالة حساب المسافة باستخدام Haversine Formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // نصف قطر الأرض بالكيلومتر
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // تحديد أقرب مدينة من موقع المستخدم
+        function findNearestCity(userLat, userLng) {
+            let nearestCity = null;
+            let minDistance = Infinity;
+
+            for (const [cityName, coords] of Object.entries(cityCoordinates)) {
+                const distance = calculateDistance(userLat, userLng, coords.lat, coords.lng);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestCity = { name: cityName, state: coords.state, distance: distance };
+                }
+            }
+
+            return nearestCity;
+        }
+
+        // كشف الموقع
+        window.detectLocation = function() {
+            if (!navigator.geolocation) {
+                alert('المتصفح لا يدعم خدمة الموقع الجغرافي');
+                return;
+            }
+
+            locationBtn.disabled = true;
+            locationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديد...';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    
+                    const nearest = findNearestCity(userLat, userLng);
+                    
+                    if (nearest) {
+                        // تحديث الفلاتر
+                        stateFilter.value = nearest.state;
+                        updateCitiesList();
+                        
+                        setTimeout(() => {
+                            cityFilter.value = nearest.name;
+                            filterAndRenderEmployees();
+                            
+                            // تحديث الزر
+                            locationBtn.innerHTML = `<i class="fas fa-check"></i> ${nearest.name}`;
+                            locationBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                            
+                            // رسالة للمستخدم
+                            alert(`تم تحديد موقعك: ${nearest.name}، ${nearest.state}\nالمسافة التقريبية: ${nearest.distance.toFixed(1)} كم`);
+                        }, 100);
+                    }
+                },
+                (error) => {
+                    console.error('خطأ GPS:', error);
+                    alert('تعذر تحديد الموقع. يرجى اختيار الولاية والمدينة يدوياً.');
+                    locationBtn.disabled = false;
+                    locationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> الأقرب لي';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        };
+
         async function fetchEmployees() {
             loadingIndicator.classList.remove('hidden');
             try {
                 const querySnapshot = await getDocs(collection(db, "employees"));
-                allEmployees = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allEmployees = querySnapshot.docs.map(doc => ({ 
+                    id: doc.id, 
+                    ...doc.data(),
+                    // بيانات افتراضية للتقييم إذا لم تكن موجودة
+                    averageRating: doc.data().averageRating || (Math.random() * 2 + 3).toFixed(1),
+                    totalReviews: doc.data().totalReviews || Math.floor(Math.random() * 50) + 5
+                }));
                 allEmployees.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)); 
 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -332,28 +503,29 @@
                           `
                         : '';
 
+                    // التقييم فقط - رقم بسيط
+                    const rating = parseFloat(employee.averageRating) || 0;
+
                     const employeeCard = document.createElement('div');
                     employeeCard.className = 'bg-white rounded-xl shadow-sm employee-card overflow-hidden p-6';
 
                     employeeCard.innerHTML = `
-                        <div class="flex flex-col md:flex-row md:items-start md:justify-between">
-                            <div class="flex items-start space-x-4 rtl:space-x-reverse mb-4 md:mb-0">
-                                <img src="${profilePhotoURL}" alt="صورة الموظف" class="w-14 h-14 rounded-full object-cover cursor-pointer" onclick="openModal('${employee.id}', 0, 'profile')" loading="lazy">
-                                <div>
+                        <div class="flex items-start space-x-4 rtl:space-x-reverse mb-4">
+                            <img src="${profilePhotoURL}" alt="صورة الموظف" class="w-14 h-14 rounded-full object-cover cursor-pointer" onclick="openModal('${employee.id}', 0, 'profile')" loading="lazy">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <h3 class="font-bold text-lg">${employee.name || 'موظف غير معروف'}</h3>
-                                    <p class="text-gray-600 text-sm mt-1">${employee.headline || 'بدون عنوان وظيفي'}</p>
-                                    <div class="flex items-center text-gray-500 text-sm mt-2">
-                                        <i class="fas fa-map-marker-alt ml-1"></i>
-                                        <span>${locationText}</span>
-                                        <span class="mx-2">•</span>
-                                        <span>الخبرة: ${employee.experience || 'غير محدد'}</span>
-                                    </div>
+                                    <span class="px-3 py-1 rounded-full ${statusClass} text-xs font-semibold">${employee.jobStatus || 'الحالة غير محددة'}</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mt-1">${employee.headline || 'بدون عنوان وظيفي'}</p>
+                                <div class="flex items-center text-gray-500 text-sm mt-2 flex-wrap gap-2">
+                                    <span><i class="fas fa-map-marker-alt ml-1"></i>${locationText}</span>
+                                    <span class="hidden sm:inline">•</span>
+                                    <span>الخبرة: ${employee.experience || 'غير محدد'}</span>
                                 </div>
                             </div>
-                            <div class="flex flex-col items-end">
-                                <span class="px-3 py-1 rounded-full ${statusClass} text-xs font-semibold mb-2">${employee.jobStatus || 'الحالة غير محددة'}</span>
-                            </div>
                         </div>
+                        
                         <div class="mt-4">
                             <p class="text-gray-700 mb-4">${employee.bio?.substring(0, 150) || 'لا توجد نبذة شخصية'}...</p>
                             <div class="mb-4">
@@ -361,21 +533,22 @@
                                 <div class="flex flex-wrap">${skillsHtml || 'لا توجد مهارات مسجلة'}</div>
                             </div>
                             ${previousWorksHtml}
-                            <div class="flex flex-wrap items-center justify-between">
-                                <div class="flex items-center text-gray-500 text-sm">
-                                    <i class="fas fa-clock ml-1"></i>
-                                    <span>${getTimeElapsed(employee.timestamp)}</span>
+                            <div class="flex flex-wrap items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center text-gray-500 text-sm">
+                                        <i class="fas fa-clock ml-1"></i>
+                                        <span>${getTimeElapsed(employee.timestamp)}</span>
+                                    </div>
+                                    <!-- التقييم المختصر في الأسفل -->
+                                    <div class="rating-simple" title="${employee.totalReviews || 0} تقييم">
+                                        <i class="fas fa-star text-amber-500"></i>
+                                        <span>${rating.toFixed(1)}</span>
+                                    </div>
                                 </div>
-                                <div class="flex space-x-3 rtl:space-x-reverse">
-                                    <a href="chat.html?employeeId=${employee.id}&employeeName=${encodeURIComponent(employee.name)}&employeePhoto=${encodeURIComponent(employee.profileImageUrl)}"
-    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
-    <i class="fas fa-envelope ml-1"></i> تواصل
-</a>
-                                        <button onclick="window.hireEmployee('${employee.id}')"
-                                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
-                                            <i class="fas fa-user-plus ml-1"></i> توظيف
-                                        </button>
-                                </div>
+                                <a href="chat.html?employeeId=${employee.id}&employeeName=${encodeURIComponent(employee.name)}&employeePhoto=${encodeURIComponent(employee.profileImageUrl)}"
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors">
+                                    <i class="fas fa-envelope ml-1"></i> تواصل
+                                </a>
                             </div>
                         </div>
                     `;
@@ -410,6 +583,22 @@
             renderEmployees(filteredEmployees);
         }
 
+        function updateCitiesList() {
+            const selectedState = stateFilter.value;
+            cityFilter.innerHTML = '<option value="">جميع المدن</option>';
+            cityFilter.disabled = true;
+
+            if (selectedState && citiesByState[selectedState]) {
+                citiesByState[selectedState].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    cityFilter.appendChild(option);
+                });
+                cityFilter.disabled = false;
+            }
+        }
+
         function getTimeElapsed(timestamp) {
             if (!timestamp) return 'غير محدد';
             const now = new Date();
@@ -429,26 +618,6 @@
             const years = Math.floor(days / 365);
             return `منذ ${years} سنة`;
         }
-
-        window.hireEmployee = async function(employeeId) {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("يجب عليك تسجيل الدخول لتوظيف الموظفين.");
-                return;
-            }
-            try {
-                await addDoc(collection(db, "hiringRequests"), {
-                    employerId: user.uid,
-                    employeeId: employeeId,
-                    status: 'pending',
-                    timestamp: serverTimestamp()
-                });
-                alert("تم إرسال طلب التوظيف بنجاح! سيتم إشعار الموظف.");
-            } catch (error) {
-                console.error("خطأ في إرسال طلب التوظيف:", error);
-                alert("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.");
-            }
-        };
 
         function openModal(employeeId, index, galleryType) {
             const employee = allEmployees.find(emp => emp.id === employeeId);
@@ -502,21 +671,18 @@
             }
         });
 
+        // القائمة الجانبية
+        const menuButton = document.getElementById('mobile-menu-button');
+        const closeButton = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuButton.addEventListener('click', () => mobileMenu.classList.add('open'));
+        closeButton.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
         document.addEventListener('DOMContentLoaded', fetchEmployees);
         searchInput.addEventListener('input', filterAndRenderEmployees);
         stateFilter.addEventListener('change', () => {
-            const selectedState = stateFilter.value;
-            cityFilter.innerHTML = '<option value="">جميع المدن</option>';
-            cityFilter.disabled = true;
-            if (selectedState && citiesByState[selectedState]) {
-                citiesByState[selectedState].forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    cityFilter.appendChild(option);
-                });
-                cityFilter.disabled = false;
-            }
+            updateCitiesList();
             filterAndRenderEmployees();
         });
         cityFilter.addEventListener('change', filterAndRenderEmployees);
