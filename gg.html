@@ -4,69 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الموظفون المتاحون - شغلني</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --light: #f9fafb;
+            --dark: #1f2937;
+            --gray: #6b7280;
+        }
+
         body {
             font-family: 'Tajawal', sans-serif;
             background-color: #f5f7fa;
-            overflow-x: hidden;
-        }
-
-        .gradient-bg { 
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); 
-        }
-
-        /* تنسيقات الهيدر المطابقة للصفحة الرئيسية */
-        #mobile-menu {
-            transition: transform 0.3s ease-in-out;
-            transform: translateX(100%);
-        }
-        #mobile-menu.open {
-            transform: translateX(0);
-        }
-
-        /* شبكة البطاقات الجديدة */
-        .employees-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .employees-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         .employee-card {
-            background: white;
-            border-radius: 1rem;
-            border: 1px solid #e5e7eb;
             transition: all 0.3s ease;
-            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .employee-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
         }
 
         .skill-tag {
             display: inline-flex;
             align-items: center;
-            background-color: #eff6ff;
-            color: #2563eb;
+            background-color: #eef2ff;
+            color: #4338ca;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             margin: 0.125rem;
-            font-weight: 600;
         }
 
         .status-available {
@@ -77,50 +56,6 @@
             background-color: #fee2e2;
             color: #991b1b;
         }
-
-        /* نظام التقييمات */
-        .rating-stars {
-            color: #fbbf24;
-            font-size: 0.875rem;
-        }
-        .rating-badge {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-weight: 700;
-            font-size: 0.875rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        /* فلتر "الأقرب لك" */
-        .proximity-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .proximity-same-city {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .proximity-same-state {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        }
-
-        .proximity-far {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-        }
-
-        /* أعمال سابقة */
         .previous-works-gallery {
             display: flex;
             gap: 8px;
@@ -130,28 +65,30 @@
             -webkit-overflow-scrolling: touch;
         }
         .previous-works-gallery::-webkit-scrollbar {
-            height: 6px;
+            height: 8px;
         }
         .previous-works-gallery::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 3px;
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+        .previous-works-gallery::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
         }
 
         .previous-works-gallery img {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
             border-radius: 8px;
-            border: 2px solid #e5e7eb;
+            border: 1px solid #e5e7eb;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease-in-out;
         }
         .previous-works-gallery img:hover {
             transform: scale(1.05);
-            border-color: #3b82f6;
         }
 
-        /* المودال */
+        /* تنسيقات نافذة المودال */
         .modal {
             display: none; 
             position: fixed;
@@ -160,7 +97,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
+            background-color: rgba(0, 0, 0, 0.9);
             align-items: center;
             justify-content: center;
         }
@@ -176,10 +113,12 @@
             cursor: pointer;
             z-index: 1002;
         }
-        .close:hover {
+        .close:hover,
+        .close:focus {
             color: #bbb;
         }
 
+        /* تنسيق Swiper */
         .swiper {
             width: 100%;
             height: 100%;
@@ -199,50 +138,59 @@
             object-fit: contain;
         }
 
-        /* تصنيفات الفلتر */
-        .filter-chip {
-            background: white;
-            border: 2px solid #e5e7eb;
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-        }
-        .filter-chip:hover, .filter-chip.active {
-            border-color: #2563eb;
-            background: #eff6ff;
-            color: #2563eb;
+        .swiper-button-prev, .swiper-button-next {
+            display: none !important;
         }
 
-        /* زر الموقع */
+        /* تنسيقات الهيدر الجديدة المطابقة للصفحة الرئيسية */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        /* نظام التقييمات - إضافة بسيطة */
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .rating-stars {
+            color: #fbbf24;
+            font-size: 0.875rem;
+        }
+
+        /* زر الأقرب لي */
         .location-btn {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             padding: 0.5rem 1rem;
-            border-radius: 0.75rem;
+            border-radius: 0.5rem;
             font-weight: 600;
+            font-size: 0.875rem;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            border: none;
+            cursor: pointer;
         }
         .location-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
-        .location-btn.loading {
+        .location-btn:disabled {
             opacity: 0.7;
-            pointer-events: none;
-        }
-
-        /* إحصائيات صغيرة */
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            color: #6b7280;
-            font-size: 0.875rem;
+            cursor: not-allowed;
+            transform: none;
         }
     </style>
 </head>
@@ -285,169 +233,149 @@
         </div>
     </header>
 
-    <!-- قسم البحث المتقدم -->
-    <section class="gradient-bg text-white py-12 px-6">
-        <div class="container mx-auto max-w-6xl">
-            <h1 class="text-3xl md:text-4xl font-black mb-6 text-center">اكتشف الكفاءات السودانية</h1>
-            
-            <!-- شريط البحث والفلاتر -->
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                <div class="flex flex-col md:flex-row gap-4 mb-4">
-                    <div class="relative flex-1">
-                        <input type="text" id="searchInput" placeholder="ابحث عن موظف، مهارة، أو وظيفة..."
-                               class="w-full pr-12 py-3 bg-white text-gray-800 rounded-xl focus:ring-2 focus:ring-white/50 border-none text-right">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                            <i class="fas fa-search text-gray-400 text-lg"></i>
-                        </div>
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4 md:mb-0">الموظفون المتاحون</h1>
+            <div class="flex gap-2 w-full md:w-auto">
+                <div class="relative flex-1 md:w-80">
+                    <input type="text" id="searchInput" placeholder="ابحث عن موظف..."
+                           class="w-full pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <button id="locationBtn" onclick="getUserLocation()" class="location-btn">
-                        <i class="fas fa-location-arrow"></i>
-                        <span>الأقرب لي</span>
-                    </button>
                 </div>
-
-                <!-- فلاتر سريعة -->
-                <div class="flex flex-wrap gap-2 justify-center">
-                    <button class="filter-chip active" data-filter="all">الكل</button>
-                    <button class="filter-chip" data-filter="available">متاح للعمل</button>
-                    <button class="filter-chip" data-filter="top-rated">الأعلى تقييماً</button>
-                    <button class="filter-chip" data-filter="nearby" id="nearbyFilter">الأقرب جغرافياً</button>
-                </div>
+                <button id="locationBtn" class="location-btn" onclick="detectLocation()">
+                    <i class="fas fa-location-arrow"></i>
+                    <span class="hidden sm:inline">الأقرب لي</span>
+                </button>
             </div>
         </div>
-    </section>
 
-    <!-- الفلاتر المتقدمة -->
-    <section class="bg-white border-b border-gray-200 py-4">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div class="flex flex-wrap gap-4 flex-1">
-                    <select id="stateFilter" class="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">جميع الولايات</option>
-                        <option value="الخرطوم">الخرطوم</option>
-                        <option value="الجزيرة">الجزيرة</option>
-                        <option value="البحر الأحمر">البحر الأحمر</option>
-                        <option value="كسلا">كسلا</option>
-                        <option value="القضارف">القضارف</option>
-                        <option value="سنار">سنار</option>
-                        <option value="النيل الأبيض">النيل الأبيض</option>
-                        <option value="النيل الأزرق">النيل الأزرق</option>
-                        <option value="الشمالية">الشمالية</option>
-                        <option value="نهر النيل">نهر النيل</option>
-                        <option value="شمال كردفان">شمال كردفان</option>
-                        <option value="جنوب كردفان">جنوب كردفان</option>
-                        <option value="غرب كردفان">غرب كردفان</option>
-                        <option value="شمال دارفور">شمال دارفور</option>
-                        <option value="جنوب دارفور">جنوب دارفور</option>
-                        <option value="غرب دارفور">غرب دارفور</option>
-                        <option value="وسط دارفور">وسط دارفور</option>
-                        <option value="شرق دارفور">شرق دارفور</option>
-                    </select>
-
-                    <select id="cityFilter" class="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" disabled>
-                        <option value="">جميع المدن</option>
-                    </select>
-
-                    <select id="skillFilter" class="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">جميع المهارات</option>
-                        <option value="تصميم">تصميم</option>
-                        <option value="برمجة">برمجة</option>
-                        <option value="تسويق">تسويق</option>
-                        <option value="كتابة">كتابة</option>
-                        <option value="ترجمة">ترجمة</option>
-                        <option value="محاسبة">محاسبة</option>
-                    </select>
-                </div>
-
-                <div class="text-gray-600 text-sm">
-                    <span id="resultsCount">جاري التحميل...</span>
-                </div>
+        <div class="flex flex-col md:flex-row md:space-x-4 rtl:space-x-reverse mb-6">
+            <div class="w-full md:w-1/2 mb-4 md:mb-0">
+                <label for="stateFilter" class="block text-sm font-medium text-gray-700">فلتر حسب الولاية:</label>
+                <select id="stateFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+                    <option value="">جميع الولايات</option>
+                    <option value="الخرطوم">ولاية الخرطوم</option>
+                    <option value="الجزيرة">ولاية الجزيرة</option>
+                    <option value="البحر الأحمر">ولاية البحر الأحمر</option>
+                    <option value="كسلا">ولاية كسلا</option>
+                    <option value="القضارف">ولاية القضارف</option>
+                    <option value="سنار">ولاية سنار</option>
+                    <option value="النيل الأبيض">ولاية النيل الأبيض</option>
+                    <option value="النيل الأزرق">ولاية النيل الأزرق</option>
+                    <option value="الشمالية">الولاية الشمالية</option>
+                    <option value="نهر النيل">ولاية نهر النيل</option>
+                    <option value="شمال كردفان">ولاية شمال كردفان</option>
+                    <option value="جنوب كردفان">ولاية جنوب كردفان</option>
+                    <option value="غرب كردفان">ولاية غرب كردفان</option>
+                    <option value="شمال دارفور">ولاية شمال دارفور</option>
+                    <option value="جنوب دارفور">ولاية جنوب دارفور</option>
+                    <option value="غرب دارفور">ولاية غرب دارفور</option>
+                    <option value="وسط دارفور">ولاية وسط دارفور</option>
+                    <option value="شرق دارفور">ولاية شرق دارفور</option>
+                </select>
+            </div>
+            <div class="w-full md:w-1/2">
+                <label for="cityFilter" class="block text-sm font-medium text-gray-700">فلتر حسب المدينة:</label>
+                <select id="cityFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md" disabled>
+                    <option value="">جميع المدن</option>
+                </select>
             </div>
         </div>
-    </section>
 
-    <!-- قائمة الموظفين -->
-    <section class="py-8 container mx-auto px-4">
-        <div id="employeesList" class="employees-grid">
-            <div class="col-span-full text-center py-20">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-                <p class="mt-4 text-gray-500">جاري تحميل الموظفين...</p>
-            </div>
+        <div id="employeesList" class="space-y-4">
+            <div id="loadingIndicator" class="text-center text-lg text-gray-500 p-8">جاري تحميل الموظفين...</div>
+            <div id="noEmployeesFound" class="hidden text-center text-lg text-gray-500 p-8">لم يتم العثور على موظفين.</div>
         </div>
-        <div id="noEmployeesFound" class="hidden text-center py-20">
-            <div class="text-6xl mb-4">🔍</div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">لم يتم العثور على موظفين</h3>
-            <p class="text-gray-500">جرب تغيير معايير البحث</p>
-        </div>
-    </section>
+    </div>
 
-    <!-- المودال -->
     <div id="imageModal" class="modal">
         <span class="close" onclick="closeModal()">&times;</span>
-        <div class="swiper mySwiper" style="width: 90%; height: 80vh;">
-            <div class="swiper-wrapper"></div>
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
-            authDomain: "shaglni-c64c0.firebaseapp.com",
-            projectId: "shaglni-c64c0",
-            storageBucket: "shaglni-c64c0.firebasestorage.app",
-            messagingSenderId: "768887356636",
-            appId: "1:768887356636:web:11ec1d6991add3309c8819"
+          apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+          authDomain: "shaglni-c64c0.firebaseapp.com",
+          projectId: "shaglni-c64c0",
+          storageBucket: "shaglni-c64c0.firebasestorage.app",
+          messagingSenderId: "768887356636",
+          appId: "1:768887356636:web:11ec1d6991add3309c8819",
+          measurementId: "G-98GQGZS09W"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // عناصر DOM
         const employeesList = document.getElementById('employeesList');
+        const loadingIndicator = document.getElementById('loadingIndicator');
         const noEmployeesFound = document.getElementById('noEmployeesFound');
         const searchInput = document.getElementById('searchInput');
         const stateFilter = document.getElementById('stateFilter');
         const cityFilter = document.getElementById('cityFilter');
-        const skillFilter = document.getElementById('skillFilter');
-        const resultsCount = document.getElementById('resultsCount');
         const imageModal = document.getElementById("imageModal");
         const locationBtn = document.getElementById('locationBtn');
-        const nearbyFilter = document.getElementById('nearbyFilter');
 
         let allEmployees = [];
-        let allRatings = [];
         let swiperInstance = null;
-        let userLocation = null;
-        let activeFilter = 'all';
 
-        // المدن حسب الولاية
-        const citiesByState = {
-            'الخرطوم': ['الخرطوم', 'أم درمان', 'بحري', 'جبل أولياء'],
-            'الجزيرة': ['ود مدني', 'الحصاحيصا', 'المناقل', 'الكاملين'],
-            'البحر الأحمر': ['بورتسودان', 'سواكن', 'طوكر', 'هيا'],
-            'كسلا': ['كسلا', 'حلفا الجديدة', 'أروما', 'تلبس'],
-            'القضارف': ['القضارف', 'القلابات', 'الفو', 'باسندة'],
-            'سنار': ['سنار', 'الدالي والمزموم', 'ود النيل', 'سنجة'],
-            'النيل الأبيض': ['ربك', 'كوستي', 'الدويم', 'القطينة'],
-            'النيل الأزرق': ['الدمازين', 'الروصيرص', 'الكرمك', 'القريشة'],
-            'الشمالية': ['دنقلا', 'عطبرة', 'كريمة', 'الدبة'],
-            'نهر النيل': ['الدامر', 'شندي', 'عطبرة', 'المتمة'],
-            'شمال كردفان': ['الأبيض', 'أم روابة', 'الرهد', 'سودري'],
-            'جنوب كردفان': ['كادقلي', 'أبو جبيهة', 'تلودي', 'الفولة'],
-            'غرب كردفان': ['الفولة', 'النهود', 'المجلد', 'بابنوسة'],
-            'شمال دارفور': ['الفاشر', 'كبكابية', 'مليط', 'السريف'],
-            'جنوب دارفور': ['نيالا', 'الضعين', 'برام', 'كاس'],
-            'غرب دارفور': ['الجنينة', 'كرينك', 'كلبس', 'زالنجي'],
-            'وسط دارفور': ['زالنجي', 'ودعة', 'أم دخن'],
-            'شرق دارفور': ['الضعين', 'عديلة', 'أبوكارنكا', 'الفردوس']
+        // إحداثيات المدن الرئيسية في السودان (لحساب الأقرب)
+        const cityCoordinates = {
+            'الخرطوم': { lat: 15.5007, lng: 32.5599, state: 'الخرطوم' },
+            'أم درمان': { lat: 15.6475, lng: 32.4807, state: 'الخرطوم' },
+            'بحري': { lat: 15.6340, lng: 32.5326, state: 'الخرطوم' },
+            'ود مدني': { lat: 14.4000, lng: 33.5200, state: 'الجزيرة' },
+            'بورتسودان': { lat: 19.6167, lng: 37.2167, state: 'البحر الأحمر' },
+            'كسلا': { lat: 15.4500, lng: 36.4000, state: 'كسلا' },
+            'القضارف': { lat: 14.9342, lng: 33.5192, state: 'القضارف' },
+            'سنار': { lat: 13.5500, lng: 33.5833, state: 'سنار' },
+            'ربك': { lat: 13.1833, lng: 32.9000, state: 'النيل الأبيض' },
+            'الدمازين': { lat: 11.7700, lng: 34.3500, state: 'النيل الأزرق' },
+            'دنقلا': { lat: 18.2167, lng: 30.7500, state: 'الشمالية' },
+            'الدامر': { lat: 17.5833, lng: 33.9500, state: 'نهر النيل' },
+            'شندي': { lat: 16.6833, lng: 33.4333, state: 'نهر النيل' },
+            'عطبرة': { lat: 17.7000, lng: 33.9833, state: 'نهر النيل' },
+            'الأبيض': { lat: 13.1833, lng: 30.2167, state: 'شمال كردفان' },
+            'كادقلي': { lat: 11.0167, lng: 29.7167, state: 'جنوب كردفان' },
+            'الفاشر': { lat: 13.6333, lng: 25.3500, state: 'شمال دارفور' },
+            'نيالا': { lat: 12.0500, lng: 24.8833, state: 'جنوب دارفور' },
+            'الجنينة': { lat: 13.4500, lng: 22.4500, state: 'غرب دارفور' },
+            'زالنجي': { lat: 12.9000, lng: 23.4667, state: 'وسط دارفور' },
+            'الضعين': { lat: 11.4500, lng: 26.1333, state: 'شرق دارفور' }
         };
 
-        // دالة Haversine لحساب المسافة [^2^]
+        const citiesByState = {
+            'الخرطوم': ['الخرطوم', 'أم درمان', 'بحري'],
+            'الجزيرة': ['ود مدني', 'الحصاحيصا', 'المناقل'],
+            'البحر الأحمر': ['بورتسودان', 'سواكن', 'طوكر'],
+            'كسلا': ['كسلا', 'حلفا الجديدة', 'أروما'],
+            'القضارف': ['القضارف', 'القلابات', 'الفو'],
+            'سنار': ['سنار', 'الدالي والمزموم', 'ود النيل'],
+            'النيل الأبيض': ['ربك', 'كوستي', 'الدويم'],
+            'النيل الأزرق': ['الدمازين', 'الروصيرص', 'الكرمك'],
+            'الشمالية': ['دنقلا', 'عطبرة', 'كريمة'],
+            'نهر النيل': ['الدامر', 'شندي', 'عطبرة'],
+            'شمال كردفان': ['الأبيض', 'أم روابة', 'الرهد'],
+            'جنوب كردفان': ['كادقلي', 'أبو جبيهة', 'تلودي'],
+            'غرب كردفان': ['الفولة', 'النهود', 'المجلد'],
+            'شمال دارفور': ['الفاشر', 'كبكابية', 'مليط'],
+            'جنوب دارفور': ['نيالا', 'الضعين', 'برام'],
+            'غرب دارفور': ['الجنينة', 'كرينك', 'كلبس'],
+            'وسط دارفور': ['زالنجي', 'ودعة', 'أم دخن'],
+            'شرق دارفور': ['الضعين', 'عديلة', 'أبوكارنكا']
+        };
+
+        // دالة حساب المسافة باستخدام Haversine Formula [^2^]
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371; // نصف قطر الأرض بالكيلومتر
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -459,318 +387,220 @@
             return R * c;
         }
 
-        // جلب الموقع
-        window.getUserLocation = function() {
+        // تحديد أقرب مدينة من موقع المستخدم
+        function findNearestCity(userLat, userLng) {
+            let nearestCity = null;
+            let minDistance = Infinity;
+
+            for (const [cityName, coords] of Object.entries(cityCoordinates)) {
+                const distance = calculateDistance(userLat, userLng, coords.lat, coords.lng);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestCity = { name: cityName, state: coords.state, distance: distance };
+                }
+            }
+
+            return nearestCity;
+        }
+
+        // كشف الموقع
+        window.detectLocation = function() {
             if (!navigator.geolocation) {
                 alert('المتصفح لا يدعم خدمة الموقع الجغرافي');
                 return;
             }
 
-            locationBtn.classList.add('loading');
-            locationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تحديد الموقع...';
+            locationBtn.disabled = true;
+            locationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديد...';
 
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    userLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
                     
-                    // تحديد أقرب ولاية/مدينة (تقريبي)
-                    determineNearestCity(userLocation.lat, userLocation.lng);
+                    const nearest = findNearestCity(userLat, userLng);
                     
-                    locationBtn.classList.remove('loading');
-                    locationBtn.innerHTML = '<i class="fas fa-check"></i> تم تحديد الموقع';
-                    locationBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
-                    
-                    // تفعيل فلتر الأقرب
-                    nearbyFilter.click();
-                    filterAndRenderEmployees();
+                    if (nearest) {
+                        // تحديث الفلاتر
+                        stateFilter.value = nearest.state;
+                        updateCitiesList();
+                        
+                        setTimeout(() => {
+                            cityFilter.value = nearest.name;
+                            filterAndRenderEmployees();
+                            
+                            // تحديث الزر
+                            locationBtn.innerHTML = `<i class="fas fa-check"></i> ${nearest.name}`;
+                            locationBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                            
+                            // رسالة للمستخدم
+                            alert(`تم تحديد موقعك: ${nearest.name}، ${nearest.state}\\nالمسافة التقريبية: ${nearest.distance.toFixed(1)} كم`);
+                        }, 100);
+                    }
                 },
                 (error) => {
-                    console.error('خطأ في تحديد الموقع:', error);
+                    console.error('خطأ GPS:', error);
                     alert('تعذر تحديد الموقع. يرجى اختيار الولاية والمدينة يدوياً.');
-                    locationBtn.classList.remove('loading');
+                    locationBtn.disabled = false;
                     locationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> الأقرب لي';
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         };
 
-        // تحديد أقرب مدينة (تقريبي)
-        function determineNearestCity(lat, lng) {
-            // إحداثيات تقريبية للمدن الرئيسية
-            const cityCoords = {
-                'الخرطوم': { lat: 15.5007, lng: 32.5599 },
-                'أم درمان': { lat: 15.6475, lng: 32.4807 },
-                'بحري': { lat: 15.6340, lng: 32.5326 },
-                'بورتسودان': { lat: 19.6167, lng: 37.2167 },
-                'ود مدني': { lat: 14.4000, lng: 33.5200 }
-            };
-
-            let nearestCity = 'الخرطوم';
-            let minDistance = Infinity;
-
-            for (const [city, coords] of Object.entries(cityCoords)) {
-                const dist = calculateDistance(lat, lng, coords.lat, coords.lng);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    nearestCity = city;
-                }
-            }
-
-            // تحديث الفلاتر
-            for (const [state, cities] of Object.entries(citiesByState)) {
-                if (cities.includes(nearestCity)) {
-                    stateFilter.value = state;
-                    updateCitiesList();
-                    setTimeout(() => {
-                        cityFilter.value = nearestCity;
-                    }, 100);
-                    break;
-                }
-            }
-        }
-
-        // جلب البيانات
-        async function fetchData() {
+        async function fetchEmployees() {
+            loadingIndicator.classList.remove('hidden');
             try {
-                // جلب الموظفين
-                const employeesQuery = query(collection(db, "employees"), orderBy("timestamp", "desc"));
-                const employeesSnapshot = await getDocs(employeesQuery);
-                allEmployees = employeesSnapshot.docs.map(doc => ({ 
+                const querySnapshot = await getDocs(collection(db, "employees"));
+                allEmployees = querySnapshot.docs.map(doc => ({ 
                     id: doc.id, 
                     ...doc.data(),
                     // بيانات افتراضية للتقييم إذا لم تكن موجودة
                     averageRating: doc.data().averageRating || (Math.random() * 2 + 3).toFixed(1),
-                    totalReviews: doc.data().totalReviews || Math.floor(Math.random() * 50) + 5,
-                    coordinates: doc.data().coordinates || null
+                    totalReviews: doc.data().totalReviews || Math.floor(Math.random() * 50) + 5
                 }));
+                allEmployees.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)); 
 
-                // جلب التقييمات
-                const ratingsSnapshot = await getDocs(collection(db, "ratings"));
-                allRatings = ratingsSnapshot.docs.map(doc => doc.data());
-
-                // تحديث إحصائيات التقييمات
-                updateEmployeesRatings();
+                const urlParams = new URLSearchParams(window.location.search);
+                const searchParam = urlParams.get('search');
+                if (searchParam) {
+                    searchInput.value = decodeURIComponent(searchParam);
+                }
 
                 filterAndRenderEmployees();
             } catch (error) {
-                console.error("خطأ في جلب البيانات:", error);
-                employeesList.innerHTML = `
-                    <div class="col-span-full text-center py-20 text-red-500">
-                        <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
-                        <p>حدث خطأ أثناء تحميل البيانات</p>
-                    </div>
-                `;
+                console.error("خطأ في جلب الموظفين:", error);
+                employeesList.innerHTML = '<div class="text-center text-red-500 p-8">حدث خطأ أثناء تحميل بيانات الموظفين.</div>';
+            } finally {
+                loadingIndicator.classList.add('hidden');
             }
         }
 
-        // تحديث تقييمات الموظفين
-        function updateEmployeesRatings() {
-            allEmployees.forEach(emp => {
-                const empRatings = allRatings.filter(r => r.reviewedId === emp.id);
-                if (empRatings.length > 0) {
-                    const avg = empRatings.reduce((sum, r) => sum + (r.overall || 0), 0) / empRatings.length;
-                    emp.averageRating = avg.toFixed(1);
-                    emp.totalReviews = empRatings.length;
-                }
-            });
-        }
+        function renderEmployees(employees) {
+            employeesList.innerHTML = '';
+            if (employees.length === 0) {
+                noEmployeesFound.classList.remove('hidden');
+            } else {
+                noEmployeesFound.classList.add('hidden');
+                employees.forEach(employee => {
+                    const skillsHtml = Array.isArray(employee.skills) && employee.skills.length > 0
+                        ? employee.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+                        : '';
+                    const statusClass = employee.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
 
-        // حساب درجة القرب
-        function calculateProximityScore(employee) {
-            if (!userLocation) return -1;
-            
-            const empState = employee.contact?.location?.state;
-            const empCity = employee.contact?.location?.city;
-            const empCoords = employee.coordinates;
+                    const employeeCity = employee.contact?.location?.city || 'غير محدد';
+                    const employeeState = employee.contact?.location?.state || 'غير محدد';
+                    const locationText = `${employeeCity}، ${employeeState}`;
 
-            // إذا كان لدينا إحداثيات دقيقة
-            if (empCoords && empCoords.lat && empCoords.lng) {
-                const distance = calculateDistance(
-                    userLocation.lat, userLocation.lng,
-                    empCoords.lat, empCoords.lng
-                );
-                return { score: 1000 - distance, distance: distance.toFixed(1) };
-            }
+                    const profilePhotoURL = employee.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg';
 
-            // إذا نفس المدينة
-            const userCity = cityFilter.value;
-            if (userCity && empCity === userCity) {
-                return { score: 500, label: 'نفس المدينة' };
-            }
+                    const previousWorksHtml = Array.isArray(employee.previousWorksUrls) && employee.previousWorksUrls.length > 0
+                        ? `
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-sm mb-2">أعمال سابقة:</h4>
+                                <div class="previous-works-gallery">
+                                    ${employee.previousWorksUrls.map((url, index) => `
+                                        <img src="${url}" alt="صورة عمل سابق" onclick="openModal('${employee.id}', ${index}, 'works')" loading="lazy">
+                                    `).join('')}
+                                </div>
+                            </div>
+                          `
+                        : '';
 
-            // إذا نفس الولاية
-            const userState = stateFilter.value;
-            if (userState && empState === userState) {
-                return { score: 100, label: 'نفس الولاية' };
-            }
+                    // نظام التقييمات - إضافة بسيطة
+                    const rating = parseFloat(employee.averageRating) || 0;
+                    const starsHtml = Array(5).fill(0).map((_, i) => 
+                        `<i class="fas fa-star ${i < Math.floor(rating) ? '' : 'text-gray-300'}"></i>`
+                    ).join('');
 
-            return { score: 0, label: 'بعيد' };
-        }
+                    const employeeCard = document.createElement('div');
+                    employeeCard.className = 'bg-white rounded-xl shadow-sm employee-card overflow-hidden p-6';
 
-        // تصيير البطاقة
-        function renderEmployeeCard(employee) {
-            const skillsHtml = Array.isArray(employee.skills) && employee.skills.length > 0
-                ? employee.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('') +
-                  (employee.skills.length > 3 ? `<span class="skill-tag">+${employee.skills.length - 3}</span>` : '')
-                : '<span class="text-gray-400 text-sm">لا توجد مهارات</span>';
-
-            const statusClass = employee.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
-            const statusText = employee.jobStatus === 'متاح للعمل' ? 'متاح للعمل' : 'غير متاح';
-
-            const employeeCity = employee.contact?.location?.city || 'غير محدد';
-            const employeeState = employee.contact?.location?.state || 'غير محدد';
-
-            const profilePhotoURL = employee.profileImageUrl || 'https://via.placeholder.com/150';
-
-            const previousWorksHtml = Array.isArray(employee.previousWorksUrls) && employee.previousWorksUrls.length > 0
-                ? `<div class="previous-works-gallery mt-3">
-                    ${employee.previousWorksUrls.slice(0, 4).map((url, index) => `
-                        <img src="${url}" alt="عمل سابق" onclick="openModal('${employee.id}', ${index}, 'works')" loading="lazy">
-                    `).join('')}
-                   </div>`
-                : '';
-
-            // نظام التقييمات
-            const rating = parseFloat(employee.averageRating) || 0;
-            const starsHtml = Array(5).fill(0).map((_, i) => 
-                `<i class="fas fa-star ${i < Math.floor(rating) ? '' : 'text-gray-300'}"></i>`
-            ).join('');
-
-            // شارة القرب
-            let proximityHtml = '';
-            if (userLocation) {
-                const prox = calculateProximityScore(employee);
-                if (prox.score > 0) {
-                    const proxClass = prox.distance ? 'proximity-same-city' : 
-                                     (prox.label === 'نفس المدينة' ? 'proximity-same-city' : 
-                                      (prox.label === 'نفس الولاية' ? 'proximity-same-state' : 'proximity-far'));
-                    const proxText = prox.distance ? `${prox.distance} كم` : prox.label;
-                    proximityHtml = `<span class="proximity-badge ${proxClass}"><i class="fas fa-map-marker-alt"></i> ${proxText}</span>`;
-                }
-            }
-
-            return `
-                <div class="employee-card">
-                    <div class="p-6">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <img src="${profilePhotoURL}" alt="${employee.name}" 
-                                     class="w-16 h-16 rounded-full object-cover border-2 border-blue-100 cursor-pointer"
-                                     onclick="openModal('${employee.id}', 0, 'profile')">
+                    employeeCard.innerHTML = `
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between">
+                            <div class="flex items-start space-x-4 rtl:space-x-reverse mb-4 md:mb-0">
+                                <img src="${profilePhotoURL}" alt="صورة الموظف" class="w-14 h-14 rounded-full object-cover cursor-pointer" onclick="openModal('${employee.id}', 0, 'profile')" loading="lazy">
                                 <div>
-                                    <h3 class="font-bold text-lg text-gray-800">${employee.name || 'موظف'}</h3>
-                                    <p class="text-blue-600 text-sm font-medium">${employee.headline || 'مبدع مستقل'}</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span class="${statusClass} text-xs px-2 py-1 rounded-full">${statusText}</span>
-                                        ${proximityHtml}
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="font-bold text-lg">${employee.name || 'موظف غير معروف'}</h3>
+                                        <div class="rating-badge">
+                                            <i class="fas fa-star"></i>
+                                            <span>${rating.toFixed(1)}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mt-1">${employee.headline || 'بدون عنوان وظيفي'}</p>
+                                    <div class="flex items-center text-gray-500 text-sm mt-2">
+                                        <i class="fas fa-map-marker-alt ml-1"></i>
+                                        <span>${locationText}</span>
+                                        <span class="mx-2">•</span>
+                                        <span>الخبرة: ${employee.experience || 'غير محدد'}</span>
+                                    </div>
+                                    <div class="rating-stars mt-1 text-xs">
+                                        ${starsHtml}
+                                        <span class="text-gray-400 mr-1">(${employee.totalReviews || 0})</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="text-left">
-                                <div class="rating-badge">
-                                    <i class="fas fa-star"></i>
-                                    <span>${rating.toFixed(1)}</span>
+                            <div class="flex flex-col items-end">
+                                <span class="px-3 py-1 rounded-full ${statusClass} text-xs font-semibold mb-2">${employee.jobStatus || 'الحالة غير محددة'}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-gray-700 mb-4">${employee.bio?.substring(0, 150) || 'لا توجد نبذة شخصية'}...</p>
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-sm mb-2">المهارات:</h4>
+                                <div class="flex flex-wrap">${skillsHtml || 'لا توجد مهارات مسجلة'}</div>
+                            </div>
+                            ${previousWorksHtml}
+                            <div class="flex flex-wrap items-center justify-between">
+                                <div class="flex items-center text-gray-500 text-sm">
+                                    <i class="fas fa-clock ml-1"></i>
+                                    <span>${getTimeElapsed(employee.timestamp)}</span>
                                 </div>
-                                <div class="text-xs text-gray-500 mt-1">${employee.totalReviews || 0} تقييم</div>
+                                <div class="flex space-x-3 rtl:space-x-reverse">
+                                    <a href="chat.html?employeeId=${employee.id}&employeeName=${encodeURIComponent(employee.name)}&employeePhoto=${encodeURIComponent(employee.profileImageUrl)}"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                                        <i class="fas fa-envelope ml-1"></i> تواصل
+                                    </a>
+                                    <button onclick="window.hireEmployee('${employee.id}')"
+                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                                        <i class="fas fa-user-plus ml-1"></i> توظيف
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="mb-3">
-                            <div class="rating-stars mb-1">${starsHtml}</div>
-                        </div>
-
-                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">${employee.bio?.substring(0, 120) || 'لا توجد نبذة شخصية'}...</p>
-
-                        <div class="flex flex-wrap gap-1 mb-3">
-                            ${skillsHtml}
-                        </div>
-
-                        ${previousWorksHtml}
-
-                        <div class="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">
-                            <div class="flex items-center gap-4 text-sm text-gray-500">
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-map-marker-alt text-blue-500"></i>
-                                    ${employeeCity}
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-briefcase text-blue-500"></i>
-                                    ${employee.experience || 'غير محدد'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 mt-4">
-                            <a href="chat.html?employeeId=${employee.id}&employeeName=${encodeURIComponent(employee.name)}&employeePhoto=${encodeURIComponent(employee.profileImageUrl)}"
-                               class="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition font-medium">
-                                <i class="fas fa-comment-dots ml-1"></i> تواصل
-                            </a>
-                            <button onclick="hireEmployee('${employee.id}')"
-                                    class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium">
-                                <i class="fas fa-user-plus ml-1"></i> توظيف
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // التصيير الرئيسي
-        function renderEmployees(employees) {
-            if (employees.length === 0) {
-                employeesList.innerHTML = '';
-                noEmployeesFound.classList.remove('hidden');
-                resultsCount.textContent = '0 نتيجة';
-                return;
+                    `;
+                    employeesList.appendChild(employeeCard);
+                });
             }
-
-            noEmployeesFound.classList.add('hidden');
-            employeesList.innerHTML = employees.map(emp => renderEmployeeCard(emp)).join('');
-            resultsCount.textContent = `${employees.length} موظف`;
         }
 
-        // الفلترة والترتيب
         function filterAndRenderEmployees() {
             const searchTerm = searchInput.value.toLowerCase();
             const selectedState = stateFilter.value;
             const selectedCity = cityFilter.value;
-            const selectedSkill = skillFilter.value;
 
-            let filtered = allEmployees.filter(employee => {
-                const searchMatch = !searchTerm || 
-                    `${employee.name} ${employee.headline} ${employee.bio} ${employee.skills?.join(' ')}`.toLowerCase().includes(searchTerm);
-                
-                const stateMatch = !selectedState || employee.contact?.location?.state === selectedState;
-                const cityMatch = !selectedCity || employee.contact?.location?.city === selectedCity;
-                const skillMatch = !selectedSkill || employee.skills?.some(s => s.includes(selectedSkill));
+            const filteredEmployees = allEmployees.filter(employee => {
+                const searchTerms = searchTerm.split(' ');
+                const employeeName = (employee.name || '').toLowerCase();
+                const employeeCity = employee.contact?.location?.city || '';
+                const employeeState = employee.contact?.location?.state || '';
 
-                // فلتر التوفر
-                if (activeFilter === 'available' && employee.jobStatus !== 'متاح للعمل') return false;
-                
-                // فلتر الأعلى تقييماً
-                if (activeFilter === 'top-rated' && parseFloat(employee.averageRating) < 4.0) return false;
+                const matchesSearch = searchTerms.every(term => {
+                    const employeeText = `${employee.name || ''} ${employee.headline || ''} ${employeeState || ''} ${employeeCity || ''} ${employee.experience || ''} ${employee.skills?.join(' ') || ''}`.toLowerCase();
+                    if (employeeText.includes(term) || employeeName.includes(term)) return true;
+                    return false;
+                });
 
-                return searchMatch && stateMatch && cityMatch && skillMatch;
+                const matchesState = selectedState === '' || (employeeState === selectedState);
+                const matchesCity = selectedCity === '' || (employeeCity === selectedCity);
+
+                return matchesSearch && matchesState && matchesCity;
             });
 
-            // ترتيب حسب القرب إذا كان مفعلاً
-            if (activeFilter === 'nearby' && userLocation) {
-                filtered.sort((a, b) => {
-                    const scoreA = calculateProximityScore(a).score;
-                    const scoreB = calculateProximityScore(b).score;
-                    return scoreB - scoreA;
-                });
-            } else if (activeFilter === 'top-rated') {
-                filtered.sort((a, b) => parseFloat(b.averageRating) - parseFloat(a.averageRating));
-            }
-
-            renderEmployees(filtered);
+            renderEmployees(filteredEmployees);
         }
 
-        // تحديث قائمة المدن
         function updateCitiesList() {
             const selectedState = stateFilter.value;
             cityFilter.innerHTML = '<option value="">جميع المدن</option>';
@@ -787,36 +617,33 @@
             }
         }
 
-        // فلترات سريعة
-        document.querySelectorAll('.filter-chip').forEach(chip => {
-            chip.addEventListener('click', function() {
-                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                activeFilter = this.dataset.filter;
-                filterAndRenderEmployees();
-            });
-        });
+        function getTimeElapsed(timestamp) {
+            if (!timestamp) return 'غير محدد';
+            const now = new Date();
+            const employeeDate = new Date(timestamp.seconds * 1000);
+            const diffInSeconds = Math.floor((now - employeeDate) / 1000);
+            if (diffInSeconds < 60) return 'الآن';
+            const minutes = Math.floor(diffInSeconds / 60);
+            if (minutes < 60) return `منذ ${minutes} دقيقة`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `منذ ${hours} ساعة`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `منذ ${days} يوم`;
+            const weeks = Math.floor(days / 7);
+            if (weeks < 4) return `منذ ${weeks} أسبوع`;
+            const months = Math.floor(days / 30);
+            if (months < 12) return `منذ ${months} شهر`;
+            const years = Math.floor(days / 365);
+            return `منذ ${years} سنة`;
+        }
 
-        // الأحداث
-        searchInput.addEventListener('input', filterAndRenderEmployees);
-        stateFilter.addEventListener('change', () => {
-            updateCitiesList();
-            filterAndRenderEmployees();
-        });
-        cityFilter.addEventListener('change', filterAndRenderEmployees);
-        skillFilter.addEventListener('change', filterAndRenderEmployees);
-
-        // توظيف
         window.hireEmployee = async function(employeeId) {
             const user = auth.currentUser;
             if (!user) {
                 alert("يجب عليك تسجيل الدخول لتوظيف الموظفين.");
-                window.location.href = 'login.html';
                 return;
             }
-            
             try {
-                const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
                 await addDoc(collection(db, "hiringRequests"), {
                     employerId: user.uid,
                     employeeId: employeeId,
@@ -825,52 +652,62 @@
                 });
                 alert("تم إرسال طلب التوظيف بنجاح! سيتم إشعار الموظف.");
             } catch (error) {
-                console.error("خطأ في التوظيف:", error);
-                alert("حدث خطأ أثناء إرسال الطلب.");
+                console.error("خطأ في إرسال طلب التوظيف:", error);
+                alert("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.");
             }
         };
 
-        // المودال
-        window.openModal = function(employeeId, index, galleryType) {
+        function openModal(employeeId, index, galleryType) {
             const employee = allEmployees.find(emp => emp.id === employeeId);
             if (!employee) return;
-
             let images = [];
             if (galleryType === 'profile') {
-                images.push(employee.profileImageUrl || 'https://via.placeholder.com/400');
+                images.push(employee.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg');
             } else if (galleryType === 'works') {
-                images = employee.previousWorksUrls || [];
+                images = employee.previousWorksUrls;
+            } else {
+                return;
             }
-
-            if (images.length === 0) return;
-
+            if (!images || images.length === 0) return;
             const swiperWrapper = document.querySelector('.swiper-wrapper');
-            swiperWrapper.innerHTML = images.map(url => `
-                <div class="swiper-slide">
-                    <img src="${url}" alt="صورة مكبرة" loading="lazy">
-                </div>
-            `).join('');
-
-            if (swiperInstance) swiperInstance.destroy();
-            
+            swiperWrapper.innerHTML = '';
+            images.forEach(url => {
+                const slide = document.createElement('div');
+                slide.className = 'swiper-slide';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'صورة مكبرة';
+                img.loading = "lazy";
+                slide.appendChild(img);
+                swiperWrapper.appendChild(slide);
+            });
+            if (swiperInstance) {
+                swiperInstance.destroy(true, true);
+            }
             swiperInstance = new Swiper(".mySwiper", {
-                loop: images.length > 1,
+                loop: false,
                 initialSlide: index,
                 keyboard: { enabled: true },
             });
-
             imageModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-        };
+            history.pushState({ modalOpen: true }, '');
+        }
 
-        window.closeModal = function() {
+        function closeModal() {
             if (swiperInstance) {
-                swiperInstance.destroy();
+                swiperInstance.destroy(true, true);
                 swiperInstance = null;
             }
             imageModal.style.display = "none";
             document.body.style.overflow = '';
-        };
+        }
+
+        window.addEventListener('popstate', (event) => {
+            if (imageModal.style.display === 'flex') {
+                closeModal();
+            }
+        });
 
         // القائمة الجانبية
         const menuButton = document.getElementById('mobile-menu-button');
@@ -880,20 +717,16 @@
         menuButton.addEventListener('click', () => mobileMenu.classList.add('open'));
         closeButton.addEventListener('click', () => mobileMenu.classList.remove('open'));
 
-        // إغلاق المودال بالخارجية
-        imageModal.addEventListener('click', (e) => {
-            if (e.target === imageModal) closeModal();
+        document.addEventListener('DOMContentLoaded', fetchEmployees);
+        searchInput.addEventListener('input', filterAndRenderEmployees);
+        stateFilter.addEventListener('change', () => {
+            updateCitiesList();
+            filterAndRenderEmployees();
         });
+        cityFilter.addEventListener('change', filterAndRenderEmployees);
 
-        // بدء التحميل
-        fetchData();
-
-        // فحص URL params للبحث
-        const urlParams = new URLSearchParams(window.location.search);
-        const searchParam = urlParams.get('search');
-        if (searchParam) {
-            searchInput.value = decodeURIComponent(searchParam);
-        }
+        window.openModal = openModal;
+        window.closeModal = closeModal;
     </script>
 </body>
 </html>
