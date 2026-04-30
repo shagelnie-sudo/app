@@ -723,9 +723,11 @@
             }
         }
 
-        // Validation Functions
+        // Validation Functions - FIXED: Changed from /\\s+/ to /\s+/ for proper whitespace handling
         function validateName(name) {
-            const parts = name.trim().split(/\\s+/);
+            // استخدام /\s+/ لمطابقة أي مسافة بيضاء (مسافة، تاب، سطر جديد)
+            // أو يمكن استخدام name.trim().split(' ').filter(part => part.length > 0)
+            const parts = name.trim().split(/\s+/).filter(part => part.length > 0);
             return parts.length >= 3 && parts.length <= 4;
         }
 
@@ -896,8 +898,12 @@
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
                 
+                // DEBUG: إظهار معلومات التصحيح للمساعدة في التشخيص
+                const nameParts = name.trim().split(/\s+/).filter(p => p.length > 0);
+                console.log('Name parts:', nameParts, 'Count:', nameParts.length);
+                
                 if (!validateName(name)) {
-                    showMessage('message', 'الاسم يجب أن يكون ثلاثياً أو رباعياً.', 'error');
+                    showMessage('message', 'الاسم يجب أن يكون ثلاثياً أو رباعياً (مثال: أحمد محمد عبد الله). لديك ' + nameParts.length + ' جزء/أجزاء.', 'error');
                     return;
                 }
                 
