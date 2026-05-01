@@ -266,6 +266,79 @@
             font-size: 0.875rem;
             margin-bottom: 1rem;
         }
+
+        /* تنسيقات دائرة المستخدم */
+        .user-avatar-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .user-avatar-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+        
+        .user-avatar-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            left: 0;
+            width: 14rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem 0;
+            z-index: 50;
+            display: none;
+        }
+        
+        .user-dropdown.show {
+            display: block;
+            animation: dropdownFade 0.2s ease;
+        }
+        
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-dropdown-item {
+            display: block;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            color: #374151;
+            transition: all 0.15s ease;
+        }
+        
+        .user-dropdown-item:hover {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+        
+        .user-dropdown-divider {
+            border-top: 1px solid #f3f4f6;
+            margin: 0.25rem 0;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -281,9 +354,34 @@
                     <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
                 <a href="login.html" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium">دخول</a>
-                <button id="mobile-menu-button" class="md:hidden text-gray-600"><i class="fas fa-bars text-2xl"></i></button>
+                
+                <!-- دائرة المستخدم بجانب الهامبرغر -->
+                <div class="relative" id="user-menu-wrapper">
+                    <button id="user-avatar-btn" class="user-avatar-btn" title="حسابي">
+                        <span id="user-initial">ش</span>
+                    </button>
+                    
+                    <div id="user-dropdown" class="user-dropdown">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-bold text-gray-800" id="dropdown-username">زائر</p>
+                            <p class="text-xs text-gray-500 mt-0.5" id="dropdown-email">تسجيل الدخول للمتابعة</p>
+                        </div>
+                        <a href="login.html" class="user-dropdown-item">
+                            <i class="fas fa-sign-in-alt ml-2 text-gray-400"></i> تسجيل الدخول
+                        </a>
+                        <a href="register.html" class="user-dropdown-item">
+                            <i class="fas fa-user-plus ml-2 text-gray-400"></i> إنشاء حساب
+                        </a>
+                        <div class="user-dropdown-divider hidden" id="logout-divider"></div>
+                        <button class="user-dropdown-item w-full text-right hidden text-red-600 hover:text-red-700 hover:bg-red-50" id="logout-btn">
+                            <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                        </button>
+                    </div>
+                </div>
+                
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 p-1"><i class="fas fa-bars text-2xl"></i></button>
             </div>
         </nav>
 
@@ -574,6 +672,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
@@ -586,9 +685,10 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
         const container = document.getElementById('home-employees-container');
 
-        // كود تشغيل القائمة الجانبية
+        // ==================== كود القائمة الجانبية ====================
         const menuButton = document.getElementById('mobile-menu-button');
         const closeButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -599,6 +699,66 @@
 
         menuButton.addEventListener('click', toggleMenu);
         closeButton.addEventListener('click', toggleMenu);
+
+        // ==================== كود دائرة المستخدم ====================
+        const userAvatarBtn = document.getElementById('user-avatar-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        const userInitial = document.getElementById('user-initial');
+        const dropdownUsername = document.getElementById('dropdown-username');
+        const dropdownEmail = document.getElementById('dropdown-email');
+        const logoutDivider = document.getElementById('logout-divider');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // تبديل ظهور القائمة المنسدلة
+        userAvatarBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+        });
+
+        // إغلاق القائمة عند النقر خارجها
+        document.addEventListener('click', (e) => {
+            if (!userAvatarBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+
+        // تسجيل الخروج
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                userDropdown.classList.remove('show');
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        });
+
+        // مراقبة حالة تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // المستخدم مسجل دخوله
+                const displayName = user.displayName || user.email.split('@')[0];
+                const firstLetter = displayName.charAt(0).toUpperCase();
+                
+                if (user.photoURL) {
+                    userAvatarBtn.innerHTML = `<img src="${user.photoURL}" alt="${displayName}">`;
+                } else {
+                    userAvatarBtn.innerHTML = `<span id="user-initial">${firstLetter}</span>`;
+                }
+                
+                dropdownUsername.textContent = displayName;
+                dropdownEmail.textContent = user.email;
+                logoutDivider.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                // المستخدم زائر (غير مسجل)
+                userAvatarBtn.innerHTML = `<span id="user-initial">ش</span>`;
+                dropdownUsername.textContent = 'زائر';
+                dropdownEmail.textContent = 'تسجيل الدخول للمتابعة';
+                logoutDivider.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+        });
+        // ==================== نهاية كود دائرة المستخدم ====================
 
         async function fetchLatestEmployees() {
             try {
