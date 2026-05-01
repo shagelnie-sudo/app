@@ -354,7 +354,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set, update, query, orderByChild, equalTo, onChildAdded, onChildChanged, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
@@ -382,7 +382,6 @@
         const chatPartnerStatus = document.getElementById('chatPartnerStatus');
         const viewProfileLink = document.getElementById('viewProfileLink');
         const inputArea = document.getElementById('inputArea');
-        const typingIndicator = document.getElementById('typingIndicator');
         const conversationsSidebar = document.getElementById('conversationsSidebar');
         const chatWindow = document.getElementById('chatWindow');
         const backToList = document.getElementById('backToList');
@@ -397,8 +396,7 @@
         let currentChatId = null;
         let unsubscribeMessages = null;
         let unsubscribeConversations = null;
-        let allMessages = {};
-        let conversationsData = {};
+        let userDataCache = {};
 
         // معالجة المصادقة
         onAuthStateChanged(auth, async (user) => {
@@ -407,15 +405,19 @@
                 userInfo.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
 
-                // جلب معلومات المستخدم من Realtime Database
+                // جلب معلومات المستخدم
                 const userRef = ref(db, 'users/' + user.uid);
-                const userSnapshot = await get(userRef);
-
-                if (userSnapshot.exists()) {
-                    const userData = userSnapshot.val();
-                    userName.textContent = userData.name || user.displayName || 'مستخدم';
-                    userAvatar.src = userData.profileImageUrl || user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
-                } else {
+                try {
+                    const userSnapshot = await get(userRef);
+                    if (userSnapshot.exists()) {
+                        const userData = userSnapshot.val();
+                        userName.textContent = userData.name || user.displayName || 'مستخدم';
+                        userAvatar.src = userData.profileImageUrl || user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
+                    } else {
+                        userName.textContent = user.displayName || 'مستخدم';
+                        userAvatar.src = user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
+                    }
+                } catch (e) {
                     userName.textContent = user.displayName || 'مستخدم';
                     userAvatar.src = user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
                 }
@@ -439,9 +441,46 @@
             }
         });
 
-        // إنشاء معرف المحادثة من معرفي المستخدمين
+        // إنشاء معرف المحادثة
         function getChatId(uid1, uid2) {
             return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
+        }
+
+        // جلب معلومات المستخدم/موظف
+        async function getUserInfo(userId) {
+            if (userDataCache[userId]) return userDataCache[userId];
+
+            try {
+                // محاولة جلب من employees أولاً
+                const empRef = ref(db, 'employees/' + userId);
+                const empSnap = await get(empRef);
+                if (empSnap.exists()) {
+                    const data = empSnap.val();
+                    const info = {
+                        name: data.name || 'موظف',
+                        photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
+                    };
+                    userDataCache[userId] = info;
+                    return info;
+                }
+
+                // محاولة جلب من users
+                const userRef = ref(db, 'users/' + userId);
+                const userSnap = await get(userRef);
+                if (userSnap.exists()) {
+                    const data = userSnap.val();
+                    const info = {
+                        name: data.name || 'مستخدم',
+                        photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/1.jpg'
+                    };
+                    userDataCache[userId] = info;
+                    return info;
+                }
+            } catch (e) {
+                console.error('خطأ في جلب معلومات المستخدم:', e);
+            }
+
+            return { name: 'مستخدم', photo: 'https://randomuser.me/api/portraits/men/32.jpg' };
         }
 
         // التحقق من معلمات URL
@@ -479,7 +518,7 @@
                 chatWindow.classList.remove('hidden-mobile');
             }
 
-            // إضافة للـ chats_by_user
+            // إنشاء/تحديث chats_by_user للمستخدم الحالي
             const myChatsRef = ref(db, 'chats_by_user/' + currentUser.uid + '/' + partnerId);
             await set(myChatsRef, {
                 partnerId: partnerId,
@@ -493,13 +532,93 @@
             loadMessagesForChat(currentChatId);
         }
 
-        // تحميل قائمة المحادثات من chats_by_user
+        // تحميل قائمة المحادثات من messages مباشرة (الطريقة الأساسية)
         function loadConversations() {
+            if (!currentUser) return;
+
+            // نبحث في جميع messages عن محادثات تشمل المستخدم الحالي
+            const messagesRef = ref(db, 'messages');
+
+            unsubscribeConversations = onValue(messagesRef, async (snapshot) => {
+                if (!snapshot.exists()) {
+                    conversationsList.innerHTML = `
+                        <div class="p-8 text-center text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-3"></i>
+                            <p>لا توجد محادثات بعد</p>
+                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const allChats = snapshot.val();
+                const userConversations = [];
+
+                // البحث عن محادثات المستخدم
+                for (const [chatId, messages] of Object.entries(allChats)) {
+                    if (chatId.includes(currentUser.uid)) {
+                        const partnerId = chatId.replace(currentUser.uid, '').replace('_', '');
+
+                        // تجميع الرسائل وإيجاد الأحدث
+                        const msgArray = [];
+                        for (const [msgId, msgData] of Object.entries(messages)) {
+                            msgArray.push({ id: msgId, ...msgData });
+                        }
+
+                        msgArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                        if (msgArray.length > 0) {
+                            const lastMsg = msgArray[0];
+                            const unreadCount = msgArray.filter(m => m.receiverId === currentUser.uid && !m.read).length;
+
+                            userConversations.push({
+                                chatId,
+                                partnerId,
+                                lastMessage: lastMsg.text || '',
+                                timestamp: lastMsg.timestamp || Date.now(),
+                                lastMessageSender: lastMsg.senderId,
+                                unreadCount
+                            });
+                        }
+                    }
+                }
+
+                // ترتيب حسب آخر رسالة
+                userConversations.sort((a, b) => b.timestamp - a.timestamp);
+
+                if (userConversations.length === 0) {
+                    conversationsList.innerHTML = `
+                        <div class="p-8 text-center text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-3"></i>
+                            <p>لا توجد محادثات بعد</p>
+                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // جلب معلومات الشركاء
+                for (const conv of userConversations) {
+                    const partnerInfo = await getUserInfo(conv.partnerId);
+                    conv.partnerName = partnerInfo.name;
+                    conv.partnerPhoto = partnerInfo.photo;
+                }
+
+                renderConversationsList(userConversations);
+            }, (error) => {
+                console.error('خطأ في تحميل المحادثات:', error);
+                // محاولة تحميل من chats_by_user كبديل
+                loadConversationsFromChatsByUser();
+            });
+        }
+
+        // طريقة بديلة: تحميل من chats_by_user
+        function loadConversationsFromChatsByUser() {
             if (!currentUser) return;
 
             const chatsRef = ref(db, 'chats_by_user/' + currentUser.uid);
 
-            unsubscribeConversations = onValue(chatsRef, (snapshot) => {
+            unsubscribeConversations = onValue(chatsRef, async (snapshot) => {
                 if (!snapshot.exists()) {
                     conversationsList.innerHTML = `
                         <div class="p-8 text-center text-gray-400">
@@ -521,48 +640,51 @@
                     });
                 }
 
-                // ترتيب حسب آخر رسالة
                 chatArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                renderConversationsList(chatArray);
+            });
+        }
 
-                conversationsList.innerHTML = '';
+        // عرض قائمة المحادثات
+        function renderConversationsList(conversations) {
+            conversationsList.innerHTML = '';
 
-                chatArray.forEach(chat => {
-                    const isActive = currentPartnerId === chat.partnerId;
-                    const timeText = formatTime(chat.timestamp);
-                    const lastText = chat.lastMessage || 'بدء محادثة جديدة';
-                    const unreadCount = chat.unreadCount || 0;
+            conversations.forEach(chat => {
+                const isActive = currentPartnerId === chat.partnerId;
+                const timeText = formatTime(chat.timestamp);
+                const lastText = chat.lastMessage || 'بدء محادثة جديدة';
+                const unreadCount = chat.unreadCount || 0;
+                const partnerName = chat.partnerName || 'مستخدم';
+                const partnerPhoto = chat.partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg';
 
-                    const item = document.createElement('div');
-                    item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
-                    item.onclick = () => openConversationWithPartner(chat.partnerId, {
-                        name: chat.partnerName || 'مستخدم',
-                        photo: chat.partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'
-                    });
-
-                    item.innerHTML = `
-                        <div class="relative flex-shrink-0">
-                            <img src="${chat.partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'}" alt="${chat.partnerName || 'مستخدم'}" class="w-12 h-12 rounded-full object-cover">
-                            <span class="offline-status"></span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-semibold text-gray-800 truncate">${chat.partnerName || 'مستخدم'}</h4>
-                                <span class="text-xs text-gray-400 flex-shrink-0">${timeText}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-gray-500 truncate ${unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
-                                    ${chat.lastMessageSender === currentUser.uid ? '<i class="fas fa-check-double text-xs ml-1 text-blue-400"></i>' : ''}
-                                    ${lastText}
-                                </p>
-                                ${unreadCount > 0 ? `<span class="unread-badge flex-shrink-0 mr-2">${unreadCount}</span>` : ''}
-                            </div>
-                        </div>
-                    `;
-
-                    conversationsList.appendChild(item);
+                const item = document.createElement('div');
+                item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
+                item.onclick = () => openConversationWithPartner(chat.partnerId, {
+                    name: partnerName,
+                    photo: partnerPhoto
                 });
-            }, (error) => {
-                console.error('خطأ في تحميل المحادثات:', error);
+
+                item.innerHTML = `
+                    <div class="relative flex-shrink-0">
+                        <img src="${partnerPhoto}" alt="${partnerName}" class="w-12 h-12 rounded-full object-cover">
+                        <span class="offline-status"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-semibold text-gray-800 truncate">${partnerName}</h4>
+                            <span class="text-xs text-gray-400 flex-shrink-0">${timeText}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-500 truncate ${unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
+                                ${chat.lastMessageSender === currentUser.uid ? '<i class="fas fa-check-double text-xs ml-1 text-blue-400"></i>' : ''}
+                                ${lastText}
+                            </p>
+                            ${unreadCount > 0 ? `<span class="unread-badge flex-shrink-0 mr-2">${unreadCount}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                conversationsList.appendChild(item);
             });
         }
 
@@ -581,7 +703,9 @@
             document.querySelectorAll('.conversation-item').forEach(item => {
                 item.classList.remove('active');
             });
-            event?.currentTarget?.classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
 
             if (window.innerWidth < 768) {
                 conversationsSidebar.classList.add('hidden-mobile');
@@ -631,14 +755,36 @@
                     messageArray.push({ id: msgId, ...msgData });
                 }
 
-                // ترتيب حسب التاريخ
                 messageArray.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
                 renderMessages(messageArray);
+
+                // تحديث حالة القراءة للرسائل الواردة
+                markMessagesAsRead(chatId, messageArray);
             }, (error) => {
                 console.error('خطأ في تحميل الرسائل:', error);
                 messagesArea.innerHTML = '<div class="text-center text-red-500 p-8">حدث خطأ في تحميل الرسائل</div>';
             });
+        }
+
+        // تحديث حالة القراءة
+        async function markMessagesAsRead(chatId, messages) {
+            if (!currentUser) return;
+
+            const updates = {};
+            messages.forEach(msg => {
+                if (msg.receiverId === currentUser.uid && !msg.read) {
+                    updates['messages/' + chatId + '/' + msg.id + '/read'] = true;
+                }
+            });
+
+            if (Object.keys(updates).length > 0) {
+                try {
+                    await update(ref(db), updates);
+                } catch (e) {
+                    console.error('خطأ في تحديث القراءة:', e);
+                }
+            }
         }
 
         // عرض الرسائل
@@ -691,6 +837,7 @@
                     text: text,
                     senderId: currentUser.uid,
                     senderName: userName.textContent || 'مستخدم',
+                    receiverId: currentPartnerId,
                     timestamp: Date.now(),
                     read: false
                 };
@@ -716,7 +863,6 @@
                 const partnerChatSnapshot = await get(partnerChatRef);
 
                 if (!partnerChatSnapshot.exists()) {
-                    // إنشاء محادثة جديدة للطرف الآخر
                     await set(partnerChatRef, {
                         partnerId: currentUser.uid,
                         partnerName: userName.textContent || 'مستخدم',
@@ -727,7 +873,6 @@
                         unreadCount: 1
                     });
                 } else {
-                    // تحديث المحادثة الموجودة
                     const currentUnread = partnerChatSnapshot.val().unreadCount || 0;
                     await update(partnerChatRef, {
                         lastMessage: text,
