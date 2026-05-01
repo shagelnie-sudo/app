@@ -240,7 +240,9 @@
             </div>
             <div class="flex items-center gap-4">
                 <div id="userInfo" class="hidden md:flex items-center gap-2">
-                    <img id="userAvatar" src="https://randomuser.me/api/portraits/men/1.jpg" class="w-8 h-8 rounded-full object-cover">
+                    <div id="userAvatarPlaceholder" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                        <i class="fas fa-user"></i>
+                    </div>
                     <span id="userName" class="text-sm font-medium text-gray-700">زائر</span>
                 </div>
                 <a href="login.html" id="loginBtn" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">دخول</a>
@@ -295,7 +297,10 @@
                             <i class="fas fa-arrow-right"></i>
                         </button>
                         <div class="relative">
-                            <img id="chatPartnerAvatar" src="" alt="" class="w-10 h-10 rounded-full object-cover">
+                            <div id="chatPartnerAvatarPlaceholder" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <img id="chatPartnerAvatar" src="" alt="" class="w-10 h-10 rounded-full object-cover hidden">
                             <span id="chatPartnerStatus" class="offline-status"></span>
                         </div>
                         <div>
@@ -378,6 +383,7 @@
         const messageInput = document.getElementById('messageInput');
         const chatPartnerName = document.getElementById('chatPartnerName');
         const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
+        const chatPartnerAvatarPlaceholder = document.getElementById('chatPartnerAvatarPlaceholder');
         const chatPartnerInfo = document.getElementById('chatPartnerInfo');
         const chatPartnerStatus = document.getElementById('chatPartnerStatus');
         const viewProfileLink = document.getElementById('viewProfileLink');
@@ -386,7 +392,6 @@
         const chatWindow = document.getElementById('chatWindow');
         const backToList = document.getElementById('backToList');
         const userInfo = document.getElementById('userInfo');
-        const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
         const loginBtn = document.getElementById('loginBtn');
 
@@ -397,7 +402,14 @@
         let unsubscribeMessages = null;
         let unsubscribeConversations = null;
         let userDataCache = {};
-        let activeListeners = [];
+
+        // دالة لإنشاء avatar placeholder
+        function getAvatarPlaceholder(name) {
+            const initial = name ? name.charAt(0).toUpperCase() : '?';
+            const colors = ['bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-600', 'bg-pink-600', 'bg-teal-600'];
+            const colorIndex = name ? name.charCodeAt(0) % colors.length : 0;
+            return `<div class="w-full h-full rounded-full ${colors[colorIndex]} flex items-center justify-center text-white font-bold text-sm">${initial}</div>`;
+        }
 
         // معالجة المصادقة
         onAuthStateChanged(auth, async (user) => {
@@ -412,14 +424,11 @@
                     if (userSnapshot.exists()) {
                         const userData = userSnapshot.val();
                         userName.textContent = userData.name || user.displayName || 'مستخدم';
-                        userAvatar.src = userData.profileImageUrl || user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
                     } else {
                         userName.textContent = user.displayName || 'مستخدم';
-                        userAvatar.src = user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
                     }
                 } catch (e) {
                     userName.textContent = user.displayName || 'مستخدم';
-                    userAvatar.src = user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
                 }
 
                 loadConversations();
@@ -457,7 +466,7 @@
                     const data = empSnap.val();
                     const info = {
                         name: data.name || 'موظف',
-                        photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
+                        photo: data.profileImageUrl || null
                     };
                     userDataCache[userId] = info;
                     return info;
@@ -469,7 +478,7 @@
                     const data = userSnap.val();
                     const info = {
                         name: data.name || 'مستخدم',
-                        photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/1.jpg'
+                        photo: data.profileImageUrl || null
                     };
                     userDataCache[userId] = info;
                     return info;
@@ -478,7 +487,7 @@
                 console.error('خطأ في جلب معلومات المستخدم:', e);
             }
 
-            return { name: 'مستخدم', photo: 'https://randomuser.me/api/portraits/men/32.jpg' };
+            return { name: 'مستخدم', photo: null };
         }
 
         // التحقق من معلمات URL
@@ -499,12 +508,23 @@
             currentPartnerId = partnerId;
             currentPartnerData = {
                 name: partnerName || 'موظف',
-                photo: partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'
+                photo: partnerPhoto || null
             };
             currentChatId = getChatId(currentUser.uid, partnerId);
 
             chatPartnerName.textContent = currentPartnerData.name;
-            chatPartnerAvatar.src = currentPartnerData.photo;
+
+            // التعامل مع الصورة
+            if (currentPartnerData.photo) {
+                chatPartnerAvatar.src = currentPartnerData.photo;
+                chatPartnerAvatar.classList.remove('hidden');
+                chatPartnerAvatarPlaceholder.classList.add('hidden');
+            } else {
+                chatPartnerAvatarPlaceholder.innerHTML = getAvatarPlaceholder(currentPartnerData.name);
+                chatPartnerAvatarPlaceholder.classList.remove('hidden');
+                chatPartnerAvatar.classList.add('hidden');
+            }
+
             chatPartnerInfo.textContent = 'غير متصل';
             chatPartnerStatus.className = 'offline-status';
             viewProfileLink.href = `employee_listing_page.html?id=${partnerId}`;
@@ -520,7 +540,7 @@
             await set(myChatsRef, {
                 partnerId: partnerId,
                 partnerName: currentPartnerData.name,
-                partnerPhoto: currentPartnerData.photo,
+                partnerPhoto: currentPartnerData.photo || '',
                 lastMessage: '',
                 timestamp: Date.now(),
                 unreadCount: 0
@@ -529,7 +549,7 @@
             loadMessagesForChat(currentChatId);
         }
 
-        // تحميل قائمة المحادثات - الطريقة الصحيحة: من chats_by_user فقط
+        // تحميل قائمة المحادثات من chats_by_user
         function loadConversations() {
             if (!currentUser) return;
 
@@ -583,7 +603,15 @@
                 const lastText = chat.lastMessage || 'بدء محادثة جديدة';
                 const unreadCount = chat.unreadCount || 0;
                 const partnerName = chat.partnerName || 'مستخدم';
-                const partnerPhoto = chat.partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg';
+                const partnerPhoto = chat.partnerPhoto || '';
+
+                // إنشاء avatar HTML
+                let avatarHtml;
+                if (partnerPhoto) {
+                    avatarHtml = `<img src="${partnerPhoto}" alt="${partnerName}" class="w-12 h-12 rounded-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="w-12 h-12 rounded-full bg-gray-300 items-center justify-center text-white hidden">${getAvatarPlaceholder(partnerName)}</div>`;
+                } else {
+                    avatarHtml = `<div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white">${getAvatarPlaceholder(partnerName)}</div>`;
+                }
 
                 const item = document.createElement('div');
                 item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
@@ -594,7 +622,7 @@
 
                 item.innerHTML = `
                     <div class="relative flex-shrink-0">
-                        <img src="${partnerPhoto}" alt="${partnerName}" class="w-12 h-12 rounded-full object-cover">
+                        ${avatarHtml}
                         <span class="offline-status"></span>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -641,7 +669,18 @@
             }
 
             chatPartnerName.textContent = partnerData.name;
-            chatPartnerAvatar.src = partnerData.photo;
+
+            // التعامل مع صورة الشريك
+            if (partnerData.photo) {
+                chatPartnerAvatar.src = partnerData.photo;
+                chatPartnerAvatar.classList.remove('hidden');
+                chatPartnerAvatarPlaceholder.classList.add('hidden');
+            } else {
+                chatPartnerAvatarPlaceholder.innerHTML = getAvatarPlaceholder(partnerData.name);
+                chatPartnerAvatarPlaceholder.classList.remove('hidden');
+                chatPartnerAvatar.classList.add('hidden');
+            }
+
             chatPartnerInfo.textContent = 'غير متصل';
             chatPartnerStatus.className = 'offline-status';
             viewProfileLink.href = `employee_listing_page.html?id=${partnerId}`;
@@ -794,7 +833,7 @@
                     await set(partnerChatRef, {
                         partnerId: currentUser.uid,
                         partnerName: userName.textContent || 'مستخدم',
-                        partnerPhoto: userAvatar.src,
+                        partnerPhoto: '',
                         lastMessage: text,
                         timestamp: Date.now(),
                         lastMessageSender: currentUser.uid,
