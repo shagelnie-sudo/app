@@ -354,34 +354,13 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            doc, 
-            getDoc, 
-            getDocs, 
-            addDoc, 
-            updateDoc,
-            setDoc,
-            query, 
-            where, 
-            orderBy, 
-            onSnapshot,
-            serverTimestamp,
-            Timestamp,
-            limit,
-            or,
-            and
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signInAnonymously 
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, update, query, orderByChild, equalTo, onChildAdded, onChildChanged, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
           authDomain: "shaglni-c64c0.firebaseapp.com",
+          databaseURL: "https://shaglni-c64c0-default-rtdb.firebaseio.com",
           projectId: "shaglni-c64c0",
           storageBucket: "shaglni-c64c0.firebasestorage.app",
           messagingSenderId: "768887356636",
@@ -390,7 +369,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
         const auth = getAuth(app);
 
         const conversationsList = document.getElementById('conversationsList');
@@ -415,10 +394,11 @@
         let currentUser = null;
         let currentPartnerId = null;
         let currentPartnerData = null;
+        let currentChatId = null;
         let unsubscribeMessages = null;
         let unsubscribeConversations = null;
-        let allMessages = [];
-        let conversationsMap = new Map();
+        let allMessages = {};
+        let conversationsData = {};
 
         // معالجة المصادقة
         onAuthStateChanged(auth, async (user) => {
@@ -427,9 +407,12 @@
                 userInfo.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
 
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
+                // جلب معلومات المستخدم من Realtime Database
+                const userRef = ref(db, 'users/' + user.uid);
+                const userSnapshot = await get(userRef);
+
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.val();
                     userName.textContent = userData.name || user.displayName || 'مستخدم';
                     userAvatar.src = userData.profileImageUrl || user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg';
                 } else {
@@ -456,6 +439,11 @@
             }
         });
 
+        // إنشاء معرف المحادثة من معرفي المستخدمين
+        function getChatId(uid1, uid2) {
+            return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
+        }
+
         // التحقق من معلمات URL
         async function checkUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -476,13 +464,14 @@
                 name: partnerName || 'موظف',
                 photo: partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'
             };
+            currentChatId = getChatId(currentUser.uid, partnerId);
 
             // تحديث الواجهة
             chatPartnerName.textContent = currentPartnerData.name;
             chatPartnerAvatar.src = currentPartnerData.photo;
             chatPartnerInfo.textContent = 'غير متصل';
             chatPartnerStatus.className = 'offline-status';
-            viewProfileLink.href = `employee_profile.html?id=${partnerId}`;
+            viewProfileLink.href = `employee_listing_page.html?id=${partnerId}`;
             inputArea.classList.remove('hidden');
 
             if (window.innerWidth < 768) {
@@ -490,203 +479,90 @@
                 chatWindow.classList.remove('hidden-mobile');
             }
 
-            loadMessagesForPartner(partnerId);
+            // إضافة للـ chats_by_user
+            const myChatsRef = ref(db, 'chats_by_user/' + currentUser.uid + '/' + partnerId);
+            await set(myChatsRef, {
+                partnerId: partnerId,
+                partnerName: currentPartnerData.name,
+                partnerPhoto: currentPartnerData.photo,
+                lastMessage: '',
+                timestamp: Date.now(),
+                unreadCount: 0
+            });
+
+            loadMessagesForChat(currentChatId);
         }
 
-        // تحميل المحادثات من مجموعة messages الواحدة
+        // تحميل قائمة المحادثات من chats_by_user
         function loadConversations() {
             if (!currentUser) return;
 
-            // الاستماع لجميع الرسائل التي تشمل المستخدم الحالي
-            const q = query(
-                collection(db, "messages"),
-                or(
-                    where("senderId", "==", currentUser.uid),
-                    where("receiverId", "==", currentUser.uid)
-                ),
-                orderBy("timestamp", "desc")
-            );
+            const chatsRef = ref(db, 'chats_by_user/' + currentUser.uid);
 
-            unsubscribeConversations = onSnapshot(q, (snapshot) => {
-                allMessages = [];
-                snapshot.forEach(doc => {
-                    allMessages.push({ id: doc.id, ...doc.data() });
+            unsubscribeConversations = onValue(chatsRef, (snapshot) => {
+                if (!snapshot.exists()) {
+                    conversationsList.innerHTML = `
+                        <div class="p-8 text-center text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-3"></i>
+                            <p>لا توجد محادثات بعد</p>
+                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const chats = snapshot.val();
+                const chatArray = [];
+
+                for (const [partnerId, chatData] of Object.entries(chats)) {
+                    chatArray.push({
+                        partnerId,
+                        ...chatData
+                    });
+                }
+
+                // ترتيب حسب آخر رسالة
+                chatArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                conversationsList.innerHTML = '';
+
+                chatArray.forEach(chat => {
+                    const isActive = currentPartnerId === chat.partnerId;
+                    const timeText = formatTime(chat.timestamp);
+                    const lastText = chat.lastMessage || 'بدء محادثة جديدة';
+                    const unreadCount = chat.unreadCount || 0;
+
+                    const item = document.createElement('div');
+                    item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
+                    item.onclick = () => openConversationWithPartner(chat.partnerId, {
+                        name: chat.partnerName || 'مستخدم',
+                        photo: chat.partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'
+                    });
+
+                    item.innerHTML = `
+                        <div class="relative flex-shrink-0">
+                            <img src="${chat.partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'}" alt="${chat.partnerName || 'مستخدم'}" class="w-12 h-12 rounded-full object-cover">
+                            <span class="offline-status"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-semibold text-gray-800 truncate">${chat.partnerName || 'مستخدم'}</h4>
+                                <span class="text-xs text-gray-400 flex-shrink-0">${timeText}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-gray-500 truncate ${unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
+                                    ${chat.lastMessageSender === currentUser.uid ? '<i class="fas fa-check-double text-xs ml-1 text-blue-400"></i>' : ''}
+                                    ${lastText}
+                                </p>
+                                ${unreadCount > 0 ? `<span class="unread-badge flex-shrink-0 mr-2">${unreadCount}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    conversationsList.appendChild(item);
                 });
-
-                buildConversationsList();
             }, (error) => {
-                console.error('خطأ في تحميل الرسائل:', error);
-                // محاولة بديلة بدون or
-                loadConversationsFallback();
-            });
-        }
-
-        // طريقة بديلة لتحميل المحادثات
-        async function loadConversationsFallback() {
-            if (!currentUser) return;
-
-            try {
-                // جلب الرسائل المرسلة
-                const sentQuery = query(
-                    collection(db, "messages"),
-                    where("senderId", "==", currentUser.uid),
-                    orderBy("timestamp", "desc")
-                );
-                const sentSnapshot = await getDocs(sentQuery);
-
-                // جلب الرسائل المستلمة
-                const receivedQuery = query(
-                    collection(db, "messages"),
-                    where("receiverId", "==", currentUser.uid),
-                    orderBy("timestamp", "desc")
-                );
-                const receivedSnapshot = await getDocs(receivedQuery);
-
-                allMessages = [];
-                sentSnapshot.forEach(doc => allMessages.push({ id: doc.id, ...doc.data() }));
-                receivedSnapshot.forEach(doc => allMessages.push({ id: doc.id, ...doc.data() }));
-
-                // ترتيب حسب الوقت تنازلياً
-                allMessages.sort((a, b) => {
-                    const timeA = a.timestamp?.seconds || 0;
-                    const timeB = b.timestamp?.seconds || 0;
-                    return timeB - timeA;
-                });
-
-                buildConversationsList();
-            } catch (error) {
-                console.error('خطأ في الطريقة البديلة:', error);
-                conversationsList.innerHTML = `
-                    <div class="p-8 text-center text-gray-400">
-                        <i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i>
-                        <p class="text-red-500">حدث خطأ في تحميل المحادثات</p>
-                        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">إعادة المحاولة</button>
-                    </div>
-                `;
-            }
-        }
-
-        // بناء قائمة المحادثات من الرسائل
-        async function buildConversationsList() {
-            conversationsMap.clear();
-
-            // تجميع الرسائل حسب الطرف الآخر
-            allMessages.forEach(msg => {
-                const partnerId = msg.senderId === currentUser.uid ? msg.receiverId : msg.senderId;
-
-                if (!conversationsMap.has(partnerId)) {
-                    conversationsMap.set(partnerId, {
-                        partnerId: partnerId,
-                        lastMessage: msg,
-                        messages: [msg],
-                        unreadCount: 0
-                    });
-                } else {
-                    const conv = conversationsMap.get(partnerId);
-                    conv.messages.push(msg);
-                    // تحديث آخر رسالة إذا كانت أحدث
-                    const currentTime = msg.timestamp?.seconds || 0;
-                    const lastTime = conv.lastMessage.timestamp?.seconds || 0;
-                    if (currentTime > lastTime) {
-                        conv.lastMessage = msg;
-                    }
-                }
-
-                // حساب الرسائل غير المقروءة
-                if (msg.receiverId === currentUser.uid && !msg.read) {
-                    const conv = conversationsMap.get(partnerId);
-                    conv.unreadCount++;
-                }
-            });
-
-            if (conversationsMap.size === 0) {
-                conversationsList.innerHTML = `
-                    <div class="p-8 text-center text-gray-400">
-                        <i class="fas fa-inbox text-4xl mb-3"></i>
-                        <p>لا توجد محادثات بعد</p>
-                        <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
-                    </div>
-                `;
-                return;
-            }
-
-            // جلب معلومات الشركاء
-            const partnerIds = Array.from(conversationsMap.keys());
-            const partnerDataMap = new Map();
-
-            for (const pid of partnerIds) {
-                try {
-                    const empDoc = await getDoc(doc(db, 'employees', pid));
-                    if (empDoc.exists()) {
-                        const data = empDoc.data();
-                        partnerDataMap.set(pid, {
-                            name: data.name || 'موظف',
-                            photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
-                        });
-                    } else {
-                        const userDoc = await getDoc(doc(db, 'users', pid));
-                        if (userDoc.exists()) {
-                            const data = userDoc.data();
-                            partnerDataMap.set(pid, {
-                                name: data.name || 'مستخدم',
-                                photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/1.jpg'
-                            });
-                        } else {
-                            partnerDataMap.set(pid, {
-                                name: 'مستخدم',
-                                photo: 'https://randomuser.me/api/portraits/men/32.jpg'
-                            });
-                        }
-                    }
-                } catch (e) {
-                    partnerDataMap.set(pid, {
-                        name: 'مستخدم',
-                        photo: 'https://randomuser.me/api/portraits/men/32.jpg'
-                    });
-                }
-            }
-
-            // ترتيب المحادثات حسب آخر رسالة
-            const sortedConversations = Array.from(conversationsMap.values()).sort((a, b) => {
-                const timeA = a.lastMessage.timestamp?.seconds || 0;
-                const timeB = b.lastMessage.timestamp?.seconds || 0;
-                return timeB - timeA;
-            });
-
-            conversationsList.innerHTML = '';
-
-            sortedConversations.forEach(conv => {
-                const partnerData = partnerDataMap.get(conv.partnerId) || { name: 'مستخدم', photo: 'https://randomuser.me/api/portraits/men/32.jpg' };
-                const isActive = currentPartnerId === conv.partnerId;
-                const timeText = formatTime(conv.lastMessage.timestamp);
-                const lastText = conv.lastMessage.text || '';
-                const isSent = conv.lastMessage.senderId === currentUser.uid;
-
-                const item = document.createElement('div');
-                item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
-                item.onclick = () => openConversationWithPartner(conv.partnerId, partnerData);
-
-                item.innerHTML = `
-                    <div class="relative flex-shrink-0">
-                        <img src="${partnerData.photo}" alt="${partnerData.name}" class="w-12 h-12 rounded-full object-cover">
-                        <span class="offline-status"></span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1">
-                            <h4 class="font-semibold text-gray-800 truncate">${partnerData.name}</h4>
-                            <span class="text-xs text-gray-400 flex-shrink-0">${timeText}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500 truncate ${conv.unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
-                                ${isSent ? '<i class="fas fa-check-double text-xs ml-1 text-blue-400"></i>' : ''}
-                                ${lastText}
-                            </p>
-                            ${conv.unreadCount > 0 ? `<span class="unread-badge flex-shrink-0 mr-2">${conv.unreadCount}</span>` : ''}
-                        </div>
-                    </div>
-                `;
-
-                conversationsList.appendChild(item);
+                console.error('خطأ في تحميل المحادثات:', error);
             });
         }
 
@@ -696,6 +572,7 @@
 
             currentPartnerId = partnerId;
             currentPartnerData = partnerData;
+            currentChatId = getChatId(currentUser.uid, partnerId);
 
             if (unsubscribeMessages) {
                 unsubscribeMessages();
@@ -718,43 +595,46 @@
             viewProfileLink.href = `employee_listing_page.html?id=${partnerId}`;
             inputArea.classList.remove('hidden');
 
-            loadMessagesForPartner(partnerId);
+            // تصفير العداد
+            const myChatRef = ref(db, 'chats_by_user/' + currentUser.uid + '/' + partnerId + '/unreadCount');
+            await set(myChatRef, 0);
+
+            // تحديث lastRead
+            const lastReadRef = ref(db, 'chats_metadata/' + currentChatId + '/lastRead/' + currentUser.uid);
+            await set(lastReadRef, Date.now());
+
+            loadMessagesForChat(currentChatId);
         }
 
-        // تحميل الرسائل لشريك محدد
-        function loadMessagesForPartner(partnerId) {
+        // تحميل الرسائل لمحادثة محددة
+        function loadMessagesForChat(chatId) {
             messagesArea.innerHTML = '<div class="flex justify-center p-8"><div class="loading-spinner"></div></div>';
 
-            // تحديث حالة القراءة للرسائل الواردة
-            markMessagesAsRead(partnerId);
+            const messagesRef = ref(db, 'messages/' + chatId);
 
-            // الاستماع للرسائل الجديدة
-            // نستخدم استعلام بسيط ثم نفلتر في الذاكرة
-            const q = query(
-                collection(db, "messages"),
-                orderBy("timestamp", "desc"),
-                limit(100)
-            );
+            unsubscribeMessages = onValue(messagesRef, (snapshot) => {
+                if (!snapshot.exists()) {
+                    messagesArea.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-handshake text-6xl mb-4 text-blue-200"></i>
+                            <p class="text-lg font-medium">ابدأ محادثتك مع ${currentPartnerData?.name || 'الطرف الآخر'}</p>
+                            <p class="text-sm mt-2 text-gray-400">أرسل رسالة للبدء</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                const messages = [];
-                snapshot.forEach(doc => {
-                    const msg = doc.data();
-                    // فلترة الرسائل بين المستخدم الحالي والشريك
-                    if ((msg.senderId === currentUser.uid && msg.receiverId === partnerId) ||
-                        (msg.senderId === partnerId && msg.receiverId === currentUser.uid)) {
-                        messages.push({ id: doc.id, ...msg });
-                    }
-                });
+                const messages = snapshot.val();
+                const messageArray = [];
 
-                // ترتيب تصاعدي
-                messages.sort((a, b) => {
-                    const timeA = a.timestamp?.seconds || 0;
-                    const timeB = b.timestamp?.seconds || 0;
-                    return timeA - timeB;
-                });
+                for (const [msgId, msgData] of Object.entries(messages)) {
+                    messageArray.push({ id: msgId, ...msgData });
+                }
 
-                renderMessages(messages);
+                // ترتيب حسب التاريخ
+                messageArray.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                renderMessages(messageArray);
             }, (error) => {
                 console.error('خطأ في تحميل الرسائل:', error);
                 messagesArea.innerHTML = '<div class="text-center text-red-500 p-8">حدث خطأ في تحميل الرسائل</div>';
@@ -763,33 +643,20 @@
 
         // عرض الرسائل
         function renderMessages(messages) {
-            if (messages.length === 0) {
-                messagesArea.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-handshake text-6xl mb-4 text-blue-200"></i>
-                        <p class="text-lg font-medium">ابدأ محادثتك مع ${currentPartnerData?.name || 'الطرف الآخر'}</p>
-                        <p class="text-sm mt-2 text-gray-400">أرسل رسالة للبدء</p>
-                    </div>
-                `;
-                return;
-            }
-
             messagesArea.innerHTML = '';
             let lastDate = null;
 
             messages.forEach(msg => {
                 const isSent = msg.senderId === currentUser.uid;
-                const messageDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
+                const messageDate = new Date(msg.timestamp || Date.now());
 
-                if (messageDate) {
-                    const dateStr = formatDate(messageDate);
-                    if (dateStr !== lastDate) {
-                        lastDate = dateStr;
-                        const dateSeparator = document.createElement('div');
-                        dateSeparator.className = 'flex justify-center my-4';
-                        dateSeparator.innerHTML = `<span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">${dateStr}</span>`;
-                        messagesArea.appendChild(dateSeparator);
-                    }
+                const dateStr = formatDate(messageDate);
+                if (dateStr !== lastDate) {
+                    lastDate = dateStr;
+                    const dateSeparator = document.createElement('div');
+                    dateSeparator.className = 'flex justify-center my-4';
+                    dateSeparator.innerHTML = `<span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">${dateStr}</span>`;
+                    messagesArea.appendChild(dateSeparator);
                 }
 
                 const messageDiv = document.createElement('div');
@@ -798,7 +665,7 @@
                     <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
                         <p>${escapeHtml(msg.text || '')}</p>
                         <span class="message-time ${isSent ? 'text-blue-200' : 'text-gray-400'}">
-                            ${formatTime(msg.timestamp)}
+                            ${formatMessageTime(msg.timestamp)}
                             ${isSent ? (msg.read ? '<i class="fas fa-check-double mr-1"></i>' : '<i class="fas fa-check mr-1"></i>') : ''}
                         </span>
                     </div>
@@ -809,51 +676,66 @@
             scrollToBottom();
         }
 
-        // تحديث حالة القراءة
-        async function markMessagesAsRead(partnerId) {
-            if (!currentUser) return;
-
-            try {
-                const q = query(
-                    collection(db, "messages"),
-                    where("senderId", "==", partnerId),
-                    where("receiverId", "==", currentUser.uid),
-                    where("read", "==", false)
-                );
-
-                const snapshot = await getDocs(q);
-                snapshot.forEach(async (docSnapshot) => {
-                    await updateDoc(doc(db, "messages", docSnapshot.id), {
-                        read: true
-                    });
-                });
-            } catch (error) {
-                console.error('خطأ في تحديث حالة القراءة:', error);
-            }
-        }
-
         // إرسال رسالة
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const text = messageInput.value.trim();
-            if (!text || !currentPartnerId || !currentUser) return;
+            if (!text || !currentPartnerId || !currentUser || !currentChatId) return;
 
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
 
             try {
-                await addDoc(collection(db, "messages"), {
+                const messageData = {
                     text: text,
                     senderId: currentUser.uid,
                     senderName: userName.textContent || 'مستخدم',
-                    senderPhoto: userAvatar.src,
-                    receiverId: currentPartnerId,
-                    receiverName: currentPartnerData?.name || 'موظف',
-                    receiverPhoto: currentPartnerData?.photo || '',
-                    timestamp: serverTimestamp(),
+                    timestamp: Date.now(),
                     read: false
+                };
+
+                // إضافة الرسالة
+                const messagesRef = ref(db, 'messages/' + currentChatId);
+                const newMessageRef = push(messagesRef);
+                await set(newMessageRef, messageData);
+
+                // تحديث chats_by_user للمستخدم الحالي
+                const myChatRef = ref(db, 'chats_by_user/' + currentUser.uid + '/' + currentPartnerId);
+                await update(myChatRef, {
+                    lastMessage: text,
+                    timestamp: Date.now(),
+                    lastMessageSender: currentUser.uid,
+                    partnerId: currentPartnerId,
+                    partnerName: currentPartnerData?.name || 'موظف',
+                    partnerPhoto: currentPartnerData?.photo || ''
                 });
+
+                // تحديث chats_by_user للطرف الآخر
+                const partnerChatRef = ref(db, 'chats_by_user/' + currentPartnerId + '/' + currentUser.uid);
+                const partnerChatSnapshot = await get(partnerChatRef);
+
+                if (!partnerChatSnapshot.exists()) {
+                    // إنشاء محادثة جديدة للطرف الآخر
+                    await set(partnerChatRef, {
+                        partnerId: currentUser.uid,
+                        partnerName: userName.textContent || 'مستخدم',
+                        partnerPhoto: userAvatar.src,
+                        lastMessage: text,
+                        timestamp: Date.now(),
+                        lastMessageSender: currentUser.uid,
+                        unreadCount: 1
+                    });
+                } else {
+                    // تحديث المحادثة الموجودة
+                    const currentUnread = partnerChatSnapshot.val().unreadCount || 0;
+                    await update(partnerChatRef, {
+                        lastMessage: text,
+                        timestamp: Date.now(),
+                        lastMessageSender: currentUser.uid,
+                        unreadCount: currentUnread + 1
+                    });
+                }
 
                 messageInput.value = '';
                 messageInput.style.height = '44px';
@@ -882,26 +764,18 @@
             conversationsSidebar.classList.remove('hidden-mobile');
             chatWindow.classList.add('hidden-mobile');
             currentPartnerId = null;
+            currentChatId = null;
             if (unsubscribeMessages) {
                 unsubscribeMessages();
                 unsubscribeMessages = null;
             }
         });
 
+        // دوال تنسيق الوقت
         function formatTime(timestamp) {
             if (!timestamp) return '';
 
-            let date;
-            if (timestamp.toDate) {
-                date = timestamp.toDate();
-            } else if (timestamp instanceof Date) {
-                date = timestamp;
-            } else if (typeof timestamp === 'object' && timestamp.seconds) {
-                date = new Date(timestamp.seconds * 1000);
-            } else {
-                return '';
-            }
-
+            const date = new Date(timestamp);
             const now = new Date();
             const diff = now - date;
 
@@ -921,6 +795,12 @@
             }
 
             return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+        }
+
+        function formatMessageTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
         }
 
         function formatDate(date) {
@@ -948,6 +828,7 @@
             return div.innerHTML;
         }
 
+        // القائمة الجانبية
         const menuButton = document.getElementById('mobile-menu-button');
         const closeButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -960,7 +841,7 @@
             if (unsubscribeConversations) unsubscribeConversations();
         });
 
-        // تعريف الدوال في الـ window للوصول من HTML
+        // تعريف الدوال في window
         window.openConversationWithPartner = openConversationWithPartner;
     </script>
 </body>
