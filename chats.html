@@ -397,6 +397,7 @@
         let unsubscribeMessages = null;
         let unsubscribeConversations = null;
         let userDataCache = {};
+        let activeListeners = [];
 
         // معالجة المصادقة
         onAuthStateChanged(auth, async (user) => {
@@ -405,7 +406,6 @@
                 userInfo.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
 
-                // جلب معلومات المستخدم
                 const userRef = ref(db, 'users/' + user.uid);
                 try {
                     const userSnapshot = await get(userRef);
@@ -451,7 +451,6 @@
             if (userDataCache[userId]) return userDataCache[userId];
 
             try {
-                // محاولة جلب من employees أولاً
                 const empRef = ref(db, 'employees/' + userId);
                 const empSnap = await get(empRef);
                 if (empSnap.exists()) {
@@ -464,7 +463,6 @@
                     return info;
                 }
 
-                // محاولة جلب من users
                 const userRef = ref(db, 'users/' + userId);
                 const userSnap = await get(userRef);
                 if (userSnap.exists()) {
@@ -505,7 +503,6 @@
             };
             currentChatId = getChatId(currentUser.uid, partnerId);
 
-            // تحديث الواجهة
             chatPartnerName.textContent = currentPartnerData.name;
             chatPartnerAvatar.src = currentPartnerData.photo;
             chatPartnerInfo.textContent = 'غير متصل';
@@ -532,88 +529,8 @@
             loadMessagesForChat(currentChatId);
         }
 
-        // تحميل قائمة المحادثات من messages مباشرة (الطريقة الأساسية)
+        // تحميل قائمة المحادثات - الطريقة الصحيحة: من chats_by_user فقط
         function loadConversations() {
-            if (!currentUser) return;
-
-            // نبحث في جميع messages عن محادثات تشمل المستخدم الحالي
-            const messagesRef = ref(db, 'messages');
-
-            unsubscribeConversations = onValue(messagesRef, async (snapshot) => {
-                if (!snapshot.exists()) {
-                    conversationsList.innerHTML = `
-                        <div class="p-8 text-center text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-3"></i>
-                            <p>لا توجد محادثات بعد</p>
-                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const allChats = snapshot.val();
-                const userConversations = [];
-
-                // البحث عن محادثات المستخدم
-                for (const [chatId, messages] of Object.entries(allChats)) {
-                    if (chatId.includes(currentUser.uid)) {
-                        const partnerId = chatId.replace(currentUser.uid, '').replace('_', '');
-
-                        // تجميع الرسائل وإيجاد الأحدث
-                        const msgArray = [];
-                        for (const [msgId, msgData] of Object.entries(messages)) {
-                            msgArray.push({ id: msgId, ...msgData });
-                        }
-
-                        msgArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-                        if (msgArray.length > 0) {
-                            const lastMsg = msgArray[0];
-                            const unreadCount = msgArray.filter(m => m.receiverId === currentUser.uid && !m.read).length;
-
-                            userConversations.push({
-                                chatId,
-                                partnerId,
-                                lastMessage: lastMsg.text || '',
-                                timestamp: lastMsg.timestamp || Date.now(),
-                                lastMessageSender: lastMsg.senderId,
-                                unreadCount
-                            });
-                        }
-                    }
-                }
-
-                // ترتيب حسب آخر رسالة
-                userConversations.sort((a, b) => b.timestamp - a.timestamp);
-
-                if (userConversations.length === 0) {
-                    conversationsList.innerHTML = `
-                        <div class="p-8 text-center text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-3"></i>
-                            <p>لا توجد محادثات بعد</p>
-                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // جلب معلومات الشركاء
-                for (const conv of userConversations) {
-                    const partnerInfo = await getUserInfo(conv.partnerId);
-                    conv.partnerName = partnerInfo.name;
-                    conv.partnerPhoto = partnerInfo.photo;
-                }
-
-                renderConversationsList(userConversations);
-            }, (error) => {
-                console.error('خطأ في تحميل المحادثات:', error);
-                // محاولة تحميل من chats_by_user كبديل
-                loadConversationsFromChatsByUser();
-            });
-        }
-
-        // طريقة بديلة: تحميل من chats_by_user
-        function loadConversationsFromChatsByUser() {
             if (!currentUser) return;
 
             const chatsRef = ref(db, 'chats_by_user/' + currentUser.uid);
@@ -640,8 +557,19 @@
                     });
                 }
 
+                // ترتيب حسب آخر رسالة
                 chatArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
                 renderConversationsList(chatArray);
+            }, (error) => {
+                console.error('خطأ في تحميل المحادثات:', error);
+                conversationsList.innerHTML = `
+                    <div class="p-8 text-center text-gray-400">
+                        <i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i>
+                        <p class="text-red-500">حدث خطأ في تحميل المحادثات</p>
+                        <p class="text-xs mt-2 text-gray-400">${error.message}</p>
+                    </div>
+                `;
             });
         }
 
@@ -759,7 +687,7 @@
 
                 renderMessages(messageArray);
 
-                // تحديث حالة القراءة للرسائل الواردة
+                // تحديث حالة القراءة
                 markMessagesAsRead(chatId, messageArray);
             }, (error) => {
                 console.error('خطأ في تحميل الرسائل:', error);
