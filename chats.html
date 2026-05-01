@@ -14,7 +14,6 @@
             background-color: #f5f7fa;
         }
 
-        /* تنسيقات الهيدر */
         #mobile-menu {
             transition: transform 0.3s ease-in-out;
             transform: translateX(100%);
@@ -23,7 +22,6 @@
             transform: translateX(0);
         }
 
-        /* تنسيقات المحادثة */
         .chat-container {
             height: calc(100vh - 80px);
         }
@@ -48,7 +46,6 @@
             border-radius: 3px;
         }
 
-        /* فقاعات الرسائل */
         .message-bubble {
             max-width: 70%;
             padding: 12px 16px;
@@ -80,7 +77,6 @@
             display: block;
         }
 
-        /* قائمة المحادثات */
         .conversation-item {
             transition: all 0.2s ease;
             cursor: pointer;
@@ -108,7 +104,6 @@
             padding: 0 6px;
         }
 
-        /* حالة الكتابة */
         .typing-indicator {
             display: none;
             align-items: center;
@@ -138,7 +133,6 @@
             40% { transform: scale(1); }
         }
 
-        /* حالة الاتصال */
         .online-status {
             width: 10px;
             height: 10px;
@@ -161,7 +155,6 @@
             right: 2px;
         }
 
-        /* تأثيرات */
         .fade-in {
             animation: fadeIn 0.3s ease-in;
         }
@@ -171,7 +164,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* صفحة فارغة */
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -181,7 +173,6 @@
             color: #9ca3af;
         }
 
-        /* مؤشر التحميل */
         .loading-spinner {
             border: 3px solid #f3f4f6;
             border-top: 3px solid #2563eb;
@@ -196,7 +187,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* زر العودة في الموبايل */
         .mobile-back-btn {
             display: none;
         }
@@ -235,7 +225,7 @@
     </style>
 </head>
 <body>
-    <!-- هيدر مطابق للصفحة الرئيسية -->
+    <!-- هيدر -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
             <div class="flex items-center">
@@ -260,7 +250,6 @@
             </div>
         </nav>
 
-        <!-- القائمة الجانبية للموبايل -->
         <div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
             <div class="flex justify-between items-center mb-8">
                 <img src="shagelnie.png.png" alt="شغلني" class="h-12">
@@ -279,7 +268,6 @@
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
     <div class="container mx-auto px-4 py-4 h-screen">
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden chat-container flex">
 
@@ -291,7 +279,6 @@
                 </div>
 
                 <div id="conversationsList" class="flex-1 overflow-y-auto">
-                    <!-- سيتم ملؤها ديناميكياً -->
                     <div class="p-8 text-center text-gray-400">
                         <i class="fas fa-comments text-4xl mb-3"></i>
                         <p>جاري تحميل المحادثات...</p>
@@ -302,7 +289,6 @@
             <!-- نافذة المحادثة -->
             <div id="chatWindow" class="chat-window hidden-mobile flex-1 flex flex-col bg-slate-50">
 
-                <!-- رأس المحادثة -->
                 <div id="chatHeader" class="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <button id="backToList" class="mobile-back-btn md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
@@ -324,7 +310,6 @@
                     </div>
                 </div>
 
-                <!-- منطقة الرسائل -->
                 <div id="messagesArea" class="messages-area flex-1 p-4 space-y-3">
                     <div class="empty-state">
                         <i class="fas fa-paper-plane text-6xl mb-4 text-blue-200"></i>
@@ -333,7 +318,6 @@
                     </div>
                 </div>
 
-                <!-- مؤشر الكتابة -->
                 <div id="typingIndicator" class="typing-indicator bg-white px-4">
                     <span>يكتب الآن</span>
                     <div class="typing-dot"></div>
@@ -341,7 +325,6 @@
                     <div class="typing-dot"></div>
                 </div>
 
-                <!-- حقل الإدخال -->
                 <div id="inputArea" class="bg-white border-t border-gray-200 p-4 hidden">
                     <form id="messageForm" class="flex items-end gap-2">
                         <button type="button" class="p-3 text-gray-400 hover:text-gray-600 transition rounded-full hover:bg-gray-100">
@@ -379,13 +362,16 @@
             getDocs, 
             addDoc, 
             updateDoc,
+            setDoc,
             query, 
             where, 
             orderBy, 
             onSnapshot,
             serverTimestamp,
             Timestamp,
-            limit
+            limit,
+            or,
+            and
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { 
             getAuth, 
@@ -407,12 +393,10 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // عناصر DOM
         const conversationsList = document.getElementById('conversationsList');
         const messagesArea = document.getElementById('messagesArea');
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
-        const chatHeader = document.getElementById('chatHeader');
         const chatPartnerName = document.getElementById('chatPartnerName');
         const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
         const chatPartnerInfo = document.getElementById('chatPartnerInfo');
@@ -429,10 +413,12 @@
         const loginBtn = document.getElementById('loginBtn');
 
         let currentUser = null;
-        let currentConversationId = null;
         let currentPartnerId = null;
+        let currentPartnerData = null;
         let unsubscribeMessages = null;
         let unsubscribeConversations = null;
+        let allMessages = [];
+        let conversationsMap = new Map();
 
         // معالجة المصادقة
         onAuthStateChanged(auth, async (user) => {
@@ -441,7 +427,6 @@
                 userInfo.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
 
-                // جلب معلومات المستخدم
                 const userDoc = await getDoc(doc(db, 'users', user.uid));
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
@@ -453,11 +438,8 @@
                 }
 
                 loadConversations();
-
-                // التحقق من وجود معلمات URL لبدء محادثة جديدة
                 checkUrlParams();
             } else {
-                // تسجيل دخول مجهول للزوار
                 try {
                     const result = await signInAnonymously(auth);
                     currentUser = result.user;
@@ -482,236 +464,372 @@
             const employeePhoto = urlParams.get('employeePhoto');
 
             if (employeeId && currentUser) {
-                // البحث عن محادثة موجودة أو إنشاء محادثة جديدة
-                const conversationId = await findOrCreateConversation(employeeId, decodeURIComponent(employeeName || ''), decodeURIComponent(employeePhoto || ''));
-                openConversation(conversationId);
-
-                // إزالة المعاملات من URL
+                await startConversationWith(employeeId, decodeURIComponent(employeeName || ''), decodeURIComponent(employeePhoto || ''));
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
-        // البحث عن محادثة أو إنشاؤها
-        async function findOrCreateConversation(partnerId, partnerName, partnerPhoto) {
-            // البحث عن محادثة موجودة
-            const q1 = query(
-                collection(db, 'conversations'),
-                where('participants', 'array-contains', currentUser.uid)
-            );
-            const snapshot = await getDocs(q1);
-
-            let existingConversation = null;
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.participants.includes(partnerId)) {
-                    existingConversation = doc.id;
-                }
-            });
-
-            if (existingConversation) {
-                return existingConversation;
-            }
-
-            // إنشاء محادثة جديدة
-            const conversationRef = await addDoc(collection(db, 'conversations'), {
-                participants: [currentUser.uid, partnerId],
-                participantNames: {
-                    [currentUser.uid]: userName.textContent || 'مستخدم',
-                    [partnerId]: partnerName || 'موظف'
-                },
-                participantPhotos: {
-                    [currentUser.uid]: userAvatar.src,
-                    [partnerId]: partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'
-                },
-                createdAt: serverTimestamp(),
-                lastMessage: '',
-                lastMessageTime: serverTimestamp(),
-                lastMessageSender: '',
-                unreadCount: {
-                    [currentUser.uid]: 0,
-                    [partnerId]: 0
-                }
-            });
-
-            return conversationRef.id;
-        }
-
-        // تحميل قائمة المحادثات
-        function loadConversations() {
-            if (!currentUser) return;
-
-            const q = query(
-                collection(db, 'conversations'),
-                where('participants', 'array-contains', currentUser.uid),
-                orderBy('lastMessageTime', 'desc')
-            );
-
-            unsubscribeConversations = onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
-                    conversationsList.innerHTML = `
-                        <div class="p-8 text-center text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-3"></i>
-                            <p>لا توجد محادثات بعد</p>
-                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                conversationsList.innerHTML = '';
-                snapshot.forEach(docSnapshot => {
-                    const conversation = docSnapshot.data();
-                    const conversationId = docSnapshot.id;
-
-                    // تحديد الطرف الآخر
-                    const partnerId = conversation.participants.find(id => id !== currentUser.uid);
-                    const partnerName = conversation.participantNames?.[partnerId] || 'مستخدم';
-                    const partnerPhoto = conversation.participantPhotos?.[partnerId] || 'https://randomuser.me/api/portraits/men/32.jpg';
-
-                    // عدد الرسائل غير المقروءة
-                    const unreadCount = conversation.unreadCount?.[currentUser.uid] || 0;
-
-                    // تنسيق الوقت
-                    const timeText = formatTime(conversation.lastMessageTime);
-
-                    const isActive = currentConversationId === conversationId;
-
-                    const item = document.createElement('div');
-                    item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
-                    item.onclick = () => openConversation(conversationId);
-
-                    item.innerHTML = `
-                        <div class="relative flex-shrink-0">
-                            <img src="${partnerPhoto}" alt="${partnerName}" class="w-12 h-12 rounded-full object-cover">
-                            <span class="${conversation.online?.[partnerId] ? 'online-status' : 'offline-status'}"></span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-semibold text-gray-800 truncate">${partnerName}</h4>
-                                <span class="text-xs text-gray-400 flex-shrink-0">${timeText}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm text-gray-500 truncate ${unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
-                                    ${conversation.lastMessageSender === currentUser.uid ? '<i class="fas fa-check-double text-xs ml-1"></i>' : ''}
-                                    ${conversation.lastMessage || 'بدء محادثة جديدة'}
-                                </p>
-                                ${unreadCount > 0 ? `<span class="unread-badge flex-shrink-0 mr-2">${unreadCount}</span>` : ''}
-                            </div>
-                        </div>
-                    `;
-
-                    conversationsList.appendChild(item);
-                });
-            }, (error) => {
-                console.error('خطأ في تحميل المحادثات:', error);
-            });
-        }
-
-        // فتح محادثة
-        async function openConversation(conversationId) {
-            if (!currentUser) return;
-
-            currentConversationId = conversationId;
-
-            // إلغاء الاشتراك السابق
-            if (unsubscribeMessages) {
-                unsubscribeMessages();
-            }
+        // بدء محادثة مع موظف
+        async function startConversationWith(partnerId, partnerName, partnerPhoto) {
+            currentPartnerId = partnerId;
+            currentPartnerData = {
+                name: partnerName || 'موظف',
+                photo: partnerPhoto || 'https://randomuser.me/api/portraits/men/32.jpg'
+            };
 
             // تحديث الواجهة
-            document.querySelectorAll('.conversation-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event?.currentTarget?.classList.add('active');
+            chatPartnerName.textContent = currentPartnerData.name;
+            chatPartnerAvatar.src = currentPartnerData.photo;
+            chatPartnerInfo.textContent = 'غير متصل';
+            chatPartnerStatus.className = 'offline-status';
+            viewProfileLink.href = `employee_profile.html?id=${partnerId}`;
+            inputArea.classList.remove('hidden');
 
-            // في الموبايل: إخفاء القائمة وإظهار المحادثة
             if (window.innerWidth < 768) {
                 conversationsSidebar.classList.add('hidden-mobile');
                 chatWindow.classList.remove('hidden-mobile');
             }
 
-            // جلب بيانات المحادثة
-            const conversationDoc = await getDoc(doc(db, 'conversations', conversationId));
-            if (!conversationDoc.exists()) return;
+            loadMessagesForPartner(partnerId);
+        }
 
-            const conversationData = conversationDoc.data();
-            currentPartnerId = conversationData.participants.find(id => id !== currentUser.uid);
+        // تحميل المحادثات من مجموعة messages الواحدة
+        function loadConversations() {
+            if (!currentUser) return;
 
-            const partnerName = conversationData.participantNames?.[currentPartnerId] || 'مستخدم';
-            const partnerPhoto = conversationData.participantPhotos?.[currentPartnerId] || 'https://randomuser.me/api/portraits/men/32.jpg';
-
-            // تحديث رأس المحادثة
-            chatPartnerName.textContent = partnerName;
-            chatPartnerAvatar.src = partnerPhoto;
-            chatPartnerInfo.textContent = conversationData.online?.[currentPartnerId] ? 'متصل الآن' : 'غير متصل';
-            chatPartnerStatus.className = conversationData.online?.[currentPartnerId] ? 'online-status' : 'offline-status';
-            viewProfileLink.href = `employee_profile.html?id=${currentPartnerId}`;
-
-            // إظهار منطقة الإدخال
-            inputArea.classList.remove('hidden');
-            messagesArea.innerHTML = '<div class="flex justify-center p-8"><div class="loading-spinner"></div></div>';
-
-            // تحديث حالة القراءة
-            await updateDoc(doc(db, 'conversations', conversationId), {
-                [`unreadCount.${currentUser.uid}`]: 0
-            });
-
-            // الاستماع للرسائل
-            const messagesQuery = query(
-                collection(db, 'conversations', conversationId, 'messages'),
-                orderBy('timestamp', 'asc')
+            // الاستماع لجميع الرسائل التي تشمل المستخدم الحالي
+            const q = query(
+                collection(db, "messages"),
+                or(
+                    where("senderId", "==", currentUser.uid),
+                    where("receiverId", "==", currentUser.uid)
+                ),
+                orderBy("timestamp", "desc")
             );
 
-            unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
-                if (snapshot.empty) {
-                    messagesArea.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-handshake text-6xl mb-4 text-blue-200"></i>
-                            <p class="text-lg font-medium">ابدأ محادثتك مع ${partnerName}</p>
-                            <p class="text-sm mt-2 text-gray-400">أرسل رسالة للبدء</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                messagesArea.innerHTML = '';
-                let lastDate = null;
-
-                snapshot.forEach(docSnapshot => {
-                    const message = docSnapshot.data();
-                    const messageId = docSnapshot.id;
-                    const isSent = message.senderId === currentUser.uid;
-
-                    // فاصل التاريخ
-                    const messageDate = message.timestamp?.toDate();
-                    if (messageDate) {
-                        const dateStr = formatDate(messageDate);
-                        if (dateStr !== lastDate) {
-                            lastDate = dateStr;
-                            const dateSeparator = document.createElement('div');
-                            dateSeparator.className = 'flex justify-center my-4';
-                            dateSeparator.innerHTML = `<span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">${dateStr}</span>`;
-                            messagesArea.appendChild(dateSeparator);
-                        }
-                    }
-
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `flex ${isSent ? 'justify-start' : 'justify-end'} fade-in`;
-                    messageDiv.innerHTML = `
-                        <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
-                            <p>${escapeHtml(message.text)}</p>
-                            <span class="message-time ${isSent ? 'text-blue-200' : 'text-gray-400'}">
-                                ${formatTime(message.timestamp)}
-                                ${isSent ? (message.read ? '<i class="fas fa-check-double mr-1"></i>' : '<i class="fas fa-check mr-1"></i>') : ''}
-                            </span>
-                        </div>
-                    `;
-                    messagesArea.appendChild(messageDiv);
+            unsubscribeConversations = onSnapshot(q, (snapshot) => {
+                allMessages = [];
+                snapshot.forEach(doc => {
+                    allMessages.push({ id: doc.id, ...doc.data() });
                 });
 
-                // التمرير للأسفل
-                scrollToBottom();
+                buildConversationsList();
+            }, (error) => {
+                console.error('خطأ في تحميل الرسائل:', error);
+                // محاولة بديلة بدون or
+                loadConversationsFallback();
             });
+        }
+
+        // طريقة بديلة لتحميل المحادثات
+        async function loadConversationsFallback() {
+            if (!currentUser) return;
+
+            try {
+                // جلب الرسائل المرسلة
+                const sentQuery = query(
+                    collection(db, "messages"),
+                    where("senderId", "==", currentUser.uid),
+                    orderBy("timestamp", "desc")
+                );
+                const sentSnapshot = await getDocs(sentQuery);
+
+                // جلب الرسائل المستلمة
+                const receivedQuery = query(
+                    collection(db, "messages"),
+                    where("receiverId", "==", currentUser.uid),
+                    orderBy("timestamp", "desc")
+                );
+                const receivedSnapshot = await getDocs(receivedQuery);
+
+                allMessages = [];
+                sentSnapshot.forEach(doc => allMessages.push({ id: doc.id, ...doc.data() }));
+                receivedSnapshot.forEach(doc => allMessages.push({ id: doc.id, ...doc.data() }));
+
+                // ترتيب حسب الوقت تنازلياً
+                allMessages.sort((a, b) => {
+                    const timeA = a.timestamp?.seconds || 0;
+                    const timeB = b.timestamp?.seconds || 0;
+                    return timeB - timeA;
+                });
+
+                buildConversationsList();
+            } catch (error) {
+                console.error('خطأ في الطريقة البديلة:', error);
+                conversationsList.innerHTML = `
+                    <div class="p-8 text-center text-gray-400">
+                        <i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i>
+                        <p class="text-red-500">حدث خطأ في تحميل المحادثات</p>
+                        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">إعادة المحاولة</button>
+                    </div>
+                `;
+            }
+        }
+
+        // بناء قائمة المحادثات من الرسائل
+        async function buildConversationsList() {
+            conversationsMap.clear();
+
+            // تجميع الرسائل حسب الطرف الآخر
+            allMessages.forEach(msg => {
+                const partnerId = msg.senderId === currentUser.uid ? msg.receiverId : msg.senderId;
+
+                if (!conversationsMap.has(partnerId)) {
+                    conversationsMap.set(partnerId, {
+                        partnerId: partnerId,
+                        lastMessage: msg,
+                        messages: [msg],
+                        unreadCount: 0
+                    });
+                } else {
+                    const conv = conversationsMap.get(partnerId);
+                    conv.messages.push(msg);
+                    // تحديث آخر رسالة إذا كانت أحدث
+                    const currentTime = msg.timestamp?.seconds || 0;
+                    const lastTime = conv.lastMessage.timestamp?.seconds || 0;
+                    if (currentTime > lastTime) {
+                        conv.lastMessage = msg;
+                    }
+                }
+
+                // حساب الرسائل غير المقروءة
+                if (msg.receiverId === currentUser.uid && !msg.read) {
+                    const conv = conversationsMap.get(partnerId);
+                    conv.unreadCount++;
+                }
+            });
+
+            if (conversationsMap.size === 0) {
+                conversationsList.innerHTML = `
+                    <div class="p-8 text-center text-gray-400">
+                        <i class="fas fa-inbox text-4xl mb-3"></i>
+                        <p>لا توجد محادثات بعد</p>
+                        <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين من <a href="employee_listing_page.html" class="text-blue-600 hover:underline">هنا</a></p>
+                    </div>
+                `;
+                return;
+            }
+
+            // جلب معلومات الشركاء
+            const partnerIds = Array.from(conversationsMap.keys());
+            const partnerDataMap = new Map();
+
+            for (const pid of partnerIds) {
+                try {
+                    const empDoc = await getDoc(doc(db, 'employees', pid));
+                    if (empDoc.exists()) {
+                        const data = empDoc.data();
+                        partnerDataMap.set(pid, {
+                            name: data.name || 'موظف',
+                            photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/32.jpg'
+                        });
+                    } else {
+                        const userDoc = await getDoc(doc(db, 'users', pid));
+                        if (userDoc.exists()) {
+                            const data = userDoc.data();
+                            partnerDataMap.set(pid, {
+                                name: data.name || 'مستخدم',
+                                photo: data.profileImageUrl || 'https://randomuser.me/api/portraits/men/1.jpg'
+                            });
+                        } else {
+                            partnerDataMap.set(pid, {
+                                name: 'مستخدم',
+                                photo: 'https://randomuser.me/api/portraits/men/32.jpg'
+                            });
+                        }
+                    }
+                } catch (e) {
+                    partnerDataMap.set(pid, {
+                        name: 'مستخدم',
+                        photo: 'https://randomuser.me/api/portraits/men/32.jpg'
+                    });
+                }
+            }
+
+            // ترتيب المحادثات حسب آخر رسالة
+            const sortedConversations = Array.from(conversationsMap.values()).sort((a, b) => {
+                const timeA = a.lastMessage.timestamp?.seconds || 0;
+                const timeB = b.lastMessage.timestamp?.seconds || 0;
+                return timeB - timeA;
+            });
+
+            conversationsList.innerHTML = '';
+
+            sortedConversations.forEach(conv => {
+                const partnerData = partnerDataMap.get(conv.partnerId) || { name: 'مستخدم', photo: 'https://randomuser.me/api/portraits/men/32.jpg' };
+                const isActive = currentPartnerId === conv.partnerId;
+                const timeText = formatTime(conv.lastMessage.timestamp);
+                const lastText = conv.lastMessage.text || '';
+                const isSent = conv.lastMessage.senderId === currentUser.uid;
+
+                const item = document.createElement('div');
+                item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
+                item.onclick = () => openConversationWithPartner(conv.partnerId, partnerData);
+
+                item.innerHTML = `
+                    <div class="relative flex-shrink-0">
+                        <img src="${partnerData.photo}" alt="${partnerData.name}" class="w-12 h-12 rounded-full object-cover">
+                        <span class="offline-status"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-semibold text-gray-800 truncate">${partnerData.name}</h4>
+                            <span class="text-xs text-gray-400 flex-shrink-0">${timeText}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-500 truncate ${conv.unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
+                                ${isSent ? '<i class="fas fa-check-double text-xs ml-1 text-blue-400"></i>' : ''}
+                                ${lastText}
+                            </p>
+                            ${conv.unreadCount > 0 ? `<span class="unread-badge flex-shrink-0 mr-2">${conv.unreadCount}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                conversationsList.appendChild(item);
+            });
+        }
+
+        // فتح محادثة مع شريك
+        async function openConversationWithPartner(partnerId, partnerData) {
+            if (!currentUser) return;
+
+            currentPartnerId = partnerId;
+            currentPartnerData = partnerData;
+
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+            }
+
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event?.currentTarget?.classList.add('active');
+
+            if (window.innerWidth < 768) {
+                conversationsSidebar.classList.add('hidden-mobile');
+                chatWindow.classList.remove('hidden-mobile');
+            }
+
+            chatPartnerName.textContent = partnerData.name;
+            chatPartnerAvatar.src = partnerData.photo;
+            chatPartnerInfo.textContent = 'غير متصل';
+            chatPartnerStatus.className = 'offline-status';
+            viewProfileLink.href = `employee_listing_page.html?id=${partnerId}`;
+            inputArea.classList.remove('hidden');
+
+            loadMessagesForPartner(partnerId);
+        }
+
+        // تحميل الرسائل لشريك محدد
+        function loadMessagesForPartner(partnerId) {
+            messagesArea.innerHTML = '<div class="flex justify-center p-8"><div class="loading-spinner"></div></div>';
+
+            // تحديث حالة القراءة للرسائل الواردة
+            markMessagesAsRead(partnerId);
+
+            // الاستماع للرسائل الجديدة
+            // نستخدم استعلام بسيط ثم نفلتر في الذاكرة
+            const q = query(
+                collection(db, "messages"),
+                orderBy("timestamp", "desc"),
+                limit(100)
+            );
+
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                const messages = [];
+                snapshot.forEach(doc => {
+                    const msg = doc.data();
+                    // فلترة الرسائل بين المستخدم الحالي والشريك
+                    if ((msg.senderId === currentUser.uid && msg.receiverId === partnerId) ||
+                        (msg.senderId === partnerId && msg.receiverId === currentUser.uid)) {
+                        messages.push({ id: doc.id, ...msg });
+                    }
+                });
+
+                // ترتيب تصاعدي
+                messages.sort((a, b) => {
+                    const timeA = a.timestamp?.seconds || 0;
+                    const timeB = b.timestamp?.seconds || 0;
+                    return timeA - timeB;
+                });
+
+                renderMessages(messages);
+            }, (error) => {
+                console.error('خطأ في تحميل الرسائل:', error);
+                messagesArea.innerHTML = '<div class="text-center text-red-500 p-8">حدث خطأ في تحميل الرسائل</div>';
+            });
+        }
+
+        // عرض الرسائل
+        function renderMessages(messages) {
+            if (messages.length === 0) {
+                messagesArea.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-handshake text-6xl mb-4 text-blue-200"></i>
+                        <p class="text-lg font-medium">ابدأ محادثتك مع ${currentPartnerData?.name || 'الطرف الآخر'}</p>
+                        <p class="text-sm mt-2 text-gray-400">أرسل رسالة للبدء</p>
+                    </div>
+                `;
+                return;
+            }
+
+            messagesArea.innerHTML = '';
+            let lastDate = null;
+
+            messages.forEach(msg => {
+                const isSent = msg.senderId === currentUser.uid;
+                const messageDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
+
+                if (messageDate) {
+                    const dateStr = formatDate(messageDate);
+                    if (dateStr !== lastDate) {
+                        lastDate = dateStr;
+                        const dateSeparator = document.createElement('div');
+                        dateSeparator.className = 'flex justify-center my-4';
+                        dateSeparator.innerHTML = `<span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">${dateStr}</span>`;
+                        messagesArea.appendChild(dateSeparator);
+                    }
+                }
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flex ${isSent ? 'justify-start' : 'justify-end'} fade-in`;
+                messageDiv.innerHTML = `
+                    <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
+                        <p>${escapeHtml(msg.text || '')}</p>
+                        <span class="message-time ${isSent ? 'text-blue-200' : 'text-gray-400'}">
+                            ${formatTime(msg.timestamp)}
+                            ${isSent ? (msg.read ? '<i class="fas fa-check-double mr-1"></i>' : '<i class="fas fa-check mr-1"></i>') : ''}
+                        </span>
+                    </div>
+                `;
+                messagesArea.appendChild(messageDiv);
+            });
+
+            scrollToBottom();
+        }
+
+        // تحديث حالة القراءة
+        async function markMessagesAsRead(partnerId) {
+            if (!currentUser) return;
+
+            try {
+                const q = query(
+                    collection(db, "messages"),
+                    where("senderId", "==", partnerId),
+                    where("receiverId", "==", currentUser.uid),
+                    where("read", "==", false)
+                );
+
+                const snapshot = await getDocs(q);
+                snapshot.forEach(async (docSnapshot) => {
+                    await updateDoc(doc(db, "messages", docSnapshot.id), {
+                        read: true
+                    });
+                });
+            } catch (error) {
+                console.error('خطأ في تحديث حالة القراءة:', error);
+            }
         }
 
         // إرسال رسالة
@@ -719,27 +837,22 @@
             e.preventDefault();
 
             const text = messageInput.value.trim();
-            if (!text || !currentConversationId || !currentUser) return;
+            if (!text || !currentPartnerId || !currentUser) return;
 
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
 
             try {
-                // إضافة الرسالة
-                await addDoc(collection(db, 'conversations', currentConversationId, 'messages'), {
+                await addDoc(collection(db, "messages"), {
                     text: text,
                     senderId: currentUser.uid,
                     senderName: userName.textContent || 'مستخدم',
+                    senderPhoto: userAvatar.src,
+                    receiverId: currentPartnerId,
+                    receiverName: currentPartnerData?.name || 'موظف',
+                    receiverPhoto: currentPartnerData?.photo || '',
                     timestamp: serverTimestamp(),
                     read: false
-                });
-
-                // تحديث آخر رسالة في المحادثة
-                await updateDoc(doc(db, 'conversations', currentConversationId), {
-                    lastMessage: text,
-                    lastMessageTime: serverTimestamp(),
-                    lastMessageSender: currentUser.uid,
-                    [`unreadCount.${currentPartnerId}`]: increment(1)
                 });
 
                 messageInput.value = '';
@@ -747,19 +860,17 @@
                 scrollToBottom();
             } catch (error) {
                 console.error('خطأ في إرسال الرسالة:', error);
-                alert('حدث خطأ أثناء إرسال الرسالة');
+                alert('حدث خطأ أثناء إرسال الرسالة: ' + error.message);
             } finally {
                 sendBtn.disabled = false;
             }
         });
 
-        // تعديل ارتفاع textarea تلقائياً
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
-        // إرسال بالضغط على Enter (بدون Shift)
         messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -767,18 +878,16 @@
             }
         });
 
-        // زر العودة للقائمة في الموبايل
         backToList.addEventListener('click', () => {
             conversationsSidebar.classList.remove('hidden-mobile');
             chatWindow.classList.add('hidden-mobile');
-            currentConversationId = null;
+            currentPartnerId = null;
             if (unsubscribeMessages) {
                 unsubscribeMessages();
                 unsubscribeMessages = null;
             }
         });
 
-        // دوال مساعدة
         function formatTime(timestamp) {
             if (!timestamp) return '';
 
@@ -787,6 +896,8 @@
                 date = timestamp.toDate();
             } else if (timestamp instanceof Date) {
                 date = timestamp;
+            } else if (typeof timestamp === 'object' && timestamp.seconds) {
+                date = new Date(timestamp.seconds * 1000);
             } else {
                 return '';
             }
@@ -794,25 +905,21 @@
             const now = new Date();
             const diff = now - date;
 
-            // اليوم
             if (diff < 24 * 60 * 60 * 1000 && date.getDate() === now.getDate()) {
                 return date.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
             }
 
-            // الأمس
             const yesterday = new Date(now);
             yesterday.setDate(yesterday.getDate() - 1);
             if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth()) {
                 return 'أمس';
             }
 
-            // هذا الأسبوع
             if (diff < 7 * 24 * 60 * 60 * 1000) {
                 const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
                 return days[date.getDay()];
             }
 
-            // تاريخ كامل
             return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
         }
 
@@ -835,12 +942,12 @@
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // القائمة الجانبية
         const menuButton = document.getElementById('mobile-menu-button');
         const closeButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -848,16 +955,13 @@
         menuButton.addEventListener('click', () => mobileMenu.classList.add('open'));
         closeButton.addEventListener('click', () => mobileMenu.classList.remove('open'));
 
-        // تنظيف عند مغادرة الصفحة
         window.addEventListener('beforeunload', () => {
             if (unsubscribeMessages) unsubscribeMessages();
             if (unsubscribeConversations) unsubscribeConversations();
         });
 
-        // increment helper (Firestore doesn't export this directly in all versions)
-        function increment(n) {
-            return { __op: 'increment', __arg: n };
-        }
+        // تعريف الدوال في الـ window للوصول من HTML
+        window.openConversationWithPartner = openConversationWithPartner;
     </script>
 </body>
 </html>
