@@ -2,104 +2,696 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>محادثة بسيطة - شغلني</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رسائلي - شغلني</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background-color: #f0f2f5; }
-        #chatBox { height: 60vh; overflow-y: auto; }
-        .my-msg { background-color: #dcf8c6; align-self: flex-start; }
-        .their-msg { background-color: #ffffff; align-self: flex-end; border: 1px solid #ddd; }
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        .chat-container {
+            height: calc(100vh - 80px);
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: calc(100vh - 140px);
+            }
+        }
+
+        .messages-area {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .messages-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-area::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message-sent {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+            margin-left: auto;
+        }
+
+        .message-received {
+            background-color: white;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 4px;
+            margin-right: auto;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .conversation-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .conversation-item:hover {
+            background-color: #f1f5f9;
+        }
+
+        .conversation-item.active {
+            background-color: #eff6ff;
+            border-right: 3px solid #2563eb;
+        }
+
+        .unread-badge {
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .mobile-back-btn {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-back-btn {
+                display: inline-flex;
+            }
+            .conversations-sidebar {
+                position: fixed;
+                top: 80px;
+                right: 0;
+                width: 100%;
+                height: calc(100% - 80px);
+                z-index: 40;
+                background: white;
+                transform: translateX(0);
+                transition: transform 0.3s ease;
+            }
+            .conversations-sidebar.hidden-mobile {
+                transform: translateX(100%);
+            }
+            .chat-window {
+                position: fixed;
+                top: 80px;
+                right: 0;
+                width: 100%;
+                height: calc(100% - 80px);
+                z-index: 50;
+                background: #f8fafc;
+            }
+            .chat-window.hidden-mobile {
+                transform: translateX(100%);
+            }
+        }
     </style>
 </head>
-<body class="flex flex-col items-center p-4">
+<body>
+    <!-- هيدر -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center">
+                <img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain">
+                <div class="hidden md:flex space-x-1 space-x-reverse mr-6">
+                    <a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
+                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
+                    <a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
+                    <a href="chats.html" class="px-4 py-2 text-blue-600 font-bold">رسائلي</a>
+                    <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="userInfo" class="hidden md:flex items-center gap-2">
+                    <span id="userName" class="text-sm font-medium text-gray-700">زائر</span>
+                </div>
+                <a href="login.html" id="loginBtn" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">دخول</a>
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
 
-    <div class="w-full max-w-lg bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="bg-blue-600 p-4 text-white font-bold text-center">
-            مركز الرسائل - شغلني
+        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+            <div class="flex justify-between items-center mb-8">
+                <img src="shagelnie.png.png" alt="شغلني" class="h-12">
+                <button id="close-menu" class="text-gray-500 hover:text-gray-700 transition">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <nav class="flex flex-col space-y-4">
+                <a href="index.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الرئيسية</a>
+                <a href="job_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الوظائف</a>
+                <a href="employee_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الموظفون</a>
+                <a href="chats.html" class="text-blue-600 font-bold py-2 border-b border-gray-100">رسائلي</a>
+                <a href="jop_posting_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">أضف وظيفة</a>
+                <a href="login.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold mt-4 hover:bg-blue-700 transition">دخول</a>
+            </nav>
         </div>
+    </header>
 
-        <div id="chatBox" class="p-4 flex flex-col space-y-3 bg-gray-50">
-            <p class="text-center text-gray-400 text-sm">اختر محادثة للبدء...</p>
+    <div class="container mx-auto px-4 py-4 h-screen">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden chat-container flex">
+
+            <!-- قائمة المحادثات -->
+            <div id="conversationsSidebar" class="conversations-sidebar w-full md:w-1/3 lg:w-1/4 border-l border-gray-200 flex flex-col">
+                <div class="p-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-xl font-bold text-gray-800">رسائلي</h2>
+                    <p class="text-sm text-gray-500 mt-1">محادثاتك</p>
+                </div>
+
+                <div id="conversationsList" class="flex-1 overflow-y-auto">
+                    <div class="p-8 text-center text-gray-400">
+                        <i class="fas fa-comments text-4xl mb-3"></i>
+                        <p>جاري تحميل المحادثات...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نافذة المحادثة -->
+            <div id="chatWindow" class="chat-window hidden-mobile flex-1 flex flex-col bg-slate-50">
+
+                <div id="chatHeader" class="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <button id="backToList" class="mobile-back-btn md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <div>
+                            <h3 id="chatPartnerName" class="font-bold text-gray-800">اختر محادثة</h3>
+                            <p id="chatPartnerInfo" class="text-xs text-gray-500">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="messagesArea" class="messages-area flex-1 p-4 space-y-3">
+                    <div class="empty-state">
+                        <i class="fas fa-paper-plane text-6xl mb-4 text-blue-200"></i>
+                        <p class="text-lg font-medium">اختر محادثة لبدء المراسلة</p>
+                        <p class="text-sm mt-2">أو اذهب إلى <a href="employee_listing_page.html" class="text-blue-600 hover:underline">قائمة الموظفين</a> للتواصل مع أحدهم</p>
+                    </div>
+                </div>
+
+                <div id="inputArea" class="bg-white border-t border-gray-200 p-4 hidden">
+                    <form id="messageForm" class="flex items-end gap-2">
+                        <div class="flex-1 relative">
+                            <textarea 
+                                id="messageInput" 
+                                rows="1"
+                                placeholder="اكتب رسالتك هنا..."
+                                class="w-full pr-4 pl-4 py-3 bg-gray-100 border-0 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white resize-none transition-all"
+                                style="min-height: 44px; max-height: 120px;"
+                            ></textarea>
+                        </div>
+                        <button 
+                            type="submit" 
+                            id="sendBtn"
+                            class="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <form id="msgForm" class="p-4 border-t flex gap-2">
-            <input id="msgInput" type="text" placeholder="اكتب رسالتك..." class="flex-1 border p-2 rounded-lg outline-none focus:border-blue-500">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">إرسال</button>
-        </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // إعدادات مشروعك (نفس التي في صفحة التسجيل)
         const firebaseConfig = {
-            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
-            authDomain: "shaglni-c64c0.firebaseapp.com",
-            databaseURL: "https://shaglni-c64c0-default-rtdb.firebaseio.com",
-            projectId: "shaglni-c64c0",
-            storageBucket: "shaglni-c64c0.appspot.com",
-            appId: "1:768887356636:web:11ec1d6991add3309c8819"
+          apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+          authDomain: "shaglni-c64c0.firebaseapp.com",
+          databaseURL: "https://shaglni-c64c0-default-rtdb.firebaseio.com",
+          projectId: "shaglni-c64c0",
+          storageBucket: "shaglni-c64c0.firebasestorage.app",
+          messagingSenderId: "768887356636",
+          appId: "1:768887356636:web:11ec1d6991add3309c8819",
+          measurementId: "G-98GQGZS09W"
         };
 
         const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
         const rtdb = getDatabase(app);
         const auth = getAuth(app);
 
-        let user = null;
-        let chatId = null;
+        const conversationsList = document.getElementById('conversationsList');
+        const messagesArea = document.getElementById('messagesArea');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const chatPartnerName = document.getElementById('chatPartnerName');
+        const chatPartnerInfo = document.getElementById('chatPartnerInfo');
+        const inputArea = document.getElementById('inputArea');
+        const conversationsSidebar = document.getElementById('conversationsSidebar');
+        const chatWindow = document.getElementById('chatWindow');
+        const backToList = document.getElementById('backToList');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const loginBtn = document.getElementById('loginBtn');
 
-        onAuthStateChanged(auth, (u) => {
-            if (u) {
-                user = u;
-                initChat();
+        let currentUser = null;
+        let currentPartnerId = null;
+        let currentPartnerName = null;
+        let currentChatId = null;
+        let unsubscribeMessages = null;
+        let employeeCache = {};
+
+        // معالجة المصادقة
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                userInfo.classList.remove('hidden');
+                loginBtn.classList.add('hidden');
+
+                try {
+                    const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        userName.textContent = userDoc.data().name || user.displayName || 'مستخدم';
+                    } else {
+                        userName.textContent = user.displayName || 'مستخدم';
+                    }
+                } catch (e) {
+                    userName.textContent = user.displayName || 'مستخدم';
+                }
+
+                loadConversations();
+                checkUrlParams();
             } else {
-                alert("يرجى تسجيل الدخول أولاً");
+                try {
+                    const result = await signInAnonymously(auth);
+                    currentUser = result.user;
+                } catch (error) {
+                    conversationsList.innerHTML = `
+                        <div class="p-8 text-center text-gray-400">
+                            <i class="fas fa-lock text-4xl mb-3 text-red-400"></i>
+                            <p class="text-red-500">يرجى تسجيل الدخول لعرض المحادثات</p>
+                        </div>
+                    `;
+                }
             }
         });
 
-        function initChat() {
-            const params = new URLSearchParams(window.location.search);
-            const otherId = params.get('id'); // نمرر ID الشخص في الرابط
+        function getChatId(uid1, uid2) {
+            return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
+        }
 
-            if (otherId) {
-                // إنشاء ID موحد للمحادثة
-                chatId = user.uid < otherId ? `${user.uid}_${otherId}` : `${otherId}_${user.uid}`;
-                loadMsgs();
+        async function getEmployeeName(employeeId) {
+            if (employeeCache[employeeId]) return employeeCache[employeeId];
+            try {
+                const empDoc = await getDoc(doc(firestore, 'employees', employeeId));
+                if (empDoc.exists()) {
+                    const name = empDoc.data().name || 'موظف';
+                    employeeCache[employeeId] = name;
+                    return name;
+                }
+            } catch (e) {}
+            return 'موظف';
+        }
+
+        async function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const employeeId = urlParams.get('employeeId');
+            const employeeName = urlParams.get('employeeName');
+
+            if (employeeId && currentUser) {
+                await startConversation(employeeId, decodeURIComponent(employeeName || ''));
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
-        function loadMsgs() {
-            onValue(ref(rtdb, `messages/${chatId}`), (snap) => {
-                const box = document.getElementById('chatBox');
-                box.innerHTML = "";
-                if (snap.exists()) {
-                    Object.values(snap.val()).forEach(m => {
-                        const div = document.createElement('div');
-                        const isMe = m.senderId === user.uid;
-                        div.className = `p-2 rounded-lg max-w-[80%] text-sm ${isMe ? 'my-msg' : 'their-msg'}`;
-                        div.textContent = m.text;
-                        box.appendChild(div);
-                    });
-                    box.scrollTop = box.scrollHeight;
+        async function startConversation(partnerId, partnerName) {
+            currentPartnerId = partnerId;
+            currentPartnerName = partnerName || await getEmployeeName(partnerId);
+            currentChatId = getChatId(currentUser.uid, partnerId);
+
+            chatPartnerName.textContent = currentPartnerName;
+            chatPartnerInfo.textContent = '';
+            inputArea.classList.remove('hidden');
+
+            if (window.innerWidth < 768) {
+                conversationsSidebar.classList.add('hidden-mobile');
+                chatWindow.classList.remove('hidden-mobile');
+            }
+
+            loadMessagesForChat(currentChatId);
+        }
+
+        async function loadConversations() {
+            if (!currentUser) return;
+
+            try {
+                const messagesRef = ref(rtdb, 'messages');
+                const snapshot = await get(messagesRef);
+
+                if (!snapshot.exists()) {
+                    conversationsList.innerHTML = `
+                        <div class="p-8 text-center text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-3"></i>
+                            <p>لا توجد محادثات بعد</p>
+                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين</p>
+                        </div>
+                    `;
+                    return;
                 }
+
+                const allChats = snapshot.val();
+                const userConversations = [];
+
+                for (const [chatId, messages] of Object.entries(allChats)) {
+                    if (chatId.includes(currentUser.uid)) {
+                        const partnerId = chatId.replace(currentUser.uid, '').replace('_', '');
+                        const msgArray = Object.entries(messages).map(([id, data]) => ({ id, ...data }));
+                        msgArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                        if (msgArray.length > 0) {
+                            const lastMsg = msgArray[0];
+                            const unreadCount = msgArray.filter(m => m.receiverId === currentUser.uid && !m.read).length;
+
+                            userConversations.push({
+                                partnerId,
+                                lastMessage: lastMsg.text || '',
+                                timestamp: lastMsg.timestamp || Date.now(),
+                                lastMessageSender: lastMsg.senderId,
+                                unreadCount
+                            });
+                        }
+                    }
+                }
+
+                userConversations.sort((a, b) => b.timestamp - a.timestamp);
+
+                if (userConversations.length === 0) {
+                    conversationsList.innerHTML = `
+                        <div class="p-8 text-center text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-3"></i>
+                            <p>لا توجد محادثات بعد</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                for (const conv of userConversations) {
+                    conv.partnerName = await getEmployeeName(conv.partnerId);
+                }
+
+                renderConversationsList(userConversations);
+            } catch (error) {
+                console.error('خطأ:', error);
+                conversationsList.innerHTML = `
+                    <div class="p-8 text-center text-gray-400">
+                        <i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i>
+                        <p class="text-red-500">حدث خطأ في تحميل المحادثات</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderConversationsList(conversations) {
+            conversationsList.innerHTML = '';
+
+            conversations.forEach(chat => {
+                const isActive = currentPartnerId === chat.partnerId;
+                const timeText = formatTime(chat.timestamp);
+                const lastText = chat.lastMessage || 'بدء محادثة جديدة';
+                const unreadCount = chat.unreadCount || 0;
+
+                const item = document.createElement('div');
+                item.className = `conversation-item p-4 border-b border-gray-100 ${isActive ? 'active' : ''}`;
+                item.onclick = () => startConversation(chat.partnerId, chat.partnerName);
+
+                item.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="font-semibold text-gray-800">${chat.partnerName || 'موظف'}</h4>
+                        <span class="text-xs text-gray-400">${timeText}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm text-gray-500 truncate ${unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
+                            ${chat.lastMessageSender === currentUser.uid ? 'أنت: ' : ''}${lastText}
+                        </p>
+                        ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+                    </div>
+                `;
+
+                conversationsList.appendChild(item);
             });
         }
 
-        document.getElementById('msgForm').onsubmit = (e) => {
-            e.preventDefault();
-            const input = document.getElementById('msgInput');
-            if (input.value.trim() && chatId) {
-                push(ref(rtdb, `messages/${chatId}`), {
-                    text: input.value,
-                    senderId: user.uid,
-                    time: Date.now()
-                });
-                input.value = "";
+        function loadMessagesForChat(chatId) {
+            messagesArea.innerHTML = '<div class="flex justify-center p-8"><div class="loading-spinner"></div></div>';
+
+            const messagesRef = ref(rtdb, 'messages/' + chatId);
+
+            unsubscribeMessages = onValue(messagesRef, (snapshot) => {
+                if (!snapshot.exists()) {
+                    messagesArea.innerHTML = `
+                        <div class="empty-state">
+                            <p class="text-lg font-medium">ابدأ محادثتك مع ${currentPartnerName || 'الطرف الآخر'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const messages = snapshot.val();
+                const messageArray = Object.entries(messages).map(([id, data]) => ({ id, ...data }));
+                messageArray.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                renderMessages(messageArray);
+                markMessagesAsRead(chatId, messageArray);
+            }, (error) => {
+                console.error('خطأ في تحميل الرسائل:', error);
+                messagesArea.innerHTML = '<div class="text-center text-red-500 p-8">حدث خطأ في تحميل الرسائل</div>';
+            });
+        }
+
+        async function markMessagesAsRead(chatId, messages) {
+            if (!currentUser) return;
+            const updates = {};
+            messages.forEach(msg => {
+                if (msg.receiverId === currentUser.uid && !msg.read) {
+                    updates['messages/' + chatId + '/' + msg.id + '/read'] = true;
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                try { await update(ref(rtdb), updates); } catch (e) {}
             }
-        };
+        }
+
+        function renderMessages(messages) {
+            messagesArea.innerHTML = '';
+            let lastDate = null;
+
+            messages.forEach(msg => {
+                const isSent = msg.senderId === currentUser.uid;
+                const messageDate = new Date(msg.timestamp || Date.now());
+
+                const dateStr = formatDate(messageDate);
+                if (dateStr !== lastDate) {
+                    lastDate = dateStr;
+                    const dateSeparator = document.createElement('div');
+                    dateSeparator.className = 'flex justify-center my-4';
+                    dateSeparator.innerHTML = `<span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">${dateStr}</span>`;
+                    messagesArea.appendChild(dateSeparator);
+                }
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flex ${isSent ? 'justify-start' : 'justify-end'} fade-in`;
+                messageDiv.innerHTML = `
+                    <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
+                        <p>${escapeHtml(msg.text || '')}</p>
+                        <span class="message-time ${isSent ? 'text-blue-200' : 'text-gray-400'}">
+                            ${formatMessageTime(msg.timestamp)}
+                            ${isSent ? (msg.read ? '<i class="fas fa-check-double mr-1"></i>' : '<i class="fas fa-check mr-1"></i>') : ''}
+                        </span>
+                    </div>
+                `;
+                messagesArea.appendChild(messageDiv);
+            });
+
+            scrollToBottom();
+        }
+
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const text = messageInput.value.trim();
+            if (!text || !currentPartnerId || !currentUser || !currentChatId) return;
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            try {
+                const messageData = {
+                    text: text,
+                    senderId: currentUser.uid,
+                    senderName: userName.textContent || 'مستخدم',
+                    receiverId: currentPartnerId,
+                    timestamp: Date.now(),
+                    read: false
+                };
+
+                const messagesRef = ref(rtdb, 'messages/' + currentChatId);
+                const newMessageRef = push(messagesRef);
+                await set(newMessageRef, messageData);
+
+                messageInput.value = '';
+                messageInput.style.height = '44px';
+                scrollToBottom();
+                loadConversations();
+            } catch (error) {
+                console.error('خطأ في إرسال الرسالة:', error);
+                alert('حدث خطأ: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        });
+
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                messageForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        backToList.addEventListener('click', () => {
+            conversationsSidebar.classList.remove('hidden-mobile');
+            chatWindow.classList.add('hidden-mobile');
+            currentPartnerId = null;
+            currentChatId = null;
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+                unsubscribeMessages = null;
+            }
+        });
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 24 * 60 * 60 * 1000 && date.getDate() === now.getDate()) {
+                return date.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+            }
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth()) return 'أمس';
+            if (diff < 7 * 24 * 60 * 60 * 1000) {
+                const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+                return days[date.getDay()];
+            }
+            return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+        }
+
+        function formatMessageTime(timestamp) {
+            if (!timestamp) return '';
+            return new Date(timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDate(date) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            if (messageDate.getTime() === today.getTime()) return 'اليوم';
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (messageDate.getTime() === yesterday.getTime()) return 'أمس';
+            return date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function scrollToBottom() {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        const menuButton = document.getElementById('mobile-menu-button');
+        const closeButton = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuButton.addEventListener('click', () => mobileMenu.classList.add('open'));
+        closeButton.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeMessages) unsubscribeMessages();
+        });
     </script>
 </body>
 </html>
