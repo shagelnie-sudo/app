@@ -2,262 +2,104 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رسائلي - شغلني</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>محادثة بسيطة - شغلني</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background-color: #f5f7fa; }
-        .chat-container { height: calc(100vh - 120px); }
-        .messages-area { overflow-y: auto; scrollbar-width: thin; }
-        .message-bubble { max-width: 75%; padding: 12px 16px; border-radius: 15px; margin-bottom: 10px; position: relative; }
-        .message-sent { background: #2563eb; color: white; align-self: flex-start; border-bottom-right-radius: 2px; }
-        .message-received { background: white; color: #1f2937; align-self: flex-end; border: 1px solid #e5e7eb; border-bottom-left-radius: 2px; }
-        .conversation-item.active { background-color: #eff6ff; border-right: 4px solid #2563eb; }
-        @media (max-width: 768px) { .hidden-mobile { display: none !important; } }
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background-color: #f0f2f5; }
+        #chatBox { height: 60vh; overflow-y: auto; }
+        .my-msg { background-color: #dcf8c6; align-self: flex-start; }
+        .their-msg { background-color: #ffffff; align-self: flex-end; border: 1px solid #ddd; }
     </style>
 </head>
-<body>
+<body class="flex flex-col items-center p-4">
 
-    <header class="bg-white shadow-sm h-20 flex items-center px-6 mb-4">
-        <img src="shagelnie.png.png" alt="شغلني" class="h-12 ml-4">
-        <nav class="hidden md:flex gap-6">
-            <a href="dashboard.html" class="text-gray-600 hover:text-blue-600">لوحة التحكم</a>
-            <a href="employee_listing_page.html" class="text-gray-600 hover:text-blue-600">الموظفون</a>
-            <a href="chats.html" class="text-blue-600 font-bold border-b-2 border-blue-600">رسائلي</a>
-        </nav>
-    </header>
-
-    <div class="container mx-auto px-4">
-        <div class="bg-white rounded-2xl shadow-xl chat-container flex overflow-hidden border border-gray-100">
-            
-            <div id="conversationsSidebar" class="w-full md:w-1/3 lg:w-1/4 border-l border-gray-100 flex flex-col bg-white">
-                <div class="p-5 border-b bg-gray-50">
-                    <h2 class="text-xl font-bold text-gray-800">المحادثات</h2>
-                </div>
-                <div id="conversationsList" class="flex-1 overflow-y-auto">
-                    <div class="p-10 text-center text-gray-400">
-                        <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
-                        <p>جاري التحميل...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="chatWindow" class="hidden-mobile md:flex flex-1 flex-col bg-slate-50">
-                <div id="chatHeader" class="p-4 bg-white border-b flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <button id="backBtn" class="md:hidden ml-2 text-gray-500"><i class="fas fa-arrow-right"></i></button>
-                        <div id="partnerAvatar" class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold overflow-hidden">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div>
-                            <h3 id="partnerName" class="font-bold text-gray-800">اختر محادثة للبدء</h3>
-                            <span id="partnerStatus" class="text-xs text-green-500 hidden">متصل الآن</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="messagesArea" class="flex-1 p-6 messages-area flex flex-col space-y-2">
-                    <div class="m-auto text-center text-gray-400">
-                        <i class="fas fa-comments text-6xl mb-4 opacity-20"></i>
-                        <p>رسائلك مشفرة وبأمان</p>
-                    </div>
-                </div>
-
-                <div id="inputArea" class="p-4 bg-white border-t hidden">
-                    <form id="messageForm" class="flex gap-3">
-                        <input id="messageInput" type="text" autocomplete="off" placeholder="اكتب رسالتك هنا..." 
-                               class="flex-1 p-4 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                        <button type="submit" class="bg-blue-600 text-white px-6 rounded-2xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
+    <div class="w-full max-w-lg bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-blue-600 p-4 text-white font-bold text-center">
+            مركز الرسائل - شغلني
         </div>
+
+        <div id="chatBox" class="p-4 flex flex-col space-y-3 bg-gray-50">
+            <p class="text-center text-gray-400 text-sm">اختر محادثة للبدء...</p>
+        </div>
+
+        <form id="msgForm" class="p-4 border-t flex gap-2">
+            <input id="msgInput" type="text" placeholder="اكتب رسالتك..." class="flex-1 border p-2 rounded-lg outline-none focus:border-blue-500">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">إرسال</button>
+        </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // استخدام المفاتيح التي زودتني بها
+        // إعدادات مشروعك (نفس التي في صفحة التسجيل)
         const firebaseConfig = {
             apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
             authDomain: "shaglni-c64c0.firebaseapp.com",
-            databaseURL: "https://shaglni-c64c0-default-rtdb.firebaseio.com", // تأكد من وجود default-rtdb
+            databaseURL: "https://shaglni-c64c0-default-rtdb.firebaseio.com",
             projectId: "shaglni-c64c0",
             storageBucket: "shaglni-c64c0.appspot.com",
-            messagingSenderId: "768887356636",
             appId: "1:768887356636:web:11ec1d6991add3309c8819"
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         const rtdb = getDatabase(app);
         const auth = getAuth(app);
 
-        let currentUser = null;
-        let currentChatId = null;
+        let user = null;
+        let chatId = null;
 
-        // 1. مراقبة حالة تسجيل الدخول
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                loadConversations();
-                checkUrlParams();
+        onAuthStateChanged(auth, (u) => {
+            if (u) {
+                user = u;
+                initChat();
             } else {
-                window.location.href = 'login.html'; // توجيه لتسجيل الدخول إذا لم يكن مسجلاً
+                alert("يرجى تسجيل الدخول أولاً");
             }
         });
 
-        // 2. فحص الرابط للبدء بمحادثة جديدة (من صفحة الموظفين)
-        async function checkUrlParams() {
+        function initChat() {
             const params = new URLSearchParams(window.location.search);
-            const targetId = params.get('employeeId');
-            const targetName = params.get('employeeName');
+            const otherId = params.get('id'); // نمرر ID الشخص في الرابط
 
-            if (targetId && currentUser) {
-                if (targetId === currentUser.uid) return; // لا يمكن مراسلة النفس
-
-                currentChatId = makeChatId(currentUser.uid, targetId);
-                
-                // تحديث واجهة الرأس فوراً
-                document.getElementById('partnerName').textContent = decodeURIComponent(targetName || "مستخدم شغلني");
-                document.getElementById('inputArea').classList.remove('hidden');
-                
-                loadMessages(currentChatId);
-                toggleMobileView(true);
+            if (otherId) {
+                // إنشاء ID موحد للمحادثة
+                chatId = user.uid < otherId ? `${user.uid}_${otherId}` : `${otherId}_${user.uid}`;
+                loadMsgs();
             }
         }
 
-        // 3. توليد معرف محادثة ثابت بين شخصين
-        function makeChatId(id1, id2) {
-            return id1 < id2 ? `${id1}_${id2}` : `${id2}_${id1}`;
-        }
-
-        // 4. تحميل قائمة المحادثات (Real-time)
-        function loadConversations() {
-            const conversationsRef = ref(rtdb, 'messages');
-            onValue(conversationsRef, async (snapshot) => {
-                const listArea = document.getElementById('conversationsList');
-                listArea.innerHTML = "";
-                
-                if (!snapshot.exists()) {
-                    listArea.innerHTML = '<div class="p-10 text-center text-gray-400">لا توجد محادثات بعد</div>';
-                    return;
-                }
-
-                const data = snapshot.val();
-                const myChats = Object.keys(data).filter(id => id.includes(currentUser.uid));
-
-                for (const chatId of myChats) {
-                    const partnerId = chatId.replace(currentUser.uid, "").replace("_", "");
-                    const messages = Object.values(data[chatId]);
-                    const lastMsg = messages[messages.length - 1];
-
-                    // محاولة جلب اسم الشخص من Firestore (اختياري لتحسين المظهر)
-                    let pName = "مستخدم شغلني";
-                    try {
-                        const userDoc = await getDoc(doc(db, "users", partnerId));
-                        if(userDoc.exists()) pName = userDoc.data().name;
-                    } catch(e) {}
-
-                    const item = document.createElement('div');
-                    item.className = `p-4 border-b cursor-pointer hover:bg-blue-50 transition-all conversation-item ${chatId === currentChatId ? 'active' : ''}`;
-                    item.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center font-bold text-gray-500">
-                                ${pName.charAt(0)}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-center mb-1">
-                                    <h4 class="font-bold text-sm text-gray-800 truncate">${pName}</h4>
-                                    <span class="text-[10px] text-gray-400">${new Date(lastMsg.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'})}</span>
-                                </div>
-                                <p class="text-xs text-gray-500 truncate">${lastMsg.senderId === currentUser.uid ? 'أنت: ' : ''}${lastMsg.text}</p>
-                            </div>
-                        </div>
-                    `;
-                    item.onclick = () => {
-                        currentChatId = chatId;
-                        document.getElementById('partnerName').textContent = pName;
-                        document.getElementById('inputArea').classList.remove('hidden');
-                        loadMessages(chatId);
-                        toggleMobileView(true);
-                    };
-                    listArea.appendChild(item);
-                }
-            });
-        }
-
-        // 5. تحميل الرسائل داخل المحادثة
-        function loadMessages(chatId) {
-            const msgRef = ref(rtdb, `messages/${chatId}`);
-            onValue(msgRef, (snapshot) => {
-                const msgArea = document.getElementById('messagesArea');
-                msgArea.innerHTML = "";
-                
-                if (snapshot.exists()) {
-                    Object.values(snapshot.val()).forEach(msg => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = `flex w-full ${msg.senderId === currentUser.uid ? 'justify-start' : 'justify-end'}`;
-                        
+        function loadMsgs() {
+            onValue(ref(rtdb, `messages/${chatId}`), (snap) => {
+                const box = document.getElementById('chatBox');
+                box.innerHTML = "";
+                if (snap.exists()) {
+                    Object.values(snap.val()).forEach(m => {
                         const div = document.createElement('div');
-                        div.className = `message-bubble ${msg.senderId === currentUser.uid ? 'message-sent' : 'message-received'}`;
-                        div.innerHTML = `
-                            <div class="text-sm">${msg.text}</div>
-                            <div class="text-[9px] mt-1 opacity-70 text-left">${new Date(msg.timestamp).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>
-                        `;
-                        wrapper.appendChild(div);
-                        msgArea.appendChild(wrapper);
+                        const isMe = m.senderId === user.uid;
+                        div.className = `p-2 rounded-lg max-w-[80%] text-sm ${isMe ? 'my-msg' : 'their-msg'}`;
+                        div.textContent = m.text;
+                        box.appendChild(div);
                     });
-                    msgArea.scrollTop = msgArea.scrollHeight;
+                    box.scrollTop = box.scrollHeight;
                 }
             });
         }
 
-        // 6. إرسال رسالة جديدة
-        document.getElementById('messageForm').onsubmit = async (e) => {
+        document.getElementById('msgForm').onsubmit = (e) => {
             e.preventDefault();
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-
-            if (text && currentChatId) {
-                const newMessage = {
-                    text: text,
-                    senderId: currentUser.uid,
-                    timestamp: Date.now()
-                };
-                
-                try {
-                    await push(ref(rtdb, `messages/${currentChatId}`), newMessage);
-                    input.value = "";
-                } catch (error) {
-                    alert("فشل في إرسال الرسالة، تحقق من الاتصال.");
-                }
+            const input = document.getElementById('msgInput');
+            if (input.value.trim() && chatId) {
+                push(ref(rtdb, `messages/${chatId}`), {
+                    text: input.value,
+                    senderId: user.uid,
+                    time: Date.now()
+                });
+                input.value = "";
             }
         };
-
-        // تبديل العرض في الموبايل
-        function toggleMobileView(showChat) {
-            if (window.innerWidth < 768) {
-                if (showChat) {
-                    document.getElementById('conversationsSidebar').classList.add('hidden-mobile');
-                    document.getElementById('chatWindow').classList.remove('hidden-mobile');
-                } else {
-                    document.getElementById('conversationsSidebar').classList.remove('hidden-mobile');
-                    document.getElementById('chatWindow').classList.add('hidden-mobile');
-                }
-            }
-        }
-
-        document.getElementById('backBtn').onclick = () => toggleMobileView(false);
-
     </script>
 </body>
 </html>
