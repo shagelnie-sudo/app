@@ -240,7 +240,7 @@
             </div>
             <div class="flex items-center gap-4">
                 <div id="userInfo" class="hidden md:flex items-center gap-2">
-                    <div id="userAvatarPlaceholder" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                    <div id="userAvatar" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
                         <i class="fas fa-user"></i>
                     </div>
                     <span id="userName" class="text-sm font-medium text-gray-700">زائر</span>
@@ -297,10 +297,9 @@
                             <i class="fas fa-arrow-right"></i>
                         </button>
                         <div class="relative">
-                            <div id="chatPartnerAvatarPlaceholder" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white">
+                            <div id="chatPartnerAvatar" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white">
                                 <i class="fas fa-user"></i>
                             </div>
-                            <img id="chatPartnerAvatar" src="" alt="" class="w-10 h-10 rounded-full object-cover hidden">
                             <span id="chatPartnerStatus" class="offline-status"></span>
                         </div>
                         <div>
@@ -359,7 +358,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, update, get, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
@@ -383,7 +382,6 @@
         const messageInput = document.getElementById('messageInput');
         const chatPartnerName = document.getElementById('chatPartnerName');
         const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
-        const chatPartnerAvatarPlaceholder = document.getElementById('chatPartnerAvatarPlaceholder');
         const chatPartnerInfo = document.getElementById('chatPartnerInfo');
         const chatPartnerStatus = document.getElementById('chatPartnerStatus');
         const viewProfileLink = document.getElementById('viewProfileLink');
@@ -404,11 +402,11 @@
         let userDataCache = {};
 
         // دالة لإنشاء avatar placeholder
-        function getAvatarPlaceholder(name) {
+        function getAvatarHtml(name, size = 'w-10 h-10') {
             const initial = name ? name.charAt(0).toUpperCase() : '?';
-            const colors = ['bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-600', 'bg-pink-600', 'bg-teal-600'];
+            const colors = ['bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-600', 'bg-pink-600', 'bg-teal-600', 'bg-indigo-600', 'bg-red-600'];
             const colorIndex = name ? name.charCodeAt(0) % colors.length : 0;
-            return `<div class="w-full h-full rounded-full ${colors[colorIndex]} flex items-center justify-center text-white font-bold text-sm">${initial}</div>`;
+            return `<div class="${size} rounded-full ${colors[colorIndex]} flex items-center justify-center text-white font-bold text-sm">${initial}</div>`;
         }
 
         // معالجة المصادقة
@@ -424,11 +422,14 @@
                     if (userSnapshot.exists()) {
                         const userData = userSnapshot.val();
                         userName.textContent = userData.name || user.displayName || 'مستخدم';
+                        document.getElementById('userAvatar').innerHTML = getAvatarHtml(userData.name || 'مستخدم', 'w-8 h-8');
                     } else {
                         userName.textContent = user.displayName || 'مستخدم';
+                        document.getElementById('userAvatar').innerHTML = getAvatarHtml(user.displayName || 'مستخدم', 'w-8 h-8');
                     }
                 } catch (e) {
                     userName.textContent = user.displayName || 'مستخدم';
+                    document.getElementById('userAvatar').innerHTML = getAvatarHtml(user.displayName || 'مستخدم', 'w-8 h-8');
                 }
 
                 loadConversations();
@@ -464,10 +465,7 @@
                 const empSnap = await get(empRef);
                 if (empSnap.exists()) {
                     const data = empSnap.val();
-                    const info = {
-                        name: data.name || 'موظف',
-                        photo: data.profileImageUrl || null
-                    };
+                    const info = { name: data.name || 'موظف', photo: data.profileImageUrl || null };
                     userDataCache[userId] = info;
                     return info;
                 }
@@ -476,10 +474,7 @@
                 const userSnap = await get(userRef);
                 if (userSnap.exists()) {
                     const data = userSnap.val();
-                    const info = {
-                        name: data.name || 'مستخدم',
-                        photo: data.profileImageUrl || null
-                    };
+                    const info = { name: data.name || 'مستخدم', photo: data.profileImageUrl || null };
                     userDataCache[userId] = info;
                     return info;
                 }
@@ -513,18 +508,7 @@
             currentChatId = getChatId(currentUser.uid, partnerId);
 
             chatPartnerName.textContent = currentPartnerData.name;
-
-            // التعامل مع الصورة
-            if (currentPartnerData.photo) {
-                chatPartnerAvatar.src = currentPartnerData.photo;
-                chatPartnerAvatar.classList.remove('hidden');
-                chatPartnerAvatarPlaceholder.classList.add('hidden');
-            } else {
-                chatPartnerAvatarPlaceholder.innerHTML = getAvatarPlaceholder(currentPartnerData.name);
-                chatPartnerAvatarPlaceholder.classList.remove('hidden');
-                chatPartnerAvatar.classList.add('hidden');
-            }
-
+            chatPartnerAvatar.innerHTML = getAvatarHtml(currentPartnerData.name);
             chatPartnerInfo.textContent = 'غير متصل';
             chatPartnerStatus.className = 'offline-status';
             viewProfileLink.href = `employee_listing_page.html?id=${partnerId}`;
@@ -555,7 +539,7 @@
 
             const chatsRef = ref(db, 'chats_by_user/' + currentUser.uid);
 
-            unsubscribeConversations = onValue(chatsRef, async (snapshot) => {
+            unsubscribeConversations = onValue(chatsRef, (snapshot) => {
                 if (!snapshot.exists()) {
                     conversationsList.innerHTML = `
                         <div class="p-8 text-center text-gray-400">
@@ -571,15 +555,10 @@
                 const chatArray = [];
 
                 for (const [partnerId, chatData] of Object.entries(chats)) {
-                    chatArray.push({
-                        partnerId,
-                        ...chatData
-                    });
+                    chatArray.push({ partnerId, ...chatData });
                 }
 
-                // ترتيب حسب آخر رسالة
                 chatArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
                 renderConversationsList(chatArray);
             }, (error) => {
                 console.error('خطأ في تحميل المحادثات:', error);
@@ -603,26 +582,17 @@
                 const lastText = chat.lastMessage || 'بدء محادثة جديدة';
                 const unreadCount = chat.unreadCount || 0;
                 const partnerName = chat.partnerName || 'مستخدم';
-                const partnerPhoto = chat.partnerPhoto || '';
-
-                // إنشاء avatar HTML
-                let avatarHtml;
-                if (partnerPhoto) {
-                    avatarHtml = `<img src="${partnerPhoto}" alt="${partnerName}" class="w-12 h-12 rounded-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="w-12 h-12 rounded-full bg-gray-300 items-center justify-center text-white hidden">${getAvatarPlaceholder(partnerName)}</div>`;
-                } else {
-                    avatarHtml = `<div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white">${getAvatarPlaceholder(partnerName)}</div>`;
-                }
 
                 const item = document.createElement('div');
                 item.className = `conversation-item p-4 border-b border-gray-100 flex items-center gap-3 ${isActive ? 'active' : ''}`;
                 item.onclick = () => openConversationWithPartner(chat.partnerId, {
                     name: partnerName,
-                    photo: partnerPhoto
+                    photo: chat.partnerPhoto || null
                 });
 
                 item.innerHTML = `
                     <div class="relative flex-shrink-0">
-                        ${avatarHtml}
+                        ${getAvatarHtml(partnerName, 'w-12 h-12')}
                         <span class="offline-status"></span>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -669,18 +639,7 @@
             }
 
             chatPartnerName.textContent = partnerData.name;
-
-            // التعامل مع صورة الشريك
-            if (partnerData.photo) {
-                chatPartnerAvatar.src = partnerData.photo;
-                chatPartnerAvatar.classList.remove('hidden');
-                chatPartnerAvatarPlaceholder.classList.add('hidden');
-            } else {
-                chatPartnerAvatarPlaceholder.innerHTML = getAvatarPlaceholder(partnerData.name);
-                chatPartnerAvatarPlaceholder.classList.remove('hidden');
-                chatPartnerAvatar.classList.add('hidden');
-            }
-
+            chatPartnerAvatar.innerHTML = getAvatarHtml(partnerData.name);
             chatPartnerInfo.textContent = 'غير متصل';
             chatPartnerStatus.className = 'offline-status';
             viewProfileLink.href = `employee_listing_page.html?id=${partnerId}`;
@@ -725,8 +684,6 @@
                 messageArray.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
                 renderMessages(messageArray);
-
-                // تحديث حالة القراءة
                 markMessagesAsRead(chatId, messageArray);
             }, (error) => {
                 console.error('خطأ في تحميل الرسائل:', error);
@@ -886,7 +843,6 @@
         // دوال تنسيق الوقت
         function formatTime(timestamp) {
             if (!timestamp) return '';
-
             const date = new Date(timestamp);
             const now = new Date();
             const diff = now - date;
@@ -894,38 +850,29 @@
             if (diff < 24 * 60 * 60 * 1000 && date.getDate() === now.getDate()) {
                 return date.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
             }
-
             const yesterday = new Date(now);
             yesterday.setDate(yesterday.getDate() - 1);
-            if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth()) {
-                return 'أمس';
-            }
-
+            if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth()) return 'أمس';
             if (diff < 7 * 24 * 60 * 60 * 1000) {
                 const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
                 return days[date.getDay()];
             }
-
             return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
         }
 
         function formatMessageTime(timestamp) {
             if (!timestamp) return '';
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+            return new Date(timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
         }
 
         function formatDate(date) {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
             if (messageDate.getTime() === today.getTime()) return 'اليوم';
-
             const yesterday = new Date(today);
             yesterday.setDate(yesterday.getDate() - 1);
             if (messageDate.getTime() === yesterday.getTime()) return 'أمس';
-
             return date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
@@ -952,9 +899,6 @@
             if (unsubscribeMessages) unsubscribeMessages();
             if (unsubscribeConversations) unsubscribeConversations();
         });
-
-        // تعريف الدوال في window
-        window.openConversationWithPartner = openConversationWithPartner;
     </script>
 </body>
 </html>
