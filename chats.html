@@ -9,108 +9,205 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f5f7fa;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --bg-light: #f8fafc;
+            --glass: rgba(255,255,255,0.75);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius-lg: 1rem;
+            --radius-xl: 1.25rem;
         }
 
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 50%, #f0f9ff 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .site-header {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226,232,240,0.6);
+        }
+
+        /* Mobile menu */
         #mobile-menu {
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
             transform: translateX(100%);
         }
         #mobile-menu.open {
             transform: translateX(0);
         }
 
+        /* Chat container */
         .chat-container {
-            height: calc(100vh - 80px);
+            height: calc(100vh - 88px);
+            max-height: 900px;
         }
 
         @media (max-width: 768px) {
             .chat-container {
-                height: calc(100vh - 140px);
+                height: calc(100vh - 80px);
+                max-height: none;
+                border-radius: 0 !important;
             }
         }
 
+        /* Scrollbar */
         .messages-area {
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: #cbd5e1 transparent;
         }
+        .messages-area::-webkit-scrollbar { width: 5px; }
+        .messages-area::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        .messages-area::-webkit-scrollbar-track { background: transparent; }
 
-        .messages-area::-webkit-scrollbar {
-            width: 6px;
+        .sidebar-scroll {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
         }
-        .messages-area::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 3px;
-        }
+        .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
 
+        /* Message bubbles */
         .message-bubble {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
+            max-width: 78%;
+            padding: 14px 18px;
+            border-radius: 20px;
             position: relative;
             word-wrap: break-word;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.15s ease;
+        }
+        .message-bubble:hover {
+            transform: translateY(-1px);
         }
 
         .message-sent {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             color: white;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 6px;
             margin-left: auto;
+            box-shadow: 0 4px 15px -3px rgba(37,99,235,0.3);
         }
 
         .message-received {
-            background-color: white;
+            background: #ffffff;
             color: #1f2937;
-            border: 1px solid #e5e7eb;
-            border-bottom-left-radius: 4px;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 6px;
             margin-right: auto;
+            box-shadow: 0 2px 8px -2px rgba(0,0,0,0.06);
         }
 
         .message-time {
             font-size: 0.7rem;
-            opacity: 0.7;
-            margin-top: 4px;
+            opacity: 0.75;
+            margin-top: 6px;
             display: block;
+            direction: ltr;
+            text-align: left;
         }
 
+        .message-sent .message-time { color: rgba(255,255,255,0.85); }
+
+        /* Conversation items */
         .conversation-item {
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
             cursor: pointer;
+            border-right: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
-
+        .conversation-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(37,99,235,0.03), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .conversation-item:hover::before { opacity: 1; }
         .conversation-item:hover {
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
+            transform: translateX(-2px);
         }
-
         .conversation-item.active {
-            background-color: #eff6ff;
+            background: linear-gradient(90deg, #eff6ff 0%, #f0f9ff 100%);
             border-right: 3px solid #2563eb;
+            box-shadow: inset 0 0 20px rgba(37,99,235,0.04);
         }
 
-        .unread-badge {
-            background-color: #ef4444;
-            color: white;
-            font-size: 0.75rem;
-            min-width: 20px;
-            height: 20px;
-            border-radius: 10px;
+        .avatar-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 6px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .unread-badge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 0.7rem;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 7px;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(239,68,68,0.3);
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            box-shadow: 0 0 0 2px rgba(34,197,94,0.2);
+            animation: pulse-dot 2.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 0 2px rgba(34,197,94,0.2); }
+            50% { box-shadow: 0 0 0 5px rgba(34,197,94,0.1); }
         }
 
         .fade-in {
-            animation: fadeIn 0.3s ease-in;
+            animation: fadeIn 0.35s cubic-bezier(0.4,0,0.2,1);
         }
-
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(12px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .empty-state {
@@ -119,31 +216,164 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #9ca3af;
+            color: #94a3b8;
+            text-align: center;
+            padding: 2rem;
         }
 
         .loading-spinner {
-            border: 3px solid #f3f4f6;
+            border: 3px solid #f1f5f9;
             border-top: 3px solid #2563eb;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.8s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        .mobile-back-btn {
-            display: none;
+        /* Input area */
+        .input-wrapper {
+            position: relative;
+            background: #f1f5f9;
+            border-radius: 24px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .input-wrapper:focus-within {
+            background: #ffffff;
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
         }
 
+        #messageInput {
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+            flex-shrink: 0;
+        }
+        .send-btn:hover {
+            transform: scale(1.05) rotate(-5deg);
+            box-shadow: 0 6px 20px rgba(37,99,235,0.4);
+        }
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Date separator */
+        .date-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        .date-separator::before {
+            content: '';
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        }
+        .date-separator span {
+            background: #f8fafc;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            position: relative;
+            z-index: 1;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: white;
+            padding: 14px 24px;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+            border: 1px solid #fee2e2;
+            direction: rtl;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .toast.error { border-color: #fecaca; color: #991b1b; }
+        .toast.success { border-color: #bbf7d0; color: #166534; }
+        .toast.info { border-color: #bfdbfe; color: #1e40af; }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 6px;
+            border: 1px solid #e2e8f0;
+            width: fit-content;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Mobile */
+        .mobile-back-btn { display: none; }
+
         @media (max-width: 768px) {
-            .mobile-back-btn {
-                display: inline-flex;
-            }
+            .mobile-back-btn { display: inline-flex; }
             .conversations-sidebar {
                 position: fixed;
                 top: 80px;
@@ -153,7 +383,7 @@
                 z-index: 40;
                 background: white;
                 transform: translateX(0);
-                transition: transform 0.3s ease;
+                transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
             }
             .conversations-sidebar.hidden-mobile {
                 transform: translateX(100%);
@@ -171,109 +401,220 @@
                 transform: translateX(100%);
             }
         }
+
+        /* Search bar */
+        .search-box {
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 40px 10px 14px;
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .search-box input:focus {
+            background: white;
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.08);
+        }
+        .search-box i {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            color: #22c55e;
+            font-weight: 500;
+        }
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Rule hint */
+        .rule-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+            padding: 6px 0;
+            direction: rtl;
+        }
+        .rule-hint i { margin-left: 4px; color: #f59e0b; }
+
+        /* Blocked overlay */
+        .blocked-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 10;
+            border-radius: 24px;
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="toastMsg">رسالة</span>
+    </div>
+
     <!-- هيدر -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
+    <header class="site-header shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
             <div class="flex items-center">
                 <img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain">
                 <div class="hidden md:flex space-x-1 space-x-reverse mr-6">
-                    <a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
-                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
-                    <a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
-                    <a href="chats.html" class="px-4 py-2 text-blue-600 font-bold">رسائلي</a>
-                    <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
+                    <a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition rounded-lg hover:bg-gray-50">الرئيسية</a>
+                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition rounded-lg hover:bg-gray-50">الوظائف</a>
+                    <a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition rounded-lg hover:bg-gray-50">الموظفون</a>
+                    <a href="chats.html" class="px-4 py-2 text-blue-600 font-bold bg-blue-50 rounded-lg">رسائلي</a>
+                    <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition rounded-lg hover:bg-gray-50">أضف وظيفة</a>
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <div id="userInfo" class="hidden md:flex items-center gap-2">
-                    <span id="userName" class="text-sm font-medium text-gray-700">زائر</span>
+                <div id="userInfo" class="hidden md:flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span id="userName" class="text-sm font-bold text-gray-800">زائر</span>
                 </div>
-                <a href="login.html" id="loginBtn" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">دخول</a>
-                <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition">
-                    <i class="fas fa-bars text-2xl"></i>
+                <a href="login.html" id="loginBtn" class="hidden md:block px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg shadow-blue-200">دخول</a>
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100">
+                    <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
         </nav>
 
-        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-80 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
             <div class="flex justify-between items-center mb-8">
                 <img src="shagelnie.png.png" alt="شغلني" class="h-12">
-                <button id="close-menu" class="text-gray-500 hover:text-gray-700 transition">
-                    <i class="fas fa-times text-2xl"></i>
+                <button id="close-menu" class="text-gray-500 hover:text-gray-700 transition w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <nav class="flex flex-col space-y-4">
-                <a href="index.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الرئيسية</a>
-                <a href="job_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الوظائف</a>
-                <a href="employee_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الموظفون</a>
-                <a href="chats.html" class="text-blue-600 font-bold py-2 border-b border-gray-100">رسائلي</a>
-                <a href="jop_posting_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">أضف وظيفة</a>
-                <a href="login.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold mt-4 hover:bg-blue-700 transition">دخول</a>
+            <nav class="flex flex-col space-y-2">
+                <a href="index.html" class="text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 hover:text-blue-600 transition font-medium">الرئيسية</a>
+                <a href="job_listing_page.html" class="text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 hover:text-blue-600 transition font-medium">الوظائف</a>
+                <a href="employee_listing_page.html" class="text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 hover:text-blue-600 transition font-medium">الموظفون</a>
+                <a href="chats.html" class="text-blue-600 font-bold py-3 px-4 rounded-xl bg-blue-50">رسائلي</a>
+                <a href="jop_posting_page.html" class="text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 hover:text-blue-600 transition font-medium">أضف وظيفة</a>
+                <a href="login.html" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center py-3.5 rounded-xl font-bold mt-4 hover:from-blue-700 hover:to-blue-800 transition shadow-lg shadow-blue-200">دخول</a>
             </nav>
         </div>
     </header>
 
-    <div class="container mx-auto px-4 py-4 h-screen">
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden chat-container flex">
+    <div class="container mx-auto px-4 py-5">
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden chat-container flex border border-gray-100">
 
             <!-- قائمة المحادثات -->
-            <div id="conversationsSidebar" class="conversations-sidebar w-full md:w-1/3 lg:w-1/4 border-l border-gray-200 flex flex-col">
-                <div class="p-4 border-b border-gray-200 bg-gray-50">
-                    <h2 class="text-xl font-bold text-gray-800">رسائلي</h2>
-                    <p class="text-sm text-gray-500 mt-1">محادثاتك</p>
+            <div id="conversationsSidebar" class="conversations-sidebar w-full md:w-5/12 lg:w-1/3 border-l border-gray-100 flex flex-col bg-white">
+                <div class="p-5 border-b border-gray-100 bg-gradient-to-b from-white to-gray-50">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-2xl font-black text-gray-900 tracking-tight">رسائلي</h2>
+                            <p class="text-sm text-gray-400 mt-1 font-medium">محادثاتك النشطة</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                            <i class="fas fa-comment-dots text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchConversations" placeholder="ابحث في المحادثات...">
+                    </div>
                 </div>
 
-                <div id="conversationsList" class="flex-1 overflow-y-auto">
-                    <div class="p-8 text-center text-gray-400">
-                        <i class="fas fa-comments text-4xl mb-3"></i>
-                        <p>جاري تحميل المحادثات...</p>
+                <div id="conversationsList" class="flex-1 sidebar-scroll">
+                    <div class="p-10 text-center text-gray-400">
+                        <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-comments text-2xl text-blue-400"></i>
+                        </div>
+                        <p class="font-medium">جاري تحميل المحادثات...</p>
                     </div>
                 </div>
             </div>
 
             <!-- نافذة المحادثة -->
-            <div id="chatWindow" class="chat-window hidden-mobile flex-1 flex flex-col bg-slate-50">
+            <div id="chatWindow" class="chat-window hidden-mobile flex-1 flex flex-col bg-slate-50/80 relative">
 
-                <div id="chatHeader" class="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
+                <div id="chatHeader" class="bg-white/80 backdrop-blur-md border-b border-gray-100 p-4 flex items-center justify-between sticky top-0 z-10">
                     <div class="flex items-center gap-3">
-                        <button id="backToList" class="mobile-back-btn md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <button id="backToList" class="mobile-back-btn md:hidden w-10 h-10 text-gray-600 hover:bg-gray-100 rounded-xl flex items-center justify-center transition">
                             <i class="fas fa-arrow-right"></i>
                         </button>
+                        <div class="relative">
+                            <div id="partnerAvatar" class="avatar-circle bg-gradient-to-br from-blue-500 to-indigo-600">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="online-dot"></div>
+                        </div>
                         <div>
-                            <h3 id="chatPartnerName" class="font-bold text-gray-800">اختر محادثة</h3>
-                            <p id="chatPartnerInfo" class="text-xs text-gray-500">--</p>
+                            <h3 id="chatPartnerName" class="font-bold text-gray-900 text-lg">اختر محادثة</h3>
+                            <p id="chatPartnerInfo" class="text-xs text-gray-400 mt-0.5">--</p>
                         </div>
                     </div>
-                </div>
-
-                <div id="messagesArea" class="messages-area flex-1 p-4 space-y-3">
-                    <div class="empty-state">
-                        <i class="fas fa-paper-plane text-6xl mb-4 text-blue-200"></i>
-                        <p class="text-lg font-medium">اختر محادثة لبدء المراسلة</p>
-                        <p class="text-sm mt-2">أو اذهب إلى <a href="employee_listing_page.html" class="text-blue-600 hover:underline">قائمة الموظفين</a> للتواصل مع أحدهم</p>
+                    <div class="flex items-center gap-2">
+                        <button id="infoBtn" class="w-10 h-10 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition flex items-center justify-center" title="معلومات">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div id="inputArea" class="bg-white border-t border-gray-200 p-4 hidden">
-                    <form id="messageForm" class="flex items-end gap-2">
-                        <div class="flex-1 relative">
+                <div id="messagesArea" class="messages-area flex-1 p-5 space-y-2">
+                    <div class="empty-state">
+                        <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center mb-6 shadow-inner">
+                            <i class="fas fa-paper-plane text-4xl text-blue-300"></i>
+                        </div>
+                        <p class="text-xl font-bold text-gray-700 mb-2">اختر محادثة لبدء المراسلة</p>
+                        <p class="text-sm text-gray-400 max-w-xs leading-relaxed">أو اذهب إلى <a href="employee_listing_page.html" class="text-blue-600 hover:text-blue-700 font-bold hover:underline transition">قائمة الموظفين</a> للتواصل مع أحدهم</p>
+                    </div>
+                </div>
+
+                <div id="inputArea" class="bg-white/90 backdrop-blur-md border-t border-gray-100 p-4 hidden">
+                    <div class="rule-hint mb-2">
+                        <i class="fas fa-shield-alt"></i>
+                        ممنوع إرسال أرقام هواتف، بريد إلكتروني، أو روابط تواصل — المراسلة نصية فقط
+                    </div>
+                    <form id="messageForm" class="flex items-end gap-3">
+                        <div class="flex-1 input-wrapper">
                             <textarea 
                                 id="messageInput" 
                                 rows="1"
                                 placeholder="اكتب رسالتك هنا..."
-                                class="w-full pr-4 pl-4 py-3 bg-gray-100 border-0 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white resize-none transition-all"
-                                style="min-height: 44px; max-height: 120px;"
+                                class="w-full pr-5 pl-5 py-3.5 resize-none transition-all text-gray-800 placeholder-gray-400"
+                                style="min-height: 48px; max-height: 130px;"
                             ></textarea>
                         </div>
                         <button 
                             type="submit" 
                             id="sendBtn"
-                            class="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="send-btn"
+                            title="إرسال"
                         >
-                            <i class="fas fa-paper-plane"></i>
+                            <i class="fas fa-paper-plane text-sm"></i>
                         </button>
                     </form>
                 </div>
@@ -309,6 +650,7 @@
         const messageInput = document.getElementById('messageInput');
         const chatPartnerName = document.getElementById('chatPartnerName');
         const chatPartnerInfo = document.getElementById('chatPartnerInfo');
+        const partnerAvatar = document.getElementById('partnerAvatar');
         const inputArea = document.getElementById('inputArea');
         const conversationsSidebar = document.getElementById('conversationsSidebar');
         const chatWindow = document.getElementById('chatWindow');
@@ -316,6 +658,9 @@
         const userInfo = document.getElementById('userInfo');
         const userName = document.getElementById('userName');
         const loginBtn = document.getElementById('loginBtn');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        const searchInput = document.getElementById('searchConversations');
 
         let currentUser = null;
         let currentPartnerId = null;
@@ -323,14 +668,57 @@
         let currentChatId = null;
         let unsubscribeMessages = null;
         let employeeCache = {};
+        let allConversations = [];
 
-        // معالجة المصادقة
+        // ====== SECURITY / FILTERING RULES ======
+        const PHONE_REGEX = /(\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/g;
+        const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+        const URL_REGEX = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+        const CONTACT_KEYWORDS = ['واتس', 'واتساب', 'whatsapp', 'تلجرام', 'telegram', 'سناب', 'snapchat', 'انستغرام', 'instagram', 'فيسبوك', 'facebook', 'تويتر', 'twitter', 'سكايب', 'skype', 'زووم', 'zoom', 'teams'];
+        const ARABIC_NUMBERS = /[٠١٢٣٤٥٦٧٨٩]+/g;
+
+        function containsContactInfo(text) {
+            const clean = text.toLowerCase();
+            if (PHONE_REGEX.test(text)) return { blocked: true, reason: 'يحتوي على رقم هاتف' };
+            if (EMAIL_REGEX.test(text)) return { blocked: true, reason: 'يحتوي على بريد إلكتروني' };
+            if (URL_REGEX.test(text)) return { blocked: true, reason: 'يحتوي على رابط إلكتروني' };
+            for (const kw of CONTACT_KEYWORDS) {
+                if (clean.includes(kw)) return { blocked: true, reason: 'يحتوي على ذكر لوسيلة تواصل خارجية' };
+            }
+            // Check for Arabic numbers that might be phone numbers (4+ consecutive)
+            const arabicNumMatches = text.match(/[٠١٢٣٤٥٦٧٨٩]{4,}/g);
+            if (arabicNumMatches && arabicNumMatches.some(m => m.length >= 7)) {
+                return { blocked: true, reason: 'يحتوي على أرقام تواصل' };
+            }
+            return { blocked: false };
+        }
+
+        function sanitizeText(text) {
+            // Remove any potential HTML/script injection
+            const div = document.createElement('div');
+            div.textContent = text;
+            let safe = div.innerHTML;
+            // Also strip any remaining suspicious patterns
+            safe = safe.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+            safe = safe.replace(/javascript:/gi, '');
+            safe = safe.replace(/on\w+\s*=/gi, '');
+            return safe;
+        }
+
+        function showToast(message, type = 'error', duration = 3500) {
+            toast.className = 'toast ' + type;
+            const iconMap = { error: 'fa-exclamation-triangle', success: 'fa-check-circle', info: 'fa-info-circle' };
+            toast.innerHTML = `<i class="fas ${iconMap[type] || iconMap.error}"></i><span>${message}</span>`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // ====== AUTH ======
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 userInfo.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
-
                 try {
                     const userDoc = await getDoc(doc(firestore, 'users', user.uid));
                     if (userDoc.exists()) {
@@ -341,7 +729,6 @@
                 } catch (e) {
                     userName.textContent = user.displayName || 'مستخدم';
                 }
-
                 loadConversations();
                 checkUrlParams();
             } else {
@@ -350,9 +737,11 @@
                     currentUser = result.user;
                 } catch (error) {
                     conversationsList.innerHTML = `
-                        <div class="p-8 text-center text-gray-400">
-                            <i class="fas fa-lock text-4xl mb-3 text-red-400"></i>
-                            <p class="text-red-500">يرجى تسجيل الدخول لعرض المحادثات</p>
+                        <div class="p-10 text-center text-gray-400">
+                            <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-lock text-2xl text-red-400"></i>
+                            </div>
+                            <p class="text-red-500 font-bold">يرجى تسجيل الدخول لعرض المحادثات</p>
                         </div>
                     `;
                 }
@@ -376,11 +765,34 @@
             return 'موظف';
         }
 
+        function getInitials(name) {
+            if (!name || name === 'موظف') return '<i class="fas fa-user"></i>';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length === 1) return parts[0].charAt(0);
+            return parts[0].charAt(0) + parts[parts.length - 1].charAt(0);
+        }
+
+        function getAvatarColor(name) {
+            const colors = [
+                ['from-blue-500', 'to-blue-700'],
+                ['from-indigo-500', 'to-indigo-700'],
+                ['from-emerald-500', 'to-emerald-700'],
+                ['from-amber-500', 'to-amber-700'],
+                ['from-rose-500', 'to-rose-700'],
+                ['from-cyan-500', 'to-cyan-700'],
+                ['from-violet-500', 'to-violet-700'],
+                ['from-teal-500', 'to-teal-700'],
+            ];
+            let hash = 0;
+            for (let i = 0; i < (name || '').length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            const idx = Math.abs(hash) % colors.length;
+            return colors[idx];
+        }
+
         async function checkUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
             const employeeId = urlParams.get('employeeId');
             const employeeName = urlParams.get('employeeName');
-
             if (employeeId && currentUser) {
                 await startConversation(employeeId, decodeURIComponent(employeeName || ''));
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -393,7 +805,12 @@
             currentChatId = getChatId(currentUser.uid, partnerId);
 
             chatPartnerName.textContent = currentPartnerName;
-            chatPartnerInfo.textContent = '';
+            chatPartnerInfo.innerHTML = '<span class="status-badge">متصل الآن</span>';
+
+            const colors = getAvatarColor(currentPartnerName);
+            partnerAvatar.className = `avatar-circle bg-gradient-to-br ${colors[0]} ${colors[1]}`;
+            partnerAvatar.innerHTML = getInitials(currentPartnerName);
+
             inputArea.classList.remove('hidden');
 
             if (window.innerWidth < 768) {
@@ -401,24 +818,32 @@
                 chatWindow.classList.remove('hidden-mobile');
             }
 
+            // Update active state in sidebar
+            document.querySelectorAll('.conversation-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.dataset.partnerId === partnerId) el.classList.add('active');
+            });
+
             loadMessagesForChat(currentChatId);
         }
 
         async function loadConversations() {
             if (!currentUser) return;
-
             try {
                 const messagesRef = ref(rtdb, 'messages');
                 const snapshot = await get(messagesRef);
 
                 if (!snapshot.exists()) {
                     conversationsList.innerHTML = `
-                        <div class="p-8 text-center text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-3"></i>
-                            <p>لا توجد محادثات بعد</p>
-                            <p class="text-sm mt-2">ابدأ بالتواصل مع الموظفين</p>
+                        <div class="p-10 text-center text-gray-400">
+                            <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-inbox text-2xl text-gray-300"></i>
+                            </div>
+                            <p class="font-bold text-gray-500">لا توجد محادثات بعد</p>
+                            <p class="text-sm mt-2 text-gray-400">ابدأ بالتواصل مع الموظفين</p>
                         </div>
                     `;
+                    allConversations = [];
                     return;
                 }
 
@@ -434,7 +859,6 @@
                         if (msgArray.length > 0) {
                             const lastMsg = msgArray[0];
                             const unreadCount = msgArray.filter(m => m.receiverId === currentUser.uid && !m.read).length;
-
                             userConversations.push({
                                 partnerId,
                                 lastMessage: lastMsg.text || '',
@@ -450,25 +874,30 @@
 
                 if (userConversations.length === 0) {
                     conversationsList.innerHTML = `
-                        <div class="p-8 text-center text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-3"></i>
-                            <p>لا توجد محادثات بعد</p>
+                        <div class="p-10 text-center text-gray-400">
+                            <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-inbox text-2xl text-gray-300"></i>
+                            </div>
+                            <p class="font-bold text-gray-500">لا توجد محادثات بعد</p>
                         </div>
                     `;
+                    allConversations = [];
                     return;
                 }
 
                 for (const conv of userConversations) {
                     conv.partnerName = await getEmployeeName(conv.partnerId);
                 }
-
+                allConversations = userConversations;
                 renderConversationsList(userConversations);
             } catch (error) {
                 console.error('خطأ:', error);
                 conversationsList.innerHTML = `
-                    <div class="p-8 text-center text-gray-400">
-                        <i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i>
-                        <p class="text-red-500">حدث خطأ في تحميل المحادثات</p>
+                    <div class="p-10 text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exclamation-circle text-2xl text-red-400"></i>
+                        </div>
+                        <p class="text-red-500 font-bold">حدث خطأ في تحميل المحادثات</p>
                     </div>
                 `;
             }
@@ -482,21 +911,34 @@
                 const timeText = formatTime(chat.timestamp);
                 const lastText = chat.lastMessage || 'بدء محادثة جديدة';
                 const unreadCount = chat.unreadCount || 0;
+                const colors = getAvatarColor(chat.partnerName);
+                const initials = getInitials(chat.partnerName);
 
                 const item = document.createElement('div');
-                item.className = `conversation-item p-4 border-b border-gray-100 ${isActive ? 'active' : ''}`;
+                item.className = `conversation-item p-4 ${isActive ? 'active' : ''}`;
+                item.dataset.partnerId = chat.partnerId;
                 item.onclick = () => startConversation(chat.partnerId, chat.partnerName);
 
                 item.innerHTML = `
-                    <div class="flex items-center justify-between mb-1">
-                        <h4 class="font-semibold text-gray-800">${chat.partnerName || 'موظف'}</h4>
-                        <span class="text-xs text-gray-400">${timeText}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm text-gray-500 truncate ${unreadCount > 0 ? 'font-semibold text-gray-700' : ''}">
-                            ${chat.lastMessageSender === currentUser.uid ? 'أنت: ' : ''}${lastText}
-                        </p>
-                        ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+                    <div class="flex items-center gap-3">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br ${colors[0]} ${colors[1]} flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                ${initials}
+                            </div>
+                            ${unreadCount > 0 ? '' : '<div class="online-dot" style="width:8px;height:8px;"></div>'}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-gray-800 truncate">${chat.partnerName || 'موظف'}</h4>
+                                <span class="text-xs text-gray-400 flex-shrink-0 mr-2">${timeText}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-gray-500 truncate ${unreadCount > 0 ? 'font-bold text-gray-700' : ''}">
+                                    ${chat.lastMessageSender === currentUser.uid ? '<span class="text-blue-500">أنت:</span> ' : ''}${lastText}
+                                </p>
+                                ${unreadCount > 0 ? `<span class="unread-badge flex-shrink-0 mr-2">${unreadCount}</span>` : ''}
+                            </div>
+                        </div>
                     </div>
                 `;
 
@@ -504,8 +946,26 @@
             });
         }
 
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim().toLowerCase();
+            if (!query) {
+                renderConversationsList(allConversations);
+                return;
+            }
+            const filtered = allConversations.filter(c =>
+                (c.partnerName || '').toLowerCase().includes(query) ||
+                (c.lastMessage || '').toLowerCase().includes(query)
+            );
+            renderConversationsList(filtered);
+        });
+
         function loadMessagesForChat(chatId) {
-            messagesArea.innerHTML = '<div class="flex justify-center p-8"><div class="loading-spinner"></div></div>';
+            messagesArea.innerHTML = `
+                <div class="flex justify-center items-center h-full">
+                    <div class="loading-spinner"></div>
+                </div>
+            `;
 
             const messagesRef = ref(rtdb, 'messages/' + chatId);
 
@@ -513,7 +973,11 @@
                 if (!snapshot.exists()) {
                     messagesArea.innerHTML = `
                         <div class="empty-state">
-                            <p class="text-lg font-medium">ابدأ محادثتك مع ${currentPartnerName || 'الطرف الآخر'}</p>
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center mb-4 shadow-inner">
+                                <i class="fas fa-handshake text-3xl text-blue-300"></i>
+                            </div>
+                            <p class="text-lg font-bold text-gray-600">ابدأ محادثتك مع ${currentPartnerName || 'الطرف الآخر'}</p>
+                            <p class="text-sm text-gray-400 mt-2">اكتب رسالتك الأولى أدناه</p>
                         </div>
                     `;
                     return;
@@ -527,7 +991,14 @@
                 markMessagesAsRead(chatId, messageArray);
             }, (error) => {
                 console.error('خطأ في تحميل الرسائل:', error);
-                messagesArea.innerHTML = '<div class="text-center text-red-500 p-8">حدث خطأ في تحميل الرسائل</div>';
+                messagesArea.innerHTML = `
+                    <div class="flex justify-center items-center h-full text-red-500">
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-circle text-3xl mb-3"></i>
+                            <p>حدث خطأ في تحميل الرسائل</p>
+                        </div>
+                    </div>
+                `;
             });
         }
 
@@ -551,24 +1022,31 @@
             messages.forEach(msg => {
                 const isSent = msg.senderId === currentUser.uid;
                 const messageDate = new Date(msg.timestamp || Date.now());
-
                 const dateStr = formatDate(messageDate);
+
                 if (dateStr !== lastDate) {
                     lastDate = dateStr;
-                    const dateSeparator = document.createElement('div');
-                    dateSeparator.className = 'flex justify-center my-4';
-                    dateSeparator.innerHTML = `<span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">${dateStr}</span>`;
-                    messagesArea.appendChild(dateSeparator);
+                    const dateSep = document.createElement('div');
+                    dateSep.className = 'date-separator';
+                    dateSep.innerHTML = `<span>${dateStr}</span>`;
+                    messagesArea.appendChild(dateSep);
                 }
 
                 const messageDiv = document.createElement('div');
-                messageDiv.className = `flex ${isSent ? 'justify-start' : 'justify-end'} fade-in`;
+                messageDiv.className = `flex ${isSent ? 'justify-start' : 'justify-end'} fade-in mb-1`;
+
+                const timeStr = formatMessageTime(msg.timestamp);
+                const readIcon = isSent
+                    ? (msg.read
+                        ? '<i class="fas fa-check-double mr-1 text-blue-200" style="font-size:0.65rem;"></i>'
+                        : '<i class="fas fa-check mr-1 text-blue-200" style="font-size:0.65rem;"></i>')
+                    : '';
+
                 messageDiv.innerHTML = `
                     <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
-                        <p>${escapeHtml(msg.text || '')}</p>
+                        <p class="leading-relaxed">${sanitizeText(msg.text || '')}</p>
                         <span class="message-time ${isSent ? 'text-blue-200' : 'text-gray-400'}">
-                            ${formatMessageTime(msg.timestamp)}
-                            ${isSent ? (msg.read ? '<i class="fas fa-check-double mr-1"></i>' : '<i class="fas fa-check mr-1"></i>') : ''}
+                            ${timeStr} ${readIcon}
                         </span>
                     </div>
                 `;
@@ -578,11 +1056,35 @@
             scrollToBottom();
         }
 
+        // ====== SEND MESSAGE WITH STRICT FILTERS ======
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const text = messageInput.value.trim();
+            let text = messageInput.value.trim();
             if (!text || !currentPartnerId || !currentUser || !currentChatId) return;
+
+            // STRICT: Check for contact info
+            const check = containsContactInfo(text);
+            if (check.blocked) {
+                showToast('تم منع الإرسال: ' + check.reason + ' — ممنوع مشاركة وسائل التواصل', 'error', 4000);
+                messageInput.focus();
+                return;
+            }
+
+            // STRICT: Max length
+            if (text.length > 1000) {
+                showToast('الرسالة طويلة جداً — الحد الأقصى 1000 حرف', 'error');
+                return;
+            }
+
+            // STRICT: Min length
+            if (text.length < 1) {
+                showToast('لا يمكن إرسال رسالة فارغة', 'error');
+                return;
+            }
+
+            // STRICT: No images/videos (already no file input, but double-check)
+            // Already enforced by UI (no file picker)
 
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
@@ -602,12 +1104,12 @@
                 await set(newMessageRef, messageData);
 
                 messageInput.value = '';
-                messageInput.style.height = '44px';
+                messageInput.style.height = '48px';
                 scrollToBottom();
                 loadConversations();
             } catch (error) {
                 console.error('خطأ في إرسال الرسالة:', error);
-                alert('حدث خطأ: ' + error.message);
+                showToast('حدث خطأ أثناء الإرسال: ' + error.message, 'error');
             } finally {
                 sendBtn.disabled = false;
             }
@@ -615,7 +1117,7 @@
 
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            this.style.height = Math.min(this.scrollHeight, 130) + 'px';
         });
 
         messageInput.addEventListener('keydown', (e) => {
@@ -625,11 +1127,35 @@
             }
         });
 
+        // Paste prevention for contact info
+        messageInput.addEventListener('paste', (e) => {
+            const pasted = (e.clipboardData || window.clipboardData).getData('text');
+            const check = containsContactInfo(pasted);
+            if (check.blocked) {
+                e.preventDefault();
+                showToast('لا يمكن لصق محتوى يحتوي على ' + check.reason, 'error');
+            }
+        });
+
         backToList.addEventListener('click', () => {
             conversationsSidebar.classList.remove('hidden-mobile');
             chatWindow.classList.add('hidden-mobile');
             currentPartnerId = null;
             currentChatId = null;
+            chatPartnerName.textContent = 'اختر محادثة';
+            chatPartnerInfo.textContent = '--';
+            partnerAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            partnerAvatar.className = 'avatar-circle bg-gradient-to-br from-blue-500 to-indigo-600';
+            inputArea.classList.add('hidden');
+            messagesArea.innerHTML = `
+                <div class="empty-state">
+                    <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center mb-6 shadow-inner">
+                        <i class="fas fa-paper-plane text-4xl text-blue-300"></i>
+                    </div>
+                    <p class="text-xl font-bold text-gray-700 mb-2">اختر محادثة لبدء المراسلة</p>
+                    <p class="text-sm text-gray-400 max-w-xs leading-relaxed">أو اذهب إلى <a href="employee_listing_page.html" class="text-blue-600 hover:text-blue-700 font-bold hover:underline transition">قائمة الموظفين</a> للتواصل مع أحدهم</p>
+                </div>
+            `;
             if (unsubscribeMessages) {
                 unsubscribeMessages();
                 unsubscribeMessages = null;
@@ -675,13 +1201,7 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
+        // Mobile menu
         const menuButton = document.getElementById('mobile-menu-button');
         const closeButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -691,6 +1211,11 @@
 
         window.addEventListener('beforeunload', () => {
             if (unsubscribeMessages) unsubscribeMessages();
+        });
+
+        // Info button
+        document.getElementById('infoBtn').addEventListener('click', () => {
+            showToast('المراسلة نصية فقط — ممنوع مشاركة أرقام أو بريد أو روابط', 'info', 3000);
         });
     </script>
 </body>
