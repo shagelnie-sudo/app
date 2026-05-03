@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل حساب جديد - شغلني</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background-color: #10b981;
+            transform: scale(1.1);
+        }
+
+        .step.completed {
+            background-color: #10b981;
+        }
+
+        .step-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-card {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-message {
+            background-color: #dcfce7;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .info-message {
+            background-color: #dbeafe;
+            color: #0c4a6e;
+            border: 1px solid #0284c7;
+        }
+
+        .password-requirement-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .password-requirement-item.valid {
+            color: #10b981;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #d1d5db;
+        }
+
+        input[type="text"], input[type="tel"], input[type="password"], select {
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .verification-code-input {
+            font-size: 24px;
+            letter-spacing: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .countdown {
+            color: #ef4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center py-8 px-4">
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">شغلني</h1>
+            <p class="text-gray-600 mt-2">نظام التسجيل السريع</p>
+        </div>
+
+        <!-- رسائل التنبيه -->
+        <div id="message" class="message"></div>
+
+        <!-- خطوات التقدم -->
+        <div class="step-container" id="stepContainer">
+            <div class="step active" id="stepIndicator1">1</div>
+            <div class="step" id="stepIndicator2">2</div>
+        </div>
+
+        <form id="unifiedForm">
+            <!-- الخطوة 1: المعلومات الأساسية -->
+            <div class="form-card" id="step1">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">البيانات الأساسية</h2>
+                
+                <div class="space-y-5">
+                    <!-- الاسم -->
+                    <div>
+                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                            الاسم الكامل
+                        </label>
+                        <input id="name" name="name" type="text" required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition text-right"
+                            placeholder="مثال: محمد أحمد علي">
+                        <p class="text-xs text-gray-500 mt-1">ثلاثي أو رباعي</p>
+                    </div>
+
+                    <!-- رقم الهاتف -->
+                    <div>
+                        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">
+                            رقم الهاتف
+                        </label>
+                        <div class="flex gap-2 flex-row-reverse">
+                            <select id="countryCode" name="countryCode" class="w-28 px-3 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none bg-gray-50 text-center" dir="ltr">
+                                <option value="+249" selected>🇸🇩 +249</option>
+                                <option value="+966">🇸🇦 +966</option>
+                                <option value="+20">🇪🇬 +20</option>
+                                <option value="+971">🇦🇪 +971</option>
+                                <option value="+966">🇶🇦 +974</option>
+                                <option value="+966">🇰🇼 +965</option>
+                            </select>
+                            <input type="tel" id="phone" name="phone" required
+                                class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition text-right"
+                                placeholder="0912345678">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">بدون رمز الدولة</p>
+                    </div>
+
+                    <!-- كلمة المرور -->
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                            كلمة المرور
+                        </label>
+                        <div class="relative">
+                            <input id="password" name="password" type="password" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition text-right pl-10"
+                                placeholder="كلمة مرور قوية">
+                            <button type="button" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                onclick="togglePasswordVisibility('password')">
+                                <i class="far fa-eye" id="password-eye"></i>
+                            </button>
+                        </div>
+
+                        <!-- متطلبات كلمة المرور -->
+                        <div class="mt-3 space-y-2">
+                            <p class="text-xs text-gray-600 font-semibold">متطلبات كلمة المرور:</p>
+                            <div id="min-length" class="password-requirement-item">
+                                <i class="fas fa-circle text-red-500 ml-2" style="font-size: 0.5rem;"></i>
+                                <span>6 أحرف على الأقل</span>
+                            </div>
+                            <div id="has-upper" class="password-requirement-item">
+                                <i class="fas fa-circle text-red-500 ml-2" style="font-size: 0.5rem;"></i>
+                                <span>حرف كبير واحد (A-Z)</span>
+                            </div>
+                            <div id="has-lower" class="password-requirement-item">
+                                <i class="fas fa-circle text-red-500 ml-2" style="font-size: 0.5rem;"></i>
+                                <span>حرف صغير واحد (a-z)</span>
+                            </div>
+                            <div id="has-number" class="password-requirement-item">
+                                <i class="fas fa-circle text-red-500 ml-2" style="font-size: 0.5rem;"></i>
+                                <span>رقم واحد (0-9)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- تأكيد كلمة المرور -->
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-semibold text-gray-700 mb-2">
+                            تأكيد كلمة المرور
+                        </label>
+                        <div class="relative">
+                            <input id="confirmPassword" name="confirmPassword" type="password" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition text-right pl-10"
+                                placeholder="أعد إدخال كلمة المرور">
+                            <button type="button" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                onclick="togglePasswordVisibility('confirmPassword')">
+                                <i class="far fa-eye" id="confirmPassword-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- نوع الحساب -->
+                    <div>
+                        <label for="role" class="block text-sm font-semibold text-gray-700 mb-2">
+                            نوع الحساب
+                        </label>
+                        <select id="role" name="role" required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition text-right">
+                            <option value="" disabled selected>اختر نوع الحساب</option>
+                            <option value="employee">👨‍💼 موظف / عامل</option>
+                            <option value="employer">🏢 شركة / صاحب عمل</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-primary w-full mt-8" id="nextBtn1">
+                    التالي →
+                </button>
+            </div>
+
+            <!-- الخطوة 2: توثيق رقم الهاتف -->
+            <div class="form-card hidden" id="step2">
+                <div class="text-center mb-6">
+                    <div class="text-5xl text-green-500 mb-3">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">توثيق رقم الهاتف</h2>
+                    <p class="text-gray-600 text-sm mt-2" id="verificationPhone"></p>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle ml-2"></i>
+                        سنرسل لك رسالة نصية برمز التحقق
+                    </p>
+                </div>
+
+                <div class="hidden" id="codeInputSection">
+                    <label for="verificationCode" class="block text-sm font-semibold text-gray-700 mb-3 text-center">
+                        أدخل رمز التحقق
+                    </label>
+                    <input type="text" id="verificationCode" maxlength="6"
+                        class="verification-code-input w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition"
+                        placeholder="000000">
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-sm text-gray-600">لم تستقبل الرمز؟</p>
+                        <button type="button" id="resendBtn" class="text-purple-600 hover:text-purple-700 font-semibold text-sm mt-2">
+                            إعادة الإرسال
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2" id="countdownText"></p>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-primary w-full mt-8 hidden" id="sendCodeBtn">
+                    إرسال رمز التحقق
+                </button>
+
+                <button type="button" class="btn-primary w-full mt-4 hidden" id="verifyBtn">
+                    تحقق الآن
+                </button>
+
+                <button type="button" class="btn-secondary w-full mt-3" id="changePhoneBtn">
+                    تغيير رقم الهاتف
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8 text-center text-sm text-gray-600">
+            <p>هل لديك حساب بالفعل؟ 
+                <a href="login.html" class="text-purple-600 hover:text-purple-700 font-semibold">
+                    تسجيل الدخول
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+            authDomain: "shaglni-c64c0.firebaseapp.com",
+            projectId: "shaglni-c64c0",
+            storageBucket: "shaglni-c64c0.appspot.com",
+            messagingSenderId: "768887356636",
+            appId: "1:768887356636:web:11ec1d6991add3309c8819",
+            measurementId: "G-98GQGZS09W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentStep = 1;
+        let phoneNumber = '';
+        let verificationCode = '';
+        let currentUser = null;
+        let countdownInterval = null;
+
+        const form = document.getElementById('unifiedForm');
+        const messageDiv = document.getElementById('message');
+
+        // ========== Password Validation ==========
+        window.togglePasswordVisibility = function(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(inputId + '-eye');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
+
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const checks = {
+                minLength: password.length >= 6,
+                hasUpper: /[A-Z]/.test(password),
+                hasLower: /[a-z]/.test(password),
+                hasNumber: /[0-9]/.test(password)
+            };
+
+            const requirements = {
+                minLength: document.getElementById('min-length'),
+                hasUpper: document.getElementById('has-upper'),
+                hasLower: document.getElementById('has-lower'),
+                hasNumber: document.getElementById('has-number'),
+            };
+
+            for (const key in checks) {
+                const element = requirements[key];
+                if (checks[key]) {
+                    element.classList.add('valid');
+                    element.querySelector('i').className = 'fas fa-check text-green-500 ml-2';
+                    element.querySelector('i').style.fontSize = '0.75rem';
+                } else {
+                    element.classList.remove('valid');
+                    element.querySelector('i').className = 'fas fa-circle text-red-500 ml-2';
+                    element.querySelector('i').style.fontSize = '0.5rem';
+                }
+            }
+            return Object.values(checks).every(Boolean);
+        }
+
+        document.getElementById('password').addEventListener('input', validatePassword);
+
+        function validateName(name) {
+            const parts = name.trim().split(/\s+/);
+            return parts.length >= 3 && parts.length <= 4;
+        }
+
+        function showMessage(msg, type) {
+            messageDiv.className = 'message';
+            void messageDiv.offsetWidth;
+            messageDiv.textContent = msg;
+            messageDiv.classList.add('show', `${type}-message`);
+
+            setTimeout(() => {
+                messageDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        function updateStepIndicator() {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            for (let i = 1; i <= currentStep; i++) {
+                const indicator = document.getElementById(`stepIndicator${i}`);
+                if (indicator) indicator.classList.add('active');
+            }
+        }
+
+        // ========== Step 1: Validation and Phone Setup ==========
+        document.getElementById('nextBtn1').addEventListener('click', async () => {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const role = document.getElementById('role').value;
+            const countryCode = document.getElementById('countryCode').value;
+
+            // Validation
+            if (!name || !validateName(name)) {
+                showMessage('الاسم يجب أن يكون ثلاثياً أو رباعياً', 'error');
+                return;
+            }
+
+            if (!phone) {
+                showMessage('يرجى إدخال رقم الهاتف', 'error');
+                return;
+            }
+
+            if (countryCode === '+249' && !/^0(1|9)\d{8}$/.test(phone)) {
+                showMessage('رقم الهاتف السوداني يجب أن يبدأ بـ 09 أو 01 ويتكون من 10 أرقام', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('كلمة المرور وتأكيدها غير متطابقين', 'error');
+                return;
+            }
+
+            if (!validatePassword()) {
+                showMessage('كلمة المرور لا تستوفي جميع المتطلبات', 'error');
+                return;
+            }
+
+            if (!role) {
+                showMessage('يرجى اختيار نوع الحساب', 'error');
+                return;
+            }
+
+            // Store phone for verification
+            phoneNumber = countryCode + phone;
+            
+            // Move to step 2
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('verificationPhone').textContent = `سنرسل رمز التحقق إلى ${phoneNumber}`;
+            document.getElementById('sendCodeBtn').classList.remove('hidden');
+            
+            currentStep = 2;
+            updateStepIndicator();
+        });
+
+        // ========== Step 2: Phone Verification ==========
+        document.getElementById('sendCodeBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('sendCodeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> جاري الإرسال...';
+
+            // Simulate SMS sending (في التطبيق الفعلي، ستستخدم خدمة SMS)
+            try {
+                setTimeout(() => {
+                    // Generate a random 6-digit code
+                    verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+                    console.log('Verification Code:', verificationCode); // For testing only
+                    
+                    showMessage('تم إرسال رمز التحقق إلى ' + phoneNumber, 'success');
+                    
+                    document.getElementById('sendCodeBtn').classList.add('hidden');
+                    document.getElementById('codeInputSection').classList.remove('hidden');
+                    document.getElementById('verifyBtn').classList.remove('hidden');
+                    
+                    startCountdown();
+                    btn.disabled = false;
+                    btn.innerHTML = 'إرسال رمز التحقق';
+                }, 1000);
+            } catch (error) {
+                showMessage('خطأ في إرسال الرمز', 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'إرسال رمز التحقق';
+            }
+        });
+
+        function startCountdown() {
+            let seconds = 60;
+            document.getElementById('resendBtn').disabled = true;
+            
+            countdownInterval = setInterval(() => {
+                seconds--;
+                document.getElementById('countdownText').textContent = `إعادة الإرسال بعد ${seconds}s`;
+                
+                if (seconds === 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('resendBtn').disabled = false;
+                    document.getElementById('countdownText').textContent = '';
+                }
+            }, 1000);
+        }
+
+        document.getElementById('resendBtn').addEventListener('click', () => {
+            document.getElementById('sendCodeBtn').classList.remove('hidden');
+            document.getElementById('codeInputSection').classList.add('hidden');
+            document.getElementById('verifyBtn').classList.add('hidden');
+            document.getElementById('verificationCode').value = '';
+            clearInterval(countdownInterval);
+        });
+
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
+            const inputCode = document.getElementById('verificationCode').value;
+
+            if (inputCode !== verificationCode) {
+                showMessage('رمز التحقق غير صحيح', 'error');
+                return;
+            }
+
+            // Create user in Firebase
+            const name = document.getElementById('name').value;
+            const email = phoneNumber + '@shaglni.com'; // Use phone as unique email
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            const btn = document.getElementById('verifyBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> جاري الإنشاء...';
+
+            try {
+                // Create user in Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                currentUser = userCredential.user;
+
+                // Save user data to Firestore
+                const userData = {
+                    name: name,
+                    phone: phoneNumber,
+                    email: email,
+                    role: role,
+                    phoneVerified: true,
+                    isProfileComplete: false,
+                    createdAt: serverTimestamp(),
+                };
+
+                const collectionName = role === 'employee' ? 'employees' : 'All_jops';
+                await setDoc(doc(db, collectionName, currentUser.uid), userData);
+
+                showMessage('✅ تم التحقق بنجاح! جاري توجيهك...', 'success');
+
+                setTimeout(() => {
+                    const redirectUrl = role === 'employee' ? "profile.html" : "employer-dashboard.html";
+                    window.location.href = redirectUrl;
+                }, 2000);
+
+            } catch (error) {
+                console.error("خطأ:", error);
+                let errorMsg = 'حدث خطأ غير متوقع';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = 'هذا الرقم مسجل بالفعل';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = 'كلمة المرور ضعيفة جداً';
+                }
+                
+                showMessage(errorMsg, 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'تحقق الآن';
+            }
+        });
+
+        document.getElementById('changePhoneBtn').addEventListener('click', () => {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('verificationCode').value = '';
+            clearInterval(countdownInterval);
+            currentStep = 1;
+            updateStepIndicator();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStepIndicator();
+        });
+    </script>
+</body>
+</html>
