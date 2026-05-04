@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملفي الشخصي - شغلني</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f5f9;
+  --white:#ffffff;
+  --surface:#f8fafc;
+  --border:#e2e8f0;
+  --blue:#2563eb;
+  --blue-l:#eff6ff;
+  --blue-m:#dbeafe;
+  --green:#16a34a;
+  --green-l:#f0fdf4;
+  --gold:#d97706;
+  --gold-l:#fffbeb;
+  --red:#dc2626;
+  --purple:#7c3aed;
+  --purple-l:#f5f3ff;
+  --text1:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --font:'Tajawal',sans-serif;
+  --header:68px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+  --sh2:0 4px 12px rgba(0,0,0,.07);
+  --sh3:0 10px 25px rgba(0,0,0,.08);
+  --r:14px;
+}
+html,body{min-height:100%;overflow-x:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text1)}
+
+/* HEADER */
+.hdr{
+  height:var(--header);background:rgba(255,255,255,.97);
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--border);
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;padding:0 28px;
+  justify-content:space-between;box-shadow:var(--sh);
+}
+.logo{height:42px;object-fit:contain}
+.hnav{display:flex;gap:2px}
+.ha{padding:7px 15px;border-radius:9px;font-size:.875rem;font-weight:500;color:var(--text2);text-decoration:none;transition:.15s}
+.ha:hover{color:var(--blue);background:var(--blue-l)}
+.ha.act{color:var(--blue);background:var(--blue-l);font-weight:700}
+.hright{display:flex;align-items:center;gap:10px}
+.nb{
+  width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+  background:var(--white);color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:.15s;position:relative;box-shadow:var(--sh);
+}
+.nb:hover{border-color:var(--blue);color:var(--blue)}
+.ndot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid white}
+.uchip{
+  display:flex;align-items:center;gap:8px;padding:5px 14px 5px 8px;
+  background:var(--white);border:1px solid var(--border);border-radius:40px;
+  text-decoration:none;transition:.15s;box-shadow:var(--sh);
+}
+.uchip:hover{border-color:var(--blue)}
+.uav{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:white;font-weight:700}
+.uname{font-size:.82rem;font-weight:600;color:var(--text1)}
+
+/* PAGE */
+.page{padding-top:calc(var(--header)+28px);padding-bottom:60px;max-width:920px;margin:0 auto;padding-right:18px;padding-left:18px}
+
+/* HERO */
+.hero{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh2);margin-bottom:18px}
+.cover{height:130px;position:relative}
+.cover-emp{background:linear-gradient(120deg,#1e3a8a 0%,#2563eb 50%,#60a5fa 100%)}
+.cover-employer{background:linear-gradient(120deg,#064e3b 0%,#16a34a 50%,#4ade80 100%)}
+.cover::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='white' fill-opacity='0.07'/%3E%3C/svg%3E")}
+
+.hbody{padding:0 24px 22px}
+.av-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.av{
+  width:88px;height:88px;border-radius:50%;border:4px solid white;
+  background:var(--surface);display:flex;align-items:center;justify-content:center;
+  font-size:1.9rem;font-weight:800;color:var(--blue);
+  margin-top:-44px;overflow:hidden;box-shadow:var(--sh3);flex-shrink:0;
+}
+.av img{width:100%;height:100%;object-fit:cover}
+.hacts{display:flex;gap:8px;padding-top:10px}
+
+.btn-p{padding:8px 20px;border-radius:9px;background:var(--blue);border:none;color:white;font-family:var(--font);font-size:.84rem;font-weight:600;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:7px;text-decoration:none}
+.btn-p:hover{background:#1d4ed8;box-shadow:0 4px 12px rgba(37,99,235,.3);transform:translateY(-1px)}
+.btn-o{padding:8px 18px;border-radius:9px;background:white;border:1.5px solid var(--border);color:var(--text2);font-family:var(--font);font-size:.84rem;font-weight:500;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:7px}
+.btn-o:hover{border-color:var(--blue);color:var(--blue)}
+
+.hname{font-size:1.35rem;font-weight:900;color:var(--text1);margin-bottom:3px}
+.htitle{font-size:.9rem;color:var(--text2);margin-bottom:10px}
+
+.bdg-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.bdg{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:.74rem;font-weight:600}
+.bdg-blue{background:var(--blue-m);color:var(--blue);border:1px solid #bfdbfe}
+.bdg-green{background:#dcfce7;color:var(--green);border:1px solid #bbf7d0}
+.bdg-gold{background:#fef3c7;color:var(--gold);border:1px solid #fde68a}
+.bdg-red{background:#fee2e2;color:var(--red);border:1px solid #fecaca}
+.bdg-gray{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+
+.star-row{display:flex;align-items:center;gap:5px;margin-bottom:12px}
+.star{color:#f59e0b;font-size:.82rem}.star.e{color:var(--border)}
+.rtxt{font-size:.78rem;color:var(--text3)}
+
+.meta-g{display:flex;flex-wrap:wrap;gap:14px}
+.mi{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--text2)}
+.mi i{color:var(--blue);width:13px;text-align:center;font-size:.8rem}
+
+.bio-sec{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:.86rem;color:var(--text2);line-height:1.75}
+
+/* COMPLETION */
+.comp-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;box-shadow:var(--sh);margin-bottom:18px}
+.comp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.comp-ttl{font-size:.92rem;font-weight:700;color:var(--text1)}
+.comp-sub{font-size:.75rem;color:var(--text3);margin-top:2px}
+.comp-pct{font-size:1.4rem;font-weight:900;color:var(--blue)}
+.bar-tr{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:10px}
+.bar-f{height:100%;border-radius:4px;background:linear-gradient(90deg,#2563eb,#3b82f6);transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.tips-row{display:flex;gap:7px;flex-wrap:wrap}
+.tip{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;background:var(--gold-l);border:1px solid #fde68a;font-size:.74rem;color:var(--gold);cursor:pointer;font-weight:500;transition:.15s}
+.tip:hover{background:#fef3c7}
+
+/* STATS */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh);transition:.2s;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--cc,var(--blue));opacity:.6}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.si{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;margin-bottom:8px}
+.sv{font-size:1.75rem;font-weight:900;color:var(--text1);line-height:1;margin-bottom:4px}
+.sl{font-size:.77rem;color:var(--text2);font-weight:500;margin-bottom:4px}
+.ss{font-size:.7rem;display:flex;align-items:center;gap:3px}
+.up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--text3)}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
+.ch{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ct{font-size:.9rem;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:8px}
+.cl{font-size:.77rem;color:var(--blue);text-decoration:none;font-weight:500}
+.cl:hover{text-decoration:underline}
+.cb{padding:16px 20px}
+
+/* SKILLS */
+.sk-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.sk{padding:6px 14px;border-radius:8px;background:var(--blue-l);border:1px solid var(--blue-m);font-size:.8rem;color:var(--blue);font-weight:500}
+
+/* NOTIF */
+.ni{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s}
+.ni:last-child{border-bottom:none;padding-bottom:0}
+.ni:first-child{padding-top:0}
+.ni:hover{opacity:.75}
+.niw{width:36px;height:36px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.nb2{flex:1;min-width:0}
+.nt{font-size:.83rem;color:var(--text1);line-height:1.55;margin-bottom:2px}
+.ntm{font-size:.7rem;color:var(--text3)}
+.udot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:7px}
+
+/* JOB CARD */
+.jc{padding:14px;border:1px solid var(--border);border-radius:11px;background:var(--surface);transition:.18s;cursor:pointer;margin-bottom:9px}
+.jc:last-child{margin-bottom:0}
+.jc:hover{border-color:var(--blue);background:var(--blue-l)}
+.jt{display:flex;align-items:flex-start;gap:11px;margin-bottom:9px}
+.jlogo{width:38px;height:38px;border-radius:9px;background:white;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.jn{font-size:.88rem;font-weight:700;color:var(--text1)}
+.jco{font-size:.76rem;color:var(--text2)}
+.jmatch{padding:3px 9px;border-radius:20px;background:#dcfce7;border:1px solid #bbf7d0;font-size:.71rem;font-weight:700;color:var(--green);white-space:nowrap}
+.jtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.jtag{padding:2px 9px;border-radius:6px;background:white;border:1px solid var(--border);font-size:.72rem;color:var(--text2)}
+.jfoot{display:flex;align-items:center;justify-content:space-between}
+.jsal{font-size:.84rem;font-weight:700;color:var(--blue)}
+.jloc{font-size:.72rem;color:var(--text3);display:flex;align-items:center;gap:3px}
+.apbtn{padding:6px 15px;border-radius:8px;background:var(--blue);border:none;color:white;font-family:var(--font);font-size:.77rem;font-weight:600;cursor:pointer;transition:.15s}
+.apbtn:hover{background:#1d4ed8}
+
+/* GALLERY */
+.gal{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.gcell{aspect-ratio:1;border-radius:9px;overflow:hidden;background:var(--surface);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:1.2rem;cursor:pointer;transition:.2s;position:relative}
+.gcell img{width:100%;height:100%;object-fit:cover}
+.gcell:hover{border-color:var(--blue);border-style:solid}
+.gov{position:absolute;inset:0;background:rgba(37,99,235,.65);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;color:white;font-size:.8rem}
+.gcell:hover .gov{opacity:1}
+
+/* REVIEW */
+.rev{padding:14px;border:1px solid var(--border);border-radius:11px;background:var(--surface);margin-bottom:9px}
+.rev:last-child{margin-bottom:0}
+.rvh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rvav{width:32px;height:32px;border-radius:50%;background:var(--blue-m);display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700;color:var(--blue)}
+.rvn{font-size:.84rem;font-weight:700;color:var(--text1)}
+.rvd{font-size:.7rem;color:var(--text3)}
+.rvt{font-size:.82rem;color:var(--text2);line-height:1.65}
+
+/* POSTED JOB */
+.pj{padding:13px;border:1px solid var(--border);border-radius:10px;background:var(--surface);display:flex;align-items:center;gap:11px;margin-bottom:8px;transition:.15s;cursor:pointer}
+.pj:last-child{margin-bottom:0}
+.pj:hover{border-color:var(--green);background:var(--green-l)}
+.pji{flex:1}
+.pjt{font-size:.87rem;font-weight:700;color:var(--text1)}
+.pjm{font-size:.73rem;color:var(--text3);margin-top:2px}
+.pjc{font-size:.74rem;font-weight:600;color:var(--blue);background:var(--blue-l);border:1px solid var(--blue-m);padding:3px 10px;border-radius:7px}
+
+/* TOAST */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--text1);color:white;padding:11px 22px;border-radius:11px;font-size:.84rem;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:500;opacity:0;pointer-events:none;transition:all .3s ease}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+.toast.info{background:var(--blue)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .38s ease both}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:760px){.srow{grid-template-columns:repeat(2,1fr)}.gal{grid-template-columns:repeat(3,1fr)}.hnav{display:none}}
+@media(max-width:460px){.gal{grid-template-columns:repeat(2,1fr)}.page{padding-right:10px;padding-left:10px}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"><i id="tIcon" class="fas fa-check-circle"></i><span id="tMsg"></span></div>
+
+<header class="hdr">
+  <img src="shagelnie.png.png" alt="شغلني" class="logo">
+  <nav class="hnav">
+    <a href="index.html" class="ha">الرئيسية</a>
+    <a href="job_listing_page.html" class="ha">الوظائف</a>
+    <a href="employee_listing_page.html" class="ha">الموظفون</a>
+    <a href="chats.html" class="ha">الرسائل</a>
+    <a href="profile.html" class="ha act">ملفي</a>
+  </nav>
+  <div class="hright">
+    <button class="nb" onclick="showToast('لا توجد إشعارات جديدة','info')">
+      <i class="fas fa-bell"></i><div class="ndot"></div>
+    </button>
+    <a href="profile.html" class="uchip">
+      <div class="uav" id="hAv">م</div>
+      <span class="uname" id="hNm">ملفي</span>
+    </a>
+  </div>
+</header>
+
+<div class="page" id="pg">
+  <div style="display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:14px">
+    <div style="width:44px;height:44px;border:3px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin 1s linear infinite"></div>
+    <p style="color:#94a3b8;font-size:.88rem">جاري تحميل ملفك الشخصي...</p>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+  authDomain:"shaglni-c64c0.firebaseapp.com",
+  projectId:"shaglni-c64c0",
+  storageBucket:"shaglni-c64c0.appspot.com",
+  messagingSenderId:"768887356636",
+  appId:"1:768887356636:web:11ec1d6991add3309c8819"
+});
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+window.showToast = (msg,type='success') => {
+  const ic={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
+  document.getElementById('tIcon').className=`fas ${ic[type]}`;
+  document.getElementById('tMsg').textContent=msg;
+  const t=document.getElementById('toast');
+  t.className=`toast show ${type}`;
+  setTimeout(()=>t.classList.remove('show'),3500);
+};
+
+const ini=n=>(n||'م').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2)||'م';
+const fdt=ts=>{if(!ts)return'—';try{const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('ar-SA',{year:'numeric',month:'long'})}catch{return'—'}};
+const strs=(n=0,t=5)=>Array.from({length:t},(_,i)=>`<i class="fas fa-star star${i>=n?' e':''}"></i>`).join('');
+const calcPct=d=>{let p=20;if(d.profileImageUrl)p+=15;if(d.bio)p+=10;if(d.skills?.length)p+=10;if(d.headline)p+=10;if((d.previousWorksUrls||[]).length>=5)p+=20;if(d.links?.cv)p+=8;if(d.links?.linkedin)p+=7;return Math.min(p,100)};
+
+// =========== EMPLOYEE ===========
+function renderEmployee(d) {
+  const in2=ini(d.name);
+  const pct=d.profileCompletionPercentage||calcPct(d);
+  const loc=[d.contact?.location?.state,d.contact?.location?.city].filter(Boolean).join(' — ')||'—';
+  const rating=d.rating||4;
+  document.getElementById('hAv').textContent=in2;
+  document.getElementById('hNm').textContent=(d.name||'').split(' ')[0]||'ملفي';
+
+  const tips=[];
+  if(!d.profileImageUrl)tips.push('أضف صورة شخصية');
+  if(!d.bio)tips.push('أضف نبذة عنك');
+  if(!d.skills?.length)tips.push('أضف مهاراتك');
+  if(!(d.previousWorksUrls?.length>=5))tips.push('5 صور أعمال');
+  if(!d.links?.cv)tips.push('أضف CV');
+
+  const skillsH=(d.skills||[]).length
+    ?d.skills.map(s=>`<span class="sk">${s}</span>`).join('')
+    :`<span style="color:var(--text3);font-size:.82rem">لم تُضف مهارات بعد — <a href="#" onclick="showToast('عدّل ملفك لإضافة مهارات','info');return false" style="color:var(--blue)">إضافة</a></span>`;
+
+  const linksH=[
+    d.links?.cv?`<a href="${d.links.cv}" target="_blank" class="bdg bdg-blue" style="text-decoration:none"><i class="fas fa-file-alt"></i> السيرة الذاتية</a>`:'',
+    d.links?.linkedin?`<a href="${d.links.linkedin}" target="_blank" class="bdg bdg-blue" style="text-decoration:none"><i class="fab fa-linkedin"></i> لينكد إن</a>`:''
+  ].filter(Boolean).join('');
+
+  const galH=Array.from({length:8},(_,i)=>{
+    const u=(d.previousWorksUrls||[])[i];
+    return u
+      ?`<div class="gcell"><img src="${u}" alt="عمل"><div class="gov"><i class="fas fa-expand"></i></div></div>`
+      :`<div class="gcell" onclick="showToast('أضف صور أعمالك من تعديل الملف','info')"><i class="fas fa-plus"></i></div>`;
+  }).join('');
+
+  const notifs=[
+    {icon:'fa-handshake',bg:'#dcfce7',ic:'#16a34a',text:'شركة البناء الحديث أرسلت لك عرض عمل جديد',time:'منذ ساعتين',u:true},
+    {icon:'fa-eye',bg:'#dbeafe',ic:'#2563eb',text:'شاهد 8 أشخاص ملفك الشخصي اليوم',time:'منذ 5 ساعات',u:true},
+    {icon:'fa-star',bg:'#fef3c7',ic:'#d97706',text:'تقييم جديد: محمد أحمد منحك 5 نجوم',time:'أمس',u:false},
+    {icon:'fa-bolt',bg:'#f5f3ff',ic:'#7c3aed',text:'وظيفة كهربائي جديدة تناسب مهاراتك — الخرطوم',time:'منذ يومين',u:false},
+  ];
+
+  const jobs=[
+    {title:'كهربائي صناعي',co:'شركة الطاقة السودانية',logo:'⚡',tags:['كهرباء','صناعي','دوام كامل'],sal:'3,500 ج.س/شهر',loc:'الخرطوم',m:95},
+    {title:'فني تكييف وتبريد',co:'مجموعة البرد',logo:'❄️',tags:['تكييف','مرن'],sal:'2,800 ج.س/شهر',loc:'أم درمان',m:87},
+    {title:'كهربائي مباني',co:'مقاولات الخليج',logo:'🏗️',tags:['كهرباء','مباني'],sal:'150 ج.س/يوم',loc:'بحري',m:82},
+  ];
+
+  const revs=[
+    {n:'أحمد محمد',i:'أم',r:5,t:'عامل ممتاز وملتزم بالوقت. أنجز العمل بجودة عالية جداً.',d:'مارس 2024'},
+    {n:'شركة الإنشاء الحديث',i:'ش',r:4,t:'تعامل احترافي وخبرة واضحة. سنتعامل معه مجدداً.',d:'يناير 2024'},
+  ];
+
+  document.getElementById('pg').innerHTML=`
+    <div class="hero fu">
+      <div class="cover cover-emp"></div>
+      <div class="hbody">
+        <div class="av-row">
+          <div class="av">${d.profileImageUrl?`<img src="${d.profileImageUrl}" alt="صورة">`:`<span>${in2}</span>`}</div>
+          <div class="hacts">
+            <button class="btn-o" onclick="showToast('سيتم فتح صفحة التعديل','info')"><i class="fas fa-pen"></i> تعديل الملف</button>
+            <a href="chats.html" class="btn-p"><i class="fas fa-comment-dots"></i> الرسائل</a>
+          </div>
+        </div>
+        <div class="hname">${d.name||'مستخدم'}</div>
+        <div class="htitle">${d.headline||'لم يُحدد العنوان الوظيفي بعد'}</div>
+        <div class="bdg-row">
+          ${d.emailVerified?`<span class="bdg bdg-green"><i class="fas fa-shield-check"></i> موثق</span>`:`<span class="bdg bdg-gray"><i class="fas fa-clock"></i> في انتظار التوثيق</span>`}
+          ${d.jobStatus==='متاح للعمل'?`<span class="bdg bdg-blue"><i class="fas fa-circle" style="font-size:.42rem"></i> متاح للعمل</span>`:`<span class="bdg bdg-red"><i class="fas fa-circle" style="font-size:.42rem"></i> غير متاح حالياً</span>`}
+          ${d.experience?`<span class="bdg bdg-gold"><i class="fas fa-award"></i> ${d.experience}</span>`:''}
+        </div>
+        <div class="star-row" style="margin-bottom:12px">${strs(rating)}<span class="rtxt">${rating}.0 (${d.reviewsCount||0} تقييم)</span></div>
+        <div class="meta-g">
+          <div class="mi"><i class="fas fa-map-marker-alt"></i>${loc}</div>
+          <div class="mi"><i class="fas fa-phone"></i>${d.contact?.phone||d.phone||'—'}</div>
+          <div class="mi"><i class="fas fa-envelope"></i>${d.email||'—'}</div>
+          <div class="mi"><i class="fas fa-calendar-alt"></i>عضو منذ ${fdt(d.createdAt)}</div>
+        </div>
+        ${d.bio?`<div class="bio-sec">${d.bio}</div>`:''}
+        ${linksH?`<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">${linksH}</div>`:''}
+      </div>
+    </div>
+
+    <div class="comp-card fu d1">
+      <div class="comp-top">
+        <div><div class="comp-ttl">اكتمال الملف الشخصي</div><div class="comp-sub">ملف مكتمل يجذب فرص أكثر بـ 3 أضعاف</div></div>
+        <div class="comp-pct" id="cpct">0%</div>
+      </div>
+      <div class="bar-tr"><div class="bar-f" id="barf" style="width:0%"></div></div>
+      ${tips.length?`<div class="tips-row">${tips.slice(0,4).map(t=>`<div class="tip" onclick="showToast('اذهب لتعديل الملف','info')"><i class="fas fa-plus" style="font-size:.6rem"></i>${t}</div>`).join('')}</div>`
+      :`<div style="font-size:.8rem;color:var(--green);font-weight:600"><i class="fas fa-check-circle" style="margin-left:5px"></i>ملفك مكتمل بامتياز! 🎉</div>`}
+    </div>
+
+    <div class="srow fu d2">
+      <div class="sc" style="--cc:#2563eb"><div class="si" style="background:#eff6ff;color:#2563eb"><i class="fas fa-eye"></i></div><div class="sv">${d.profileViews??0}</div><div class="sl">زيارة للملف الشخصي</div><div class="ss up"><i class="fas fa-arrow-up"></i> +12 هذا الأسبوع</div></div>
+      <div class="sc" style="--cc:#16a34a"><div class="si" style="background:#f0fdf4;color:#16a34a"><i class="fas fa-paper-plane"></i></div><div class="sv">${d.applications??0}</div><div class="sl">طلب تقدّم به</div><div class="ss up"><i class="fas fa-arrow-up"></i> +3 هذا الشهر</div></div>
+      <div class="sc" style="--cc:#d97706"><div class="si" style="background:#fffbeb;color:#d97706"><i class="fas fa-handshake"></i></div><div class="sv">${d.jobOffers??0}</div><div class="sl">عرض عمل وصلك</div><div class="ss up"><i class="fas fa-circle" style="font-size:.4rem"></i> جديد!</div></div>
+      <div class="sc" style="--cc:#7c3aed"><div class="si" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-bookmark"></i></div><div class="sv">${(d.bookmarkedJobs||[]).length}</div><div class="sl">وظيفة محفوظة</div><div class="ss neu">— لا تغيير</div></div>
+    </div>
+
+    <div class="card fu d3">
+      <div class="ch"><div class="ct"><i class="fas fa-bell" style="color:#d97706"></i> آخر الإشعارات</div><a href="#" class="cl">عرض الكل</a></div>
+      <div class="cb" style="padding-top:8px;padding-bottom:8px">
+        ${notifs.map(n=>`<div class="ni"><div class="niw" style="background:${n.bg}"><i class="fas ${n.icon}" style="color:${n.ic}"></i></div><div class="nb2"><div class="nt">${n.text}</div><div class="ntm"><i class="fas fa-clock" style="font-size:.58rem;margin-left:3px"></i>${n.time}</div></div>${n.u?'<div class="udot"></div>':''}</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card fu d3">
+      <div class="ch"><div class="ct"><i class="fas fa-tools" style="color:#2563eb"></i> المهارات</div><a href="#" class="cl" onclick="showToast('عدّل الملف لإضافة مهارات','info');return false">+ إضافة</a></div>
+      <div class="cb"><div class="sk-wrap">${skillsH}</div></div>
+    </div>
+
+    <div class="card fu d4">
+      <div class="ch"><div class="ct"><i class="fas fa-bolt" style="color:#7c3aed"></i> وظائف مقترحة لك</div><a href="job_listing_page.html" class="cl">عرض الكل</a></div>
+      <div class="cb">
+        ${jobs.map(j=>`<div class="jc"><div class="jt"><div class="jlogo">${j.logo}</div><div class="job-info" style="flex:1"><div class="jn">${j.title}</div><div class="jco">${j.co}</div></div><span class="jmatch">⚡ ${j.m}% توافق</span></div><div class="jtags">${j.tags.map(t=>`<span class="jtag">${t}</span>`).join('')}</div><div class="jfoot"><div><div class="jsal">${j.sal}</div><div class="jloc"><i class="fas fa-map-marker-alt"></i>${j.loc}</div></div><button class="apbtn" onclick="showToast('تم إرسال طلبك!','success')">تقدّم الآن</button></div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card fu d4">
+      <div class="ch"><div class="ct"><i class="fas fa-images" style="color:#16a34a"></i> معرض الأعمال السابقة</div><a href="#" class="cl" onclick="showToast('أضف صوراً من تعديل الملف','info');return false">+ إضافة</a></div>
+      <div class="cb"><div class="gal">${galH}</div></div>
+    </div>
+
+    <div class="card fu d5">
+      <div class="ch"><div class="ct"><i class="fas fa-star" style="color:#d97706"></i> التقييمات</div><span style="font-size:.77rem;color:var(--text3)">${rating}.0 من 5 ★</span></div>
+      <div class="cb">
+        ${revs.map(r=>`<div class="rev"><div class="rvh"><div class="rvav">${r.i}</div><div style="flex:1"><div class="rvn">${r.n}</div><div class="rvd">${r.d}</div></div><div class="star-row">${strs(r.r)}</div></div><div class="rvt">${r.t}</div></div>`).join('')}
+      </div>
+    </div>
+  `;
+  setTimeout(()=>{document.getElementById('cpct').textContent=pct+'%';document.getElementById('barf').style.width=pct+'%'},400);
+}
+
+// =========== EMPLOYER ===========
+function renderEmployer(d) {
+  const in2=ini(d.name);
+  const c=d.companyInfo||{};
+  const pct=d.profileCompletionPercentage||55;
+  const loc=[c.location?.state,c.location?.city].filter(Boolean).join(' — ')||'—';
+  document.getElementById('hAv').textContent=in2;
+  document.getElementById('hNm').textContent=(d.name||'').split(' ')[0]||'ملفي';
+
+  const notifs=[
+    {icon:'fa-user-check',bg:'#dcfce7',ic:'#16a34a',text:'أحمد علي تقدّم لوظيفة كهربائي التي نشرتها',time:'منذ ساعة',u:true},
+    {icon:'fa-eye',bg:'#dbeafe',ic:'#2563eb',text:'12 شخص شاهدوا إعلاناتك الوظيفية اليوم',time:'منذ 3 ساعات',u:true},
+    {icon:'fa-star',bg:'#fef3c7',ic:'#d97706',text:'موظف جديد قيّمك بـ 5 نجوم',time:'أمس',u:false},
+  ];
+
+  const pjobs=[
+    {t:'كهربائي صناعي',ap:7,d:'منذ 3 أيام',act:true},
+    {t:'سباك محترف',ap:12,d:'منذ أسبوع',act:true},
+    {t:'فني تكييف',ap:4,d:'منذ أسبوعين',act:false},
+  ];
+
+  document.getElementById('pg').innerHTML=`
+    <div class="hero fu">
+      <div class="cover cover-employer"></div>
+      <div class="hbody">
+        <div class="av-row">
+          <div class="av" style="color:var(--green)">${c.logoUrl?`<img src="${c.logoUrl}" alt="شعار">`:`<span>${in2}</span>`}</div>
+          <div class="hacts">
+            <button class="btn-o" onclick="showToast('سيتم فتح صفحة التعديل','info')"><i class="fas fa-pen"></i> تعديل الملف</button>
+            <a href="jop_posting_page.html" class="btn-p" style="text-decoration:none;background:var(--green)"><i class="fas fa-plus"></i> نشر وظيفة</a>
+          </div>
+        </div>
+        <div class="hname">${d.name||'مستخدم'}</div>
+        <div class="htitle">${c.name||'اسم الشركة'} — ${c.businessType||'نوع النشاط'}</div>
+        <div class="bdg-row">
+          ${d.verification?.isVerified?`<span class="bdg bdg-green"><i class="fas fa-shield-check"></i> شركة موثقة</span>`:`<span class="bdg bdg-gray"><i class="fas fa-clock"></i> في انتظار التوثيق</span>`}
+          <span class="bdg bdg-blue"><i class="fas fa-briefcase"></i> ${d.subRole==='hiring'?'تبحث عن موظفين':'صاحب عمل فردي'}</span>
+        </div>
+        <div class="meta-g">
+          <div class="mi"><i class="fas fa-map-marker-alt"></i>${loc}</div>
+          <div class="mi"><i class="fas fa-phone"></i>${c.phone||d.phone||'—'}</div>
+          <div class="mi"><i class="fas fa-envelope"></i>${c.email||d.email||'—'}</div>
+          <div class="mi"><i class="fas fa-calendar-alt"></i>عضو منذ ${fdt(d.createdAt)}</div>
+        </div>
+        ${c.description?`<div class="bio-sec">${c.description}</div>`:''}
+      </div>
+    </div>
+
+    <div class="comp-card fu d1">
+      <div class="comp-top">
+        <div><div class="comp-ttl">اكتمال ملف الشركة</div><div class="comp-sub">ملف مكتمل يجذب أفضل المتقدمين</div></div>
+        <div class="comp-pct" id="cpct">0%</div>
+      </div>
+      <div class="bar-tr"><div class="bar-f" id="barf" style="width:0%;background:linear-gradient(90deg,#16a34a,#22c55e)"></div></div>
+    </div>
+
+    <div class="srow fu d2">
+      <div class="sc" style="--cc:#2563eb"><div class="si" style="background:#eff6ff;color:#2563eb"><i class="fas fa-eye"></i></div><div class="sv">—</div><div class="sl">مشاهدة الإعلانات</div><div class="ss up"><i class="fas fa-arrow-up"></i> +24 هذا الأسبوع</div></div>
+      <div class="sc" style="--cc:#16a34a"><div class="si" style="background:#f0fdf4;color:#16a34a"><i class="fas fa-users"></i></div><div class="sv">23</div><div class="sl">متقدم لوظائفك</div><div class="ss up"><i class="fas fa-arrow-up"></i> 7 جدد هذا الأسبوع</div></div>
+      <div class="sc" style="--cc:#d97706"><div class="si" style="background:#fffbeb;color:#d97706"><i class="fas fa-briefcase"></i></div><div class="sv">3</div><div class="sl">وظيفة منشورة</div><div class="ss neu">— نشطة الآن</div></div>
+      <div class="sc" style="--cc:#7c3aed"><div class="si" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-check-circle"></i></div><div class="sv">5</div><div class="sl">توظيف ناجح</div><div class="ss up"><i class="fas fa-arrow-up"></i> +2 هذا الشهر</div></div>
+    </div>
+
+    <div class="card fu d3">
+      <div class="ch"><div class="ct"><i class="fas fa-bell" style="color:#d97706"></i> آخر الإشعارات</div><a href="#" class="cl">عرض الكل</a></div>
+      <div class="cb" style="padding-top:8px;padding-bottom:8px">
+        ${notifs.map(n=>`<div class="ni"><div class="niw" style="background:${n.bg}"><i class="fas ${n.icon}" style="color:${n.ic}"></i></div><div class="nb2"><div class="nt">${n.text}</div><div class="ntm"><i class="fas fa-clock" style="font-size:.58rem;margin-left:3px"></i>${n.time}</div></div>${n.u?'<div class="udot"></div>':''}</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card fu d4">
+      <div class="ch"><div class="ct"><i class="fas fa-briefcase" style="color:#16a34a"></i> الوظائف المنشورة</div><a href="jop_posting_page.html" class="cl">+ نشر وظيفة جديدة</a></div>
+      <div class="cb">
+        ${pjobs.map(j=>`<div class="pj"><div class="pji"><div class="pjt">${j.t}</div><div class="pjm">${j.d} · ${j.act?'<span style="color:#16a34a">نشطة</span>':'<span style="color:#94a3b8">منتهية</span>'}</div></div><span class="pjc"><i class="fas fa-users" style="margin-left:5px"></i>${j.ap} متقدم</span></div>`).join('')}
+      </div>
+    </div>
+  `;
+  setTimeout(()=>{document.getElementById('cpct').textContent=pct+'%';document.getElementById('barf').style.width=pct+'%'},400);
+}
+
+// =========== AUTH ===========
+onAuthStateChanged(auth, async user => {
+  if(!user){window.location.href='login.html';return}
+  try{
+    const es=await getDoc(doc(db,'employees',user.uid));
+    if(es.exists()){renderEmployee(es.data());return}
+    const emp=await getDoc(doc(db,'All_jops',user.uid));
+    if(emp.exists()){renderEmployer(emp.data());return}
+    document.getElementById('pg').innerHTML=`
+      <div style="text-align:center;padding:80px 20px">
+        <i class="fas fa-user-circle" style="font-size:4rem;color:#cbd5e1;margin-bottom:20px;display:block"></i>
+        <h2 style="color:#475569;margin-bottom:8px">لم يتم العثور على ملفك الشخصي</h2>
+        <p style="color:#94a3b8;margin-bottom:24px">ربما لم تكمل التسجيل بعد</p>
+        <a href="register.html" style="padding:10px 28px;background:#2563eb;color:white;border-radius:10px;text-decoration:none;font-weight:600">إكمال التسجيل</a>
+      </div>`;
+  }catch(e){console.error(e);showToast('خطأ في تحميل البيانات','error')}
+});
+</script>
+</body>
+</html>
