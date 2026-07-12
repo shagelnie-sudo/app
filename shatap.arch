@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>أرشيف الشبطاب</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { background: #f8fafc; overflow-x: hidden; }
+        .header-banner {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3d7ab5 100%);
+            position: relative; overflow: hidden; min-height: 160px;
+        }
+        .header-shape {
+            position: absolute; border-radius: 16px; opacity: 0.1; background: white;
+            animation: shapeFloat 8s ease-in-out infinite;
+        }
+        @keyframes shapeFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        .app-nav {
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(226,232,240,0.6);
+        }
+        .archive-card {
+            background: white; border-radius: 24px; overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+            border: 1px solid #f1f5f9; position: relative; flex-shrink: 0;
+            width: 300px; scroll-snap-align: start;
+        }
+        .archive-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(30, 58, 95, 0.15); border-color: #dbeafe;
+        }
+        .archive-card:active { transform: scale(0.97); }
+        .card-image-area {
+            position: relative; height: 240px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            overflow: hidden;
+        }
+        .card-image-area img {
+            width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;
+        }
+        .archive-card:hover .card-image-area img { transform: scale(1.08); }
+        .card-category-badge {
+            position: absolute; top: 14px; right: 14px; padding: 6px 14px;
+            border-radius: 14px; font-size: 11px; font-weight: 800; color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 2;
+        }
+        .cat-children { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .cat-events { background: linear-gradient(135deg, #ec4899, #db2777); }
+        .cat-achievements { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .cat-people { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .cat-houses { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .cat-shops { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .card-date-badge {
+            position: absolute; top: 14px; left: 14px; padding: 5px 12px;
+            border-radius: 12px; font-size: 11px; font-weight: 800; color: #1e3a5f;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);
+            border: 1px solid rgba(30,58,95,0.1); z-index: 2;
+        }
+        .card-body { padding: 18px; }
+        .card-title {
+            font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 8px;
+            line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .card-desc {
+            font-size: 13px; color: #64748b; line-height: 1.6;
+            display: -webkit-box; -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px;
+        }
+        .card-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: 12px; border-top: 1.5px solid #f1f5f9;
+        }
+        .card-uploader { display: flex; align-items: center; gap: 8px; }
+        .card-uploader-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #1e3a5f, #3d7ab5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: white; font-weight: 700;
+        }
+        .card-uploader-name { font-size: 12px; font-weight: 700; color: #334155; }
+        .card-date { font-size: 11px; color: #94a3b8; font-weight: 600; }
+        .filter-chip {
+            transition: all 0.2s ease; border: 2px solid transparent; white-space: nowrap;
+        }
+        .filter-chip.active {
+            background: linear-gradient(135deg, #1e3a5f, #3d7ab5); color: white;
+            box-shadow: 0 4px 16px rgba(30,58,95,0.3);
+        }
+        .filter-chip:not(.active) {
+            background: white; border-color: #e2e8f0; color: #64748b;
+        }
+        .filter-chip:not(.active):hover {
+            border-color: #1e3a5f; color: #1e3a5f; background: #eff6ff;
+        }
+        .filters-section { background: white; border-bottom: 1px solid #e2e8f0; }
+        .filter-label {
+            font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .gallery-wrapper {
+            position: relative; width: 100%; height: 350px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            overflow: hidden;
+        }
+        .gallery-track { display: flex; height: 100%; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .gallery-slide { min-width: 100%; height: 100%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .gallery-slide img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .gallery-dots {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; z-index: 10;
+        }
+        .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.2); transition: all 0.3s ease; cursor: pointer; }
+        .gallery-dot.active { width: 24px; border-radius: 6px; background: #1e3a5f; }
+        .gallery-nav {
+            position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px;
+            background: rgba(255,255,255,0.95); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; z-index: 10;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15); border: none; font-size: 14px; color: #475569;
+        }
+        .gallery-nav:hover { transform: translateY(-50%) scale(1.1); background: white; }
+        .gallery-nav.prev { right: 16px; }
+        .gallery-nav.next { left: 16px; }
+        .fab-container { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%); z-index: 50; pointer-events: none; }
+        .fab-btn {
+            pointer-events: auto; background: linear-gradient(135deg, #1e3a5f, #3d7ab5);
+            box-shadow: 0 8px 32px rgba(30, 58, 95, 0.4), 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fab-btn:hover { transform: scale(1.05); box-shadow: 0 12px 40px rgba(30, 58, 95, 0.5); }
+        .fab-btn:active { transform: scale(0.95); }
+        .bottom-nav {
+            position: fixed; bottom: 0; right: 0; left: 0; z-index: 50;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(226,232,240,0.6);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+        .bottom-item { position: relative; transition: all 0.2s ease; }
+        .bottom-item.active { color: #1e3a5f; }
+        .bottom-item.active::before {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 32px; height: 3px; background: linear-gradient(90deg, #1e3a5f, #3d7ab5); border-radius: 0 0 8px 8px;
+        }
+        .horizontal-scroll {
+            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;
+        }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; }
+        @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .main-content { padding-bottom: 160px; }
+        html { scroll-behavior: smooth; }
+        .section-title { font-size: 18px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .section-title-icon {
+            width: 32px; height: 32px; border-radius: 10px;
+            background: linear-gradient(135deg, #1e3a5f, #3d7ab5);
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;
+        }
+        .view-all-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;
+            background: linear-gradient(135deg, #1e3a5f, #3d7ab5); color: white;
+            font-weight: 800; font-size: 13px; border-radius: 16px; border: none;
+            cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(30,58,95,0.3); margin-top: 16px;
+        }
+        .view-all-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(30,58,95,0.4); }
+        .view-all-btn:active { transform: scale(0.95); }
+        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); }
+        .feature-item { display: flex; align-items: center; gap: 12px; padding: 14px; background: #f8fafc; border-radius: 16px; margin-bottom: 8px; border: 1px solid #f1f5f9; }
+        .feature-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+        .site-footer {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            color: white; padding: 40px 0 100px;
+        }
+        .footer-credit {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            border-radius: 16px; padding: 16px 24px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- شريط علوي -->
+    <div class="header-banner text-white py-6 px-4 relative">
+        <div class="header-shape" style="width:120px;height:80px;top:10px;right:-20px;animation-delay:0s;"></div>
+        <div class="header-shape" style="width:80px;height:120px;bottom:0;left:10px;animation-delay:2s;"></div>
+        <div class="header-shape" style="width:60px;height:60px;top:30%;right:30%;animation-delay:4s;"></div>
+        <div class="header-shape" style="width:100px;height:50px;bottom:20px;right:20%;animation-delay:1s;"></div>
+        <div class="header-shape" style="width:40px;height:90px;top:5px;left:40%;animation-delay:3s;"></div>
+        <div class="max-w-lg mx-auto flex items-center justify-between relative z-10">
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur border border-white/30">
+                        <i class="fas fa-landmark text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black leading-none tracking-tight">أرشيف الشبطاب</h1>
+                        <p class="text-[10px] text-white/80 font-semibold mt-1">ذاكرة القرية الرقمية</p>
+                    </div>
+                </div>
+                <p class="text-xs text-white/90 mb-3 leading-relaxed font-medium">
+                    نحفظ ذكرياتنا، صور أطفالنا، مناسباتنا، إنجازاتنا، وتاريخ بيوتنا العريقة
+                </p>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="bg-white/20 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold border border-white/20"><i class="fas fa-camera ml-1"></i> صور</span>
+                    <span class="bg-white/20 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold border border-white/20"><i class="fas fa-history ml-1"></i> تاريخ</span>
+                    <span class="bg-white/20 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold border border-white/20"><i class="fas fa-users ml-1"></i> مجتمع</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="app-nav sticky top-0 z-40">
+        <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between gap-3">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" placeholder="ابحث بالاسم، الوصف، أو التاريخ..."
+                    class="w-full pr-10 pl-4 py-2 bg-slate-100 border-2 border-transparent rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-900 transition-all"
+                    oninput="filterArchives()">
+            </div>
+            <div class="flex items-center gap-1">
+                <button onclick="showNotifications()" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-blue-900 transition-all relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute top-1 left-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">3</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- فلاتر -->
+    <section class="filters-section py-3">
+        <div class="max-w-lg mx-auto px-4 space-y-3">
+            <div>
+                <div class="filter-label"><i class="fas fa-folder-open text-[10px]"></i> تصنيف الأرشيف</div>
+                <div class="flex gap-2 overflow-x-auto pb-1" id="categoryFilters">
+                    <button onclick="setCategoryFilter('')" class="filter-chip active flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0" data-category="">
+                        <i class="fas fa-th-large"></i> الكل
+                    </button>
+                    <button onclick="setCategoryFilter('children')" class="filter-chip flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0" data-category="children">
+                        <i class="fas fa-child text-amber-500"></i> الأطفال
+                    </button>
+                    <button onclick="setCategoryFilter('events')" class="filter-chip flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0" data-category="events">
+                        <i class="fas fa-calendar-alt text-pink-500"></i> المناسبات
+                    </button>
+                    <button onclick="setCategoryFilter('achievements')" class="filter-chip flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0" data-category="achievements">
+                        <i class="fas fa-trophy text-green-500"></i> الإنجازات
+                    </button>
+                    <button onclick="setCategoryFilter('people')" class="filter-chip flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0" data-category="people">
+                        <i class="fas fa-user-tie text-blue-500"></i> الشخصيات
+                    </button>
+                    <button onclick="setCategoryFilter('houses')" class="filter-chip flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0" data-category="houses">
+                        <i class="fas fa-home text-purple-500"></i> المنازل العريقة
+                    </button>
+                    <button onclick="setCategoryFilter('shops')" class="filter-chip flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0" data-category="shops">
+                        <i class="fas fa-store text-cyan-500"></i> المحلات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content max-w-lg mx-auto px-4 py-5">
+        <!-- أحدث الإضافات -->
+        <div class="flex items-center justify-between mb-4">
+            <div class="section-title">
+                <div class="section-title-icon"><i class="fas fa-images"></i></div>
+                <span>أحدث الإضافات</span>
+            </div>
+            <span id="archiveCount" class="bg-blue-100 text-blue-900 px-2.5 py-1 rounded-lg font-bold text-xs">جاري التحميل...</span>
+        </div>
+
+        <!-- حالة التحميل -->
+        <div id="loadingState" class="horizontal-scroll pb-2">
+            <div class="archive-card" style="width:300px;flex-shrink:0;">
+                <div class="card-image-area"><div class="skeleton" style="width:100%;height:100%;"></div></div>
+                <div class="p-4 space-y-3">
+                    <div class="h-4 skeleton rounded w-3/4"></div>
+                    <div class="h-3 skeleton rounded w-full"></div>
+                    <div class="h-3 skeleton rounded w-2/3"></div>
+                    <div class="flex justify-between pt-2">
+                        <div class="h-8 skeleton rounded-xl w-24"></div>
+                        <div class="h-8 skeleton rounded-full w-8"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="archive-card" style="width:300px;flex-shrink:0;">
+                <div class="card-image-area"><div class="skeleton" style="width:100%;height:100%;"></div></div>
+                <div class="p-4 space-y-3">
+                    <div class="h-4 skeleton rounded w-3/4"></div>
+                    <div class="h-3 skeleton rounded w-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- شبكة الأرشيف - أفقية -->
+        <div id="archiveGrid" class="hidden horizontal-scroll pb-2"></div>
+
+        <!-- زر عرض الكل -->
+        <div id="viewAllContainer" class="hidden text-center mt-2">
+            <button onclick="showAllArchives()" class="view-all-btn">
+                <i class="fas fa-th-large"></i>
+                <span>عرض كل الأرشيف</span>
+            </button>
+        </div>
+
+        <!-- عرض كل الأرشيف -->
+        <div id="allArchivesGrid" class="hidden mt-6"></div>
+
+        <div id="noResults" class="hidden text-center py-16">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-search text-3xl text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700">لا توجد نتائج</h3>
+            <p class="text-slate-500 text-sm">جرب بحث مختلف أو فلتر آخر</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="max-w-lg mx-auto px-4">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-landmark text-white"></i>
+                </div>
+                <span class="text-xl font-black">أرشيف الشبطاب</span>
+            </div>
+            <p class="text-slate-400 text-xs text-center mb-4">نحفظ ذكرياتنا وتاريخنا للأجيال القادمة</p>
+            <div class="flex justify-center gap-3 mb-6">
+                <a href="#" class="w-9 h-9 bg-white/10 hover:bg-green-600 rounded-lg flex items-center justify-center transition-colors text-sm"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" class="w-9 h-9 bg-white/10 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors text-sm"><i class="fab fa-facebook-f"></i></a>
+            </div>
+            <div class="footer-credit">
+                <p class="text-white/90 font-bold text-sm">إعداد: سليمان صلاح الدين محمد</p>
+                <p class="text-white/50 text-[10px] mt-1">© 2026 أرشيف الشبطاب - جميع الحقوق محفوظة</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- FAB -->
+    <div class="fab-container">
+        <a href="add.html" class="fab-btn flex items-center gap-2 px-6 py-3.5 rounded-full text-white font-bold text-sm">
+            <i class="fas fa-plus text-lg"></i>
+            <span>أضف للأرشيف</span>
+        </a>
+    </div>
+
+    <!-- الشريط السفلي -->
+    <nav class="bottom-nav h-16">
+        <div class="max-w-lg mx-auto h-full flex items-center justify-around px-4">
+            <a href="index.html" class="bottom-item active flex flex-col items-center gap-1 py-2 px-4 text-slate-500">
+                <div class="relative"><i class="fas fa-home text-xl"></i></div>
+                <span class="text-[10px] font-bold">الرئيسية</span>
+            </a>
+            <a href="add.html" class="bottom-item flex flex-col items-center gap-1 py-2 px-4 text-slate-500">
+                <div class="relative"><i class="fas fa-plus-circle text-xl"></i></div>
+                <span class="text-[10px] font-bold">إضافة</span>
+            </a>
+            <a href="#" onclick="showAbout()" class="bottom-item flex flex-col items-center gap-1 py-2 px-4 text-slate-500">
+                <div class="relative"><i class="fas fa-info-circle text-xl"></i></div>
+                <span class="text-[10px] font-bold">عن الأرشيف</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Modal تفاصيل الأرشيف -->
+    <div id="archiveModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 md:inset-4 md:max-w-2xl md:mx-auto bg-white md:rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+            <button onclick="closeModal()" class="absolute top-4 left-4 z-20 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all">
+                <i class="fas fa-times text-slate-600"></i>
+            </button>
+            <div id="modalContent" class="flex-1 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Firebase + JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
+        import { getFirestore, collection, query, orderBy, limit, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyARzFwq6D3QI5xanevX_OLb0xQl-r_Fm8c",
+            authDomain: "phone-soug.firebaseapp.com",
+            databaseURL: "https://phone-soug-default-rtdb.firebaseio.com",
+            projectId: "phone-soug",
+            storageBucket: "phone-soug.firebasestorage.app",
+            messagingSenderId: "224588578227",
+            appId: "1:224588578227:web:f3127dfbea31a77d521fc6",
+            measurementId: "G-S87955B526"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let allArchives = [];
+        let currentCategory = '';
+        let currentArchiveId = null;
+        let galleryInterval = null;
+        let showingAll = false;
+        let unsubscribeArchives = null;
+
+        const categoryConfig = {
+            'children': { label: 'الأطفال', class: 'cat-children', icon: 'fa-child' },
+            'events': { label: 'مناسبة', class: 'cat-events', icon: 'fa-calendar-alt' },
+            'achievements': { label: 'إنجاز', class: 'cat-achievements', icon: 'fa-trophy' },
+            'people': { label: 'شخصية', class: 'cat-people', icon: 'fa-user-tie' },
+            'houses': { label: 'منزل عريق', class: 'cat-houses', icon: 'fa-home' },
+            'shops': { label: 'محل', class: 'cat-shops', icon: 'fa-store' }
+        };
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            return date.toLocaleDateString('ar-SD', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function formatRelativeDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            if (diffDays === 0) return 'اليوم';
+            if (diffDays === 1) return 'أمس';
+            if (diffDays < 7) return `قبل ${diffDays} أيام`;
+            if (diffDays < 30) return `قبل ${Math.floor(diffDays / 7)} أسابيع`;
+            return date.toLocaleDateString('ar-SD', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        async function loadArchives() {
+            try {
+                const archivesQuery = query(collection(db, 'archives'), orderBy('createdAt', 'desc'), limit(100));
+                unsubscribeArchives = onSnapshot(archivesQuery, (snapshot) => {
+                    allArchives = [];
+                    snapshot.forEach((doc) => { allArchives.push({ id: doc.id, ...doc.data() }); });
+                    hideLoading();
+                    renderArchives(allArchives);
+                }, (error) => { console.error('Error:', error); fallbackLoad(); });
+            } catch (error) { console.error('Critical Error:', error); hideLoading(); }
+        }
+
+        async function fallbackLoad() {
+            try {
+                const q = query(collection(db, 'archives'), limit(100));
+                const snapshot = await getDocs(q);
+                allArchives = [];
+                snapshot.forEach((doc) => { allArchives.push({ id: doc.id, ...doc.data() }); });
+                hideLoading();
+                renderArchives(allArchives);
+            } catch (err) { console.error('Fallback failed:', err); hideLoading(); document.getElementById('archiveCount').textContent = 'خطأ في الاتصال'; }
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('archiveGrid').classList.remove('hidden');
+        }
+
+        function buildCardHTML(archive) {
+            const cat = categoryConfig[archive.category] || { label: 'عام', class: 'cat-children', icon: 'fa-image' };
+            const image = archive.images && archive.images.length > 0 ? archive.images[0] : (archive.mainImage || 'https://via.placeholder.com/400?text=No+Image');
+            const names = archive.names || archive.name || 'بدون اسم';
+            const desc = archive.description || '';
+            const uploader = archive.uploaderName || archive.userName || 'مجهول';
+            const date = formatRelativeDate(archive.createdAt);
+            const fullDate = formatDate(archive.createdAt);
+            const eventDate = archive.eventDate ? formatDate(archive.eventDate) : null;
+
+            return `
+                <div class="archive-card" onclick="openArchiveModal('${archive.id}')">
+                    <div class="card-image-area">
+                        <img src="${image}" alt="${names}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400?text=No+Image';">
+                        <span class="card-category-badge ${cat.class}"><i class="fas ${cat.icon} ml-1"></i> ${cat.label}</span>
+                        <span class="card-date-badge"><i class="far fa-clock ml-1"></i> ${date}</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">${names}</h3>
+                        <p class="card-desc">${desc}</p>
+                        <div class="card-footer">
+                            <div class="card-uploader">
+                                <div class="card-uploader-avatar"><i class="fas fa-user"></i></div>
+                                <div>
+                                    <span class="card-uploader-name">${uploader}</span>
+                                    ${eventDate ? `<span class="card-date">${eventDate}</span>` : `<span class="card-date">${fullDate}</span>`}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.renderArchives = function(archives) {
+            const grid = document.getElementById('archiveGrid');
+            const allGrid = document.getElementById('allArchivesGrid');
+            const noResults = document.getElementById('noResults');
+            const countEl = document.getElementById('archiveCount');
+            const viewAllContainer = document.getElementById('viewAllContainer');
+
+            countEl.textContent = archives.length + ' صورة/مادة';
+
+            if (archives.length === 0) {
+                grid.innerHTML = '';
+                allGrid.innerHTML = '';
+                allGrid.classList.add('hidden');
+                viewAllContainer.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+
+            const featured = archives.slice(0, 10);
+            grid.innerHTML = featured.map(archive => buildCardHTML(archive)).join('');
+
+            if (archives.length > 10) {
+                viewAllContainer.classList.remove('hidden');
+            } else {
+                viewAllContainer.classList.add('hidden');
+            }
+
+            if (showingAll) {
+                allGrid.classList.remove('hidden');
+                allGrid.innerHTML = `<div class="grid grid-cols-1 gap-4">${archives.map(archive => buildCardHTML(archive)).join('')}</div>`;
+            } else {
+                allGrid.classList.add('hidden');
+            }
+        };
+
+        window.showAllArchives = function() {
+            showingAll = true;
+            const allGrid = document.getElementById('allArchivesGrid');
+            allGrid.classList.remove('hidden');
+            allGrid.innerHTML = `<div class="grid grid-cols-1 gap-4">${allArchives.map(archive => buildCardHTML(archive)).join('')}</div>`;
+            document.getElementById('viewAllContainer').classList.add('hidden');
+            setTimeout(() => { allGrid.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+        };
+
+        window.setCategoryFilter = function(category) {
+            currentCategory = category;
+            showingAll = false;
+            document.querySelectorAll('#categoryFilters .filter-chip').forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            filterArchives();
+        };
+
+        window.filterArchives = function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allArchives.filter(archive => {
+                const matchesSearch = !searchTerm || 
+                    (archive.names || archive.name || '').toLowerCase().includes(searchTerm) ||
+                    (archive.description || '').toLowerCase().includes(searchTerm) ||
+                    (archive.uploaderName || archive.userName || '').toLowerCase().includes(searchTerm) ||
+                    (archive.eventDate || '').includes(searchTerm);
+                const matchesCategory = !currentCategory || archive.category === currentCategory;
+                return matchesSearch && matchesCategory;
+            });
+            renderArchives(filtered);
+        };
+
+        let galleryState = { current: 0, total: 0 };
+
+        window.openArchiveModal = function(archiveId) {
+            const archive = allArchives.find(a => a.id === archiveId);
+            if (!archive) return;
+            currentArchiveId = archiveId;
+
+            const cat = categoryConfig[archive.category] || { label: 'عام', class: 'cat-children', icon: 'fa-image' };
+            const images = archive.images || [];
+            const hasImages = images.length > 0;
+            const mainImage = archive.mainImage || (images.length > 0 ? images[0] : 'https://via.placeholder.com/400?text=No+Image');
+            const names = archive.names || archive.name || 'بدون اسم';
+            const desc = archive.description || 'لا يوجد وصف';
+            const uploader = archive.uploaderName || archive.userName || 'مجهول';
+            const date = formatDate(archive.createdAt);
+            const eventDate = archive.eventDate ? formatDate(archive.eventDate) : null;
+
+            const modal = document.getElementById('archiveModal');
+            const content = document.getElementById('modalContent');
+
+            let galleryHtml = '';
+            if (hasImages && images.length > 1) {
+                galleryState.total = images.length;
+                galleryState.current = 0;
+                galleryHtml = `
+                    <div class="gallery-wrapper" id="galleryWrapper">
+                        <div class="gallery-track" id="galleryTrack">
+                            ${images.map((img, idx) => `
+                                <div class="gallery-slide">
+                                    <img src="${img}" alt="صورة ${idx + 1}" onerror="this.style.display='none'" style="max-width:100%;max-height:100%;object-fit:contain;">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="gallery-nav prev" onclick="moveGallery(-1)"><i class="fas fa-chevron-right text-slate-600"></i></button>
+                        <button class="gallery-nav next" onclick="moveGallery(1)"><i class="fas fa-chevron-left text-slate-600"></i></button>
+                        <div class="gallery-dots" id="galleryDots">
+                            ${images.map((_, i) => `<div class="gallery-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                galleryHtml = `<div class="aspect-[4/3] bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-8"><img src="${mainImage}" class="max-h-72 object-contain drop-shadow-xl" onerror="this.src='https://via.placeholder.com/400?text=No+Image'"></div>`;
+            }
+
+            const similar = allArchives.filter(a => a.id !== archiveId && a.category === archive.category).slice(0, 6);
+
+            const similarHtml = similar.length > 0 ? `
+                <div class="mt-6 pt-5 border-t border-slate-200">
+                    <h3 class="font-bold text-slate-900 mb-3 flex items-center gap-2 text-sm">
+                        <i class="fas fa-images text-blue-900"></i> ${cat.label} أخرى
+                    </h3>
+                    <div class="horizontal-scroll pb-2">
+                        ${similar.map(a => {
+                            const simImg = a.images && a.images.length > 0 ? a.images[0] : (a.mainImage || 'https://via.placeholder.com/150?text=No+Image');
+                            const simNames = a.names || a.name || 'بدون اسم';
+                            const simCat = categoryConfig[a.category] || { label: 'عام', color: '#1e3a5f' };
+                            return `
+                                <div class="similar-card" onclick="switchToArchive('${a.id}')" style="min-width:150px;max-width:150px;flex-shrink:0;background:white;border-radius:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);cursor:pointer;border:1px solid #f1f5f9;scroll-snap-align:start;">
+                                    <div style="height:120px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);display:flex;align-items:center;justify-content:center;padding:12px;">
+                                        <img src="${simImg}" style="max-width:100%;max-height:100%;object-fit:cover;border-radius:12px;" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                                    </div>
+                                    <div style="padding:10px 12px 12px;">
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <span style="width:6px;height:6px;border-radius:50%;background:${simCat.color || '#1e3a5f'};"></span>
+                                            <span class="text-[9px] font-bold text-slate-500">${simCat.label}</span>
+                                        </div>
+                                        <p style="font-size:12px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">${simNames}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            content.innerHTML = `
+                ${galleryHtml}
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="${cat.class} text-white px-3 py-1 rounded-lg text-xs font-bold"><i class="fas ${cat.icon} ml-1"></i> ${cat.label}</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-2">${names}</h2>
+                    <p class="text-slate-500 text-sm mb-4 leading-relaxed">${desc}</p>
+                    <div class="space-y-2 mb-5">
+                        ${eventDate ? `<div class="feature-item"><div class="feature-icon bg-amber-100 text-amber-600"><i class="fas fa-calendar-alt"></i></div><div><p class="text-xs text-slate-500">تاريخ المناسبة</p><p class="font-bold text-slate-900">${eventDate}</p></div></div>` : ''}
+                        <div class="feature-item"><div class="feature-icon bg-blue-100 text-blue-600"><i class="fas fa-user"></i></div><div><p class="text-xs text-slate-500">أضافها</p><p class="font-bold text-slate-900">${uploader}</p></div></div>
+                        <div class="feature-item"><div class="feature-icon bg-slate-100 text-slate-600"><i class="fas fa-clock"></i></div><div><p class="text-xs text-slate-500">تاريخ الإضافة</p><p class="font-bold text-slate-900">${date}</p></div></div>
+                        ${archive.eventDate ? `<div class="feature-item"><div class="feature-icon bg-green-100 text-green-600"><i class="fas fa-calendar-check"></i></div><div><p class="text-xs text-slate-500">تاريخ الحدث</p><p class="font-bold text-slate-900">${formatDate(archive.eventDate)}</p></div></div>` : ''}
+                        ${archive.extraInfo ? `<div class="feature-item"><div class="feature-icon bg-purple-100 text-purple-600"><i class="fas fa-info-circle"></i></div><div><p class="text-xs text-slate-500">معلومات إضافية</p><p class="font-bold text-slate-900">${archive.extraInfo}</p></div></div>` : ''}
+                    </div>
+                    ${similarHtml}
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            if (hasImages && images.length > 1) {
+                startAutoGallery(images.length);
+            }
+        };
+
+        function startAutoGallery(total) {
+            if (galleryInterval) clearInterval(galleryInterval);
+            galleryState.current = 0;
+            galleryState.total = total;
+            updateGallery();
+            galleryInterval = setInterval(() => {
+                galleryState.current = (galleryState.current + 1) % total;
+                updateGallery();
+            }, 4000);
+        }
+
+        window.moveGallery = function(dir) {
+            if (galleryState.total <= 1) return;
+            galleryState.current = (galleryState.current + dir + galleryState.total) % galleryState.total;
+            updateGallery();
+        };
+
+        window.goToSlide = function(index) {
+            galleryState.current = index;
+            updateGallery();
+        };
+
+        function updateGallery() {
+            const track = document.getElementById('galleryTrack');
+            const dots = document.querySelectorAll('.gallery-dot');
+            if (track) {
+                track.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                track.style.transform = `translateX(-${galleryState.current * 100}%)`;
+            }
+            dots.forEach((dot, i) => { dot.classList.toggle('active', i === galleryState.current); });
+        }
+
+        window.switchToArchive = function(archiveId) {
+            closeModal();
+            setTimeout(() => openArchiveModal(archiveId), 350);
+        };
+
+        window.closeModal = function() {
+            if (galleryInterval) { clearInterval(galleryInterval); galleryInterval = null; }
+            document.getElementById('archiveModal').classList.add('hidden');
+            document.body.style.overflow = '';
+            currentArchiveId = null;
+        };
+
+        window.showNotifications = function() { alert('سيتم فتح الإشعارات قريباً!'); };
+        window.showAbout = function() { 
+            alert('أرشيف الشبطاب\n\nنحفظ ذكرياتنا وتاريخنا للأجيال القادمة\n\nإعداد: سليمان صلاح الدين محمد'); 
+        };
+
+        document.addEventListener('DOMContentLoaded', () => { loadArchives(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        window.addEventListener('beforeunload', () => { if (unsubscribeArchives) unsubscribeArchives(); if (galleryInterval) clearInterval(galleryInterval); });
+    </script>
+</body>
+</html>
