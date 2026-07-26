@@ -729,7 +729,7 @@
             getAuth, onAuthStateChanged, signOut, updateProfile,
             EmailAuthProvider, reauthenticateWithCredential, updatePassword
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
 
         // نفس إعدادات Firebase المستخدمة في بقية صفحات الموقع
         const firebaseConfig = {
@@ -742,10 +742,13 @@
             measurementId: "G-98GQGZS09W"
         };
 
+        // --- إعدادات Cloudinary (تُستخدم لرفع كل الصور: الغلاف، الصورة الشخصية، معرض الأعمال) ---
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dbmjg23hl/image/upload";
+        const CLOUDINARY_UPLOAD_PRESET = "Companies_emploies";
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const storage = getStorage(app);
 
         let currentUser = null;
         let userRole = 'employee';       // 'employee' أو 'employer'
@@ -1381,11 +1384,21 @@
             }, 'notifications-message', null);
         });
 
-        // ==================== رفع الصور (الغلاف / الصورة الشخصية / معرض الأعمال) ====================
-        async function uploadImageAndGetUrl(file, pathPrefix) {
-            const storageRef = ref(storage, `${pathPrefix}/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            return getDownloadURL(snapshot.ref);
+        // ==================== رفع الصور عبر Cloudinary (الغلاف / الصورة الشخصية / معرض الأعمال) ====================
+        async function uploadImageAndGetUrl(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            if (!response.ok) {
+                const errText = await response.text().catch(() => '');
+                console.error('Cloudinary upload error:', response.status, errText);
+                throw new Error('cloudinary-upload-failed');
+            }
+            const data = await response.json();
+            if (!data.secure_url) throw new Error('cloudinary-no-url');
+            return data.secure_url;
         }
 
         document.getElementById('edit-cover-btn').addEventListener('click', () => document.getElementById('cover-input').click());
@@ -1394,11 +1407,12 @@
             if (!file) return;
             showMessage('header-message', 'جاري رفع صورة الغلاف...', 'success');
             try {
-                const url = await uploadImageAndGetUrl(file, `${userCollection}/${currentUser.uid}/cover`);
+                const url = await uploadImageAndGetUrl(file);
                 await saveField({ coverPhotoUrl: url }, 'header-message', null);
             } catch (err) {
-                showMessage('header-message', 'تعذر رفع صورة الغلاف.', 'error');
+                showMessage('header-message', 'تعذر رفع صورة الغلاف. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
             }
+            e.target.value = '';
         });
 
         document.getElementById('edit-avatar-btn').addEventListener('click', () => document.getElementById('avatar-input').click());
@@ -1407,12 +1421,13 @@
             if (!file) return;
             showMessage('header-message', 'جاري رفع الصورة الشخصية...', 'success');
             try {
-                const url = await uploadImageAndGetUrl(file, `${userCollection}/${currentUser.uid}/profile`);
+                const url = await uploadImageAndGetUrl(file);
                 const field = userRole === 'employer' ? { companyInfo: { ...(profileData.companyInfo || {}), logoUrl: url } } : { profileImageUrl: url };
                 await saveField(field, 'header-message', null);
             } catch (err) {
-                showMessage('header-message', 'تعذر رفع الصورة الشخصية.', 'error');
+                showMessage('header-message', 'تعذر رفع الصورة الشخصية. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
             }
+            e.target.value = '';
         });
 
         document.getElementById('portfolio-input').addEventListener('change', async (e) => {
@@ -1420,7 +1435,7 @@
             if (!files.length) return;
             showMessage('portfolio-message', 'جاري رفع الصور...', 'success');
             try {
-                const urls = await Promise.all(files.map(f => uploadImageAndGetUrl(f, `employees/${currentUser.uid}/works`)));
+                const urls = await Promise.all(files.map(f => uploadImageAndGetUrl(f)));
                 const previousWorksUrls = [...(profileData.previousWorksUrls || []), ...urls];
                 await saveField({ previousWorksUrls }, 'portfolio-message', null);
             } catch (err) {
