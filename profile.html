@@ -355,7 +355,7 @@
             <button class="tab-btn active" data-tab="overview"><i class="fas fa-user"></i> نظرة عامة</button>
             <button class="tab-btn" data-tab="skills" id="tab-btn-skills"><i class="fas fa-layer-group"></i> المهارات والخبرات</button>
             <button class="tab-btn" data-tab="portfolio" id="tab-btn-portfolio"><i class="fas fa-briefcase"></i> معرض الأعمال</button>
-            <button class="tab-btn" data-tab="jobs" id="tab-btn-jobs"><i class="fas fa-bookmark"></i> الوظائف</button>
+            <button class="tab-btn" data-tab="jobs" id="tab-btn-jobs"><i class="fas fa-bookmark"></i> الوظائف <span class="text-[0.65rem] opacity-70">(قريباً)</span></button>
             <button class="tab-btn" data-tab="settings"><i class="fas fa-gear"></i> الإعدادات</button>
         </div>
 
@@ -751,6 +751,12 @@
         let userRole = 'employee';       // 'employee' أو 'employer'
         let userCollection = 'employees'; // employees أو All_jops
         let profileData = {};             // نسخة محلية من بيانات المستند الحالي
+
+        // مجموعتا "jobs" و "applications" غير موجودتين بعد في قاعدة بياناتك (صفحة الوظائف لم تُبنَ بعد).
+        // لذلك لا نحاول القراءة منهما الآن - هذا هو سبب خطأ "Missing or insufficient permissions" السابق.
+        // بمجرد أن تُنشئ صفحة الوظائف وتضيف المجموعتين + قواعد الأمان المناسبة في Firebase،
+        // غيّر القيمة التالية إلى true وسيعمل قسم "الوظائف" (المحفوظة/المتقدم لها/السجل) تلقائياً.
+        const JOBS_FEATURE_ENABLED = false;
 
         const sudanStates = ["الخرطوم","الجزيرة","البحر الأحمر","كسلا","القضارف","سنار","النيل الأبيض","النيل الأزرق","الشمالية","نهر النيل","شمال كردفان","جنوب كردفان","غرب كردفان","شمال دارفور","جنوب دارفور","غرب دارفور","وسط دارفور","شرق دارفور"];
         const citiesByState = {
@@ -1450,10 +1456,32 @@
 
         async function loadJobsData() {
             if (userRole !== 'employee') return;
+
+            if (!JOBS_FEATURE_ENABLED) {
+                // صفحة الوظائف ومجموعتا jobs/applications غير موجودتين بعد -
+                // نعرض حالة "قريباً" بدل محاولة القراءة من مجموعات غير موجودة (وهذا ما كان يسبب خطأ الصلاحيات).
+                showJobsComingSoon();
+                return;
+            }
+
             await loadSavedJobs();
             await loadAppliedAndHistory();
         }
 
+        function showJobsComingSoon() {
+            const comingSoonInner = `<i class="fas fa-hourglass-half"></i><br>ميزة الوظائف (الحفظ والتقديم) ستُفعَّل قريباً بمجرد إطلاق صفحة الوظائف.`;
+            ['saved-jobs-list', 'applied-jobs-list', 'history-jobs-list'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            ['saved-jobs-empty', 'applied-jobs-empty', 'history-jobs-empty'].forEach(id => {
+                const el = document.getElementById(id);
+                el.innerHTML = comingSoonInner;
+                el.classList.remove('hidden');
+            });
+        }
+
+        // ملاحظة: الدالتان التاليتان جاهزتان للعمل فوراً بمجرد تفعيل JOBS_FEATURE_ENABLED = true
+        // وإنشاء مجموعتي "jobs" و "applications" مع قواعد الأمان المناسبة في Firebase.
         async function loadSavedJobs() {
             const listEl = document.getElementById('saved-jobs-list');
             const emptyEl = document.getElementById('saved-jobs-empty');
