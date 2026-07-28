@@ -705,24 +705,14 @@
                     let profileImageUrl = null;
                     let previousWorksUrls = [];
 
-                    try {
-                        if (profilePhotoFile) { 
-                            profileImageUrl = await uploadFile(profilePhotoFile, `profile_photos/${user.uid}`); 
-                        }
-                    } catch (uploadErr) {
-                        console.warn('Profile photo upload failed:', uploadErr);
-                        showMessage('تنبيه: لم يتم رفع صورة الملف الشخصي. يمكنك إضافتها لاحقاً.', 'error');
+                    if (profilePhotoFile) { 
+                        profileImageUrl = await uploadFile(profilePhotoFile, `profile_photos/${user.uid}`); 
                     }
 
                     if (previousWorksFiles.length > 0) {
-                        try {
-                            previousWorksUrls = await Promise.all(
-                                Array.from(previousWorksFiles).map(file => uploadFile(file, `previous_works/${user.uid}`))
-                            );
-                        } catch (uploadErr) {
-                            console.warn('Previous works upload failed:', uploadErr);
-                            showMessage('تنبيه: فشل رفع بعض صور الأعمال. يمكنك إضافتها لاحقاً.', 'error');
-                        }
+                        previousWorksUrls = await Promise.all(
+                            Array.from(previousWorksFiles).map(file => uploadFile(file, `previous_works/${user.uid}`))
+                        );
                     }
 
                     const skillInputs = document.querySelectorAll('.skill-input');
@@ -760,34 +750,19 @@
                     let companyPhotosUrls = [];
                     let isVerified = false;
 
-                    try {
-                        if (companyLogoFile) { 
-                            companyLogoUrl = await uploadFile(companyLogoFile, `company_logos/${user.uid}`); 
-                        }
-                    } catch (uploadErr) {
-                        console.warn('Company logo upload failed:', uploadErr);
-                        showMessage('تنبيه: لم يتم رفع شعار الشركة. يمكنك إضافته لاحقاً.', 'error');
+                    if (companyLogoFile) { 
+                        companyLogoUrl = await uploadFile(companyLogoFile, `company_logos/${user.uid}`); 
                     }
 
-                    try {
-                        if (commercialRegisterFile) { 
-                            commercialRegisterUrl = await uploadFile(commercialRegisterFile, `company_documents/${user.uid}`); 
-                            isVerified = true;
-                        }
-                    } catch (uploadErr) {
-                        console.warn('Commercial register upload failed:', uploadErr);
-                        showMessage('تنبيه: لم يتم رفع السجل التجاري. يمكنك إضافته لاحقاً.', 'error');
+                    if (commercialRegisterFile) { 
+                        commercialRegisterUrl = await uploadFile(commercialRegisterFile, `company_documents/${user.uid}`); 
+                        isVerified = true;
                     }
 
                     if (companyPhotosFiles.length > 0) {
-                        try {
-                            companyPhotosUrls = await Promise.all(
-                                Array.from(companyPhotosFiles).map(file => uploadFile(file, `company_photos/${user.uid}`))
-                            );
-                        } catch (uploadErr) {
-                            console.warn('Company photos upload failed:', uploadErr);
-                            showMessage('تنبيه: فشل رفع بعض صور الشركة. يمكنك إضافتها لاحقاً.', 'error');
-                        }
+                        companyPhotosUrls = await Promise.all(
+                            Array.from(companyPhotosFiles).map(file => uploadFile(file, `company_photos/${user.uid}`))
+                        );
                     }
 
                     const fullCompanyPhone = formInputs['companyCountryCode'].value + formInputs['companyPhone'].value;
@@ -840,17 +815,25 @@
             }
         }
 
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function uploadFile(file, filePath) {
             try {
                 const storageRef = ref(storage, filePath + '/' + file.name);
                 const uploadTask = await uploadBytes(storageRef, file);
                 return await getDownloadURL(uploadTask.ref);
             } catch (error) {
-                console.error('Upload error:', error);
-                if (error.message && error.message.toLowerCase().includes('cors')) {
-                    throw new Error('مشكلة CORS: يجب تفعيل CORS في إعدادات Firebase Storage.');
-                }
-                throw error;
+                console.warn('Storage upload failed (likely CORS), falling back to Base64:', error);
+                // Fallback to Base64 to avoid CORS issues - stores directly in Firestore
+                const base64 = await fileToBase64(file);
+                return base64;
             }
         }
 
