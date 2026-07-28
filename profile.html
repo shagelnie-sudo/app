@@ -86,17 +86,23 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 .warning-message{background:#fef3c7;color:#92400e;border:1px solid #f59e0b}
 .loading-spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s ease-in-out infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* ملاحظة مهمة: هذه العناصر (اللودر / رسالة الشبكة) لا يُتحكم في ظهورها عبر كلاسات CSS إطلاقاً،
+   بل عبر style.display مباشرة من الجافاسكربت فقط. هذا مقصود لتفادي مشكلة تعارض
+   خصوصية (specificity) بين محدد الـ ID هنا وكلاس ".hidden" من Tailwind، والتي كانت
+   السبب في بقاء شاشة التحميل ظاهرة للأبد رغم اكتمال تحميل البيانات فعلياً. */
 #page-loader{position:fixed;inset:0;background:#f5f7fa;z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
 .big-spinner{width:48px;height:48px;border:4px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;animation:spin .9s linear infinite}
-#network-retry{display:none;text-align:center;padding:2rem}
-#network-retry.show{display:block}
+#network-retry{position:fixed;inset:0;background:#f5f7fa;z-index:190;overflow-y:auto}
+#global-error-banner{position:fixed;top:0;left:0;right:0;z-index:300;background:#fee2e2;color:#991b1b;padding:.75rem 1rem;font-size:.85rem;font-weight:700;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 @media(max-width:768px){.avatar-ring{width:96px;height:96px}.cover-wrapper{height:130px}}
 </style>
-<base target="_blank">
 </head>
 <body class="bg-gray-50">
 
-<!-- شاشة التحميل -->
+<!-- شريط خطأ عام ظاهر على الشاشة (وليس فقط في الكونسول) -->
+<div id="global-error-banner" style="display:none"></div>
+
+<!-- شاشة التحميل - يتحكم بها JS عبر style.display فقط -->
 <div id="page-loader">
 <div class="big-spinner"></div>
 <p class="text-gray-500 font-bold">جاري تحميل ملفك الشخصي...</p>
@@ -111,14 +117,17 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <a href="login.html" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-blue-700 transition">تسجيل الدخول</a>
 </div>
 
-<!-- حالة فشل الشبكة -->
-<div id="network-retry" class="hidden container mx-auto px-4 py-24 text-center">
+<!-- حالة فشل الشبكة/التحميل -->
+<div id="network-retry" class="hidden">
+<div class="container mx-auto px-4 py-24 text-center">
 <i class="fas fa-wifi text-5xl text-gray-300 mb-4"></i>
-<h2 class="text-2xl font-bold text-gray-800 mb-2">تعذر الاتصال</h2>
-<p class="text-gray-500 mb-6">الشبكة غير مستقرة أو تعذر تحميل بيانات Firebase.</p>
+<h2 class="text-2xl font-bold text-gray-800 mb-2">تعذر تحميل الصفحة</h2>
+<p class="text-gray-500 mb-2">الشبكة غير مستقرة أو تعذر الاتصال بقاعدة البيانات.</p>
+<p class="text-gray-400 text-sm mb-6" id="network-retry-detail"></p>
 <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-blue-700 transition">
 <i class="fas fa-redo ml-2"></i> إعادة المحاولة
 </button>
+</div>
 </div>
 
 <!-- الهيدر -->
@@ -173,7 +182,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="cover-wrapper">
 <div class="cover-fallback gradient-bg" id="cover-fallback"></div>
 <img id="cover-photo" class="hidden" alt="صورة الغلاف">
-<button class="cover-edit-btn" id="edit-cover-btn" onclick="window.triggerCoverUpload&&window.triggerCoverUpload()"><i class="fas fa-camera"></i><span>تغيير الغلاف</span></button>
+<button class="cover-edit-btn" id="edit-cover-btn" onclick="document.getElementById('cover-input').click()"><i class="fas fa-camera"></i><span>تغيير الغلاف</span></button>
 <input type="file" id="cover-input" accept="image/*" class="hidden">
 </div>
 <div class="px-6 md:px-8 pb-6">
@@ -181,7 +190,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="flex items-end gap-4">
 <div class="relative">
 <img id="profile-avatar" class="avatar-ring" src="" alt="الصورة الشخصية">
-<button class="avatar-edit-btn" id="edit-avatar-btn" onclick="window.triggerAvatarUpload&&window.triggerAvatarUpload()" title="تغيير الصورة"><i class="fas fa-camera"></i></button>
+<button class="avatar-edit-btn" id="edit-avatar-btn" onclick="document.getElementById('avatar-input').click()" title="تغيير الصورة"><i class="fas fa-camera"></i></button>
 <input type="file" id="avatar-input" accept="image/*" class="hidden">
 </div>
 <div class="pb-2">
@@ -197,7 +206,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 </div>
 </div>
 </div>
-<button class="save-btn !bg-blue-50 !text-blue-600 hover:!bg-blue-600 hover:!text-white self-start md:self-auto" onclick="window.scrollToSettings&&window.scrollToSettings()"><i class="fas fa-pen"></i> تعديل البيانات الأساسية</button>
+<button class="save-btn !bg-blue-50 !text-blue-600 hover:!bg-blue-600 hover:!text-white self-start md:self-auto" onclick="scrollToSettings()"><i class="fas fa-pen"></i> تعديل البيانات الأساسية</button>
 </div>
 <div class="mt-6 bg-gray-50 rounded-xl p-4">
 <div class="flex items-center justify-between mb-2">
@@ -216,7 +225,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')"><i class="fas fa-user"></i> نظرة عامة</button>
 <button class="tab-btn" data-tab="skills" id="tab-btn-skills" onclick="switchTab('skills')"><i class="fas fa-layer-group"></i> المهارات والخبرات</button>
 <button class="tab-btn" data-tab="portfolio" id="tab-btn-portfolio" onclick="switchTab('portfolio')"><i class="fas fa-briefcase"></i> معرض الأعمال</button>
-<button class="tab-btn" data-tab="jobs" id="tab-btn-jobs" onclick="switchTab('jobs')"><i class="fas fa-bookmark"></i> الوظائف</button>
+<button class="tab-btn" data-tab="jobs" id="tab-btn-jobs" onclick="switchTab('jobs')"><i class="fas fa-bookmark"></i> الوظائف <span class="text-[0.65rem] opacity-70">(قريباً)</span></button>
 <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-gear"></i> الإعدادات</button>
 </div>
 
@@ -230,7 +239,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="hidden space-y-3" id="bio-edit">
 <textarea class="field-textarea" id="input-bio" rows="5" placeholder="اكتب نبذة مختصرة عنك وعن خبراتك المهنية"></textarea>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveBio&&window.saveBio()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveBio()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('bio')">إلغاء</button>
 </div>
 <div class="message-container"><div id="bio-message" class="message"></div></div>
@@ -260,7 +269,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div><label class="field-label">المدينة</label><select class="field-select" id="input-city"><option value="">اختر مدينة</option></select></div>
 <div><label class="field-label">رابط لينكد إن</label><input type="url" class="field-input" id="input-linkedin" placeholder="https://linkedin.com/in/..."></div>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveContact&&window.saveContact()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveContact()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('contact')">إلغاء</button>
 </div>
 <div class="message-container"><div id="contact-message" class="message"></div></div>
@@ -268,7 +277,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 </div>
 <div class="dash-card">
 <div class="section-head"><h2 class="text-lg font-bold text-gray-800">حالة البحث عن عمل</h2></div>
-<select class="field-select" id="input-job-status" onchange="window.saveJobStatus&&window.saveJobStatus(this.value)">
+<select class="field-select" id="input-job-status" onchange="saveJobStatus(this.value)">
 <option value="متاح للعمل">متاح للعمل</option>
 <option value="لا أبحث حالياً">لا أبحث حالياً</option>
 </select>
@@ -293,7 +302,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div><label class="field-label">المهارات (حتى 6 مهارات)</label><div id="skills-input-container"></div><p id="skills-limit-message" class="text-red-500 text-sm hidden">لا يمكنك إضافة أكثر من 6 مهارات.</p></div>
 <div><label class="field-label">مستوى الخبرة</label><select class="field-select" id="input-experience"><option value="">اختر مستوى الخبرة</option><option value="مبتدئ">مبتدئ (0-2 سنوات)</option><option value="متوسط">متوسط (2-5 سنوات)</option><option value="خبير">خبير (5+ سنوات)</option></select></div>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveSkills&&window.saveSkills()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveSkills()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('skills')">إلغاء</button>
 </div>
 <div class="message-container"><div id="skills-message" class="message"></div></div>
@@ -305,9 +314,9 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <p class="text-gray-400 text-sm" id="languages-view-empty">لم تتم إضافة لغات بعد.</p>
 <div class="hidden space-y-3" id="languages-edit">
 <div id="languages-input-container" class="space-y-2"></div>
-<button type="button" class="add-item-btn" onclick="window.addLanguageRow&&window.addLanguageRow()"><i class="fas fa-plus ml-1"></i> إضافة لغة</button>
+<button type="button" class="add-item-btn" onclick="addLangRow()"><i class="fas fa-plus ml-1"></i> إضافة لغة</button>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveLanguages&&window.saveLanguages()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveLanguages()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('languages')">إلغاء</button>
 </div>
 <div class="message-container"><div id="languages-message" class="message"></div></div>
@@ -319,9 +328,9 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <p class="text-gray-400 text-sm" id="workexp-view-empty">لم تتم إضافة خبرات عملية بعد.</p>
 <div class="hidden space-y-3" id="workexp-edit">
 <div id="workexp-input-container" class="space-y-4"></div>
-<button type="button" class="add-item-btn" onclick="window.addWorkExpRow&&window.addWorkExpRow()"><i class="fas fa-plus ml-1"></i> إضافة خبرة عملية</button>
+<button type="button" class="add-item-btn" onclick="addWorkRow()"><i class="fas fa-plus ml-1"></i> إضافة خبرة عملية</button>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveWorkExp&&window.saveWorkExp()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveWorkExp()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('workexp')">إلغاء</button>
 </div>
 <div class="message-container"><div id="workexp-message" class="message"></div></div>
@@ -333,9 +342,9 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <p class="text-gray-400 text-sm" id="education-view-empty">لم تتم إضافة مؤهلات تعليمية بعد.</p>
 <div class="hidden space-y-3" id="education-edit">
 <div id="education-input-container" class="space-y-4"></div>
-<button type="button" class="add-item-btn" onclick="window.addEducationRow&&window.addEducationRow()"><i class="fas fa-plus ml-1"></i> إضافة مؤهل</button>
+<button type="button" class="add-item-btn" onclick="addEduRow()"><i class="fas fa-plus ml-1"></i> إضافة مؤهل</button>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveEducation&&window.saveEducation()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveEducation()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('education')">إلغاء</button>
 </div>
 <div class="message-container"><div id="education-message" class="message"></div></div>
@@ -347,9 +356,9 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <p class="text-gray-400 text-sm" id="certs-view-empty">لم تتم إضافة شهادات بعد.</p>
 <div class="hidden space-y-3" id="certs-edit">
 <div id="certs-input-container" class="space-y-4"></div>
-<button type="button" class="add-item-btn" onclick="window.addCertRow&&window.addCertRow()"><i class="fas fa-plus ml-1"></i> إضافة شهادة</button>
+<button type="button" class="add-item-btn" onclick="addCertRow()"><i class="fas fa-plus ml-1"></i> إضافة شهادة</button>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveCerts&&window.saveCerts()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveCerts()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('certs')">إلغاء</button>
 </div>
 <div class="message-container"><div id="certs-message" class="message"></div></div>
@@ -361,7 +370,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <!-- معرض الأعمال -->
 <div class="tab-panel" id="panel-portfolio">
 <div class="dash-card mb-6">
-<div class="section-head"><h2 class="text-lg font-bold text-gray-800"><i class="fas fa-images ml-1 text-blue-600"></i> صور من أعمالك السابقة</h2><label class="section-edit-btn cursor-pointer" title="إضافة صور"><i class="fas fa-plus"></i><input type="file" id="portfolio-input" accept="image/*" multiple class="hidden" onchange="window.handlePortfolioUpload&&window.handlePortfolioUpload(this)"></label></div>
+<div class="section-head"><h2 class="text-lg font-bold text-gray-800"><i class="fas fa-images ml-1 text-blue-600"></i> صور من أعمالك السابقة</h2><label class="section-edit-btn cursor-pointer" title="إضافة صور"><i class="fas fa-plus"></i><input type="file" id="portfolio-input" accept="image/*" multiple class="hidden" onchange="handlePortfolioUpload(this)"></label></div>
 <div class="portfolio-grid" id="portfolio-grid"></div>
 <p class="empty-state hidden" id="portfolio-empty"><i class="far fa-image"></i><br>لم تتم إضافة أعمال بعد. أضف صوراً من أعمالك لجذب أصحاب العمل.</p>
 <div class="message-container"><div id="portfolio-message" class="message"></div></div>
@@ -372,7 +381,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="hidden space-y-3" id="links-edit">
 <div><label class="field-label">رابط السيرة الذاتية (CV)</label><input type="url" class="field-input" id="input-cv" placeholder="https://docs.google.com/your-cv"></div>
 <div class="flex gap-2">
-<button class="save-btn" onclick="window.saveLinks&&window.saveLinks()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveLinks()"><i class="fas fa-check"></i> حفظ</button>
 <button class="cancel-btn" onclick="toggleEditSection('links')">إلغاء</button>
 </div>
 <div class="message-container"><div id="links-message" class="message"></div></div>
@@ -382,14 +391,10 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 
 <!-- الوظائف -->
 <div class="tab-panel" id="panel-jobs">
-<div class="flex gap-2 mb-6 flex-wrap">
-<button class="tab-btn active" data-subtab="saved" onclick="switchSubTab('saved')">الوظائف المحفوظة</button>
-<button class="tab-btn" data-subtab="applied" onclick="switchSubTab('applied')">الوظائف المتقدم لها</button>
-<button class="tab-btn" data-subtab="history" onclick="switchSubTab('history')">سجل الطلبات</button>
+<div class="empty-state">
+<i class="fas fa-hourglass-half"></i><br>
+ميزة الوظائف (المحفوظة، المتقدم لها، وسجل الطلبات) ستُفعَّل قريباً بمجرد إطلاق صفحة الوظائف.
 </div>
-<div class="space-y-3" id="subpanel-saved"><div id="saved-jobs-list" class="space-y-3"></div><div class="empty-state" id="saved-jobs-empty"><i class="far fa-bookmark"></i><br>لا توجد وظائف محفوظة حالياً.<br><a href="job_listing_page.html" class="text-blue-600 font-bold hover:underline">تصفح الوظائف المتاحة</a></div></div>
-<div class="space-y-3 hidden" id="subpanel-applied"><div id="applied-jobs-list" class="space-y-3"></div><div class="empty-state" id="applied-jobs-empty"><i class="far fa-paper-plane"></i><br>لم تتقدم لأي وظيفة بعد.<br><a href="job_listing_page.html" class="text-blue-600 font-bold hover:underline">ابدأ التقديم الآن</a></div></div>
-<div class="space-y-3 hidden" id="subpanel-history"><div id="history-jobs-list" class="space-y-3"></div><div class="empty-state" id="history-jobs-empty"><i class="fas fa-clock-rotate-left"></i><br>لا يوجد سجل طلبات بعد.</div></div>
 </div>
 
 <!-- الإعدادات -->
@@ -401,7 +406,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div><label class="field-label">الاسم الكامل</label><input type="text" class="field-input" id="input-name" placeholder="الاسم الثلاثي أو الرباعي"></div>
 <div><label class="field-label">العنوان الاحترافي</label><input type="text" class="field-input" id="input-headline" placeholder="مثال: مصمم واجهات مستخدم"></div>
 <div><label class="field-label">البريد الإلكتروني</label><input type="email" class="field-input bg-gray-100" id="input-email-readonly" disabled></div>
-<button class="save-btn" onclick="window.saveBasicInfo&&window.saveBasicInfo()"><i class="fas fa-check"></i> حفظ التغييرات</button>
+<button class="save-btn" onclick="saveBasicInfo()"><i class="fas fa-check"></i> حفظ التغييرات</button>
 <div class="message-container"><div id="basic-message" class="message"></div></div>
 </div>
 </div>
@@ -411,7 +416,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div><label class="field-label">كلمة المرور الحالية</label><input type="password" class="field-input" id="input-current-password"></div>
 <div><label class="field-label">كلمة المرور الجديدة</label><input type="password" class="field-input" id="input-new-password"></div>
 <div><label class="field-label">تأكيد كلمة المرور الجديدة</label><input type="password" class="field-input" id="input-confirm-password"></div>
-<button class="save-btn" onclick="window.savePassword&&window.savePassword()"><i class="fas fa-key"></i> تحديث كلمة المرور</button>
+<button class="save-btn" id="save-password-btn" onclick="savePassword()"><i class="fas fa-key"></i> تحديث كلمة المرور</button>
 <div class="message-container"><div id="password-message" class="message"></div></div>
 </div>
 </div>
@@ -422,7 +427,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="flex items-center justify-between py-2 border-b border-gray-50"><div><p class="font-bold text-gray-700 text-sm">تنبيهات الوظائف الجديدة</p><p class="text-xs text-gray-400">تنبيه عند نشر وظائف تطابق مهاراتك</p></div><label class="toggle-switch"><input type="checkbox" id="notif-jobalerts" checked><span class="toggle-slider"></span></label></div>
 <div class="flex items-center justify-between py-2 border-b border-gray-50"><div><p class="font-bold text-gray-700 text-sm">إشعارات الرسائل</p><p class="text-xs text-gray-400">تنبيه عند استلام رسالة جديدة</p></div><label class="toggle-switch"><input type="checkbox" id="notif-messages" checked><span class="toggle-slider"></span></label></div>
 <div class="flex items-center justify-between py-2"><div><p class="font-bold text-gray-700 text-sm">تحديثات طلبات التوظيف</p><p class="text-xs text-gray-400">تنبيه عند تغيير حالة أحد طلباتك</p></div><label class="toggle-switch"><input type="checkbox" id="notif-applications" checked><span class="toggle-slider"></span></label></div>
-<button class="save-btn" onclick="window.saveNotifications&&window.saveNotifications()"><i class="fas fa-check"></i> حفظ الإعدادات</button>
+<button class="save-btn" onclick="saveNotifications()"><i class="fas fa-check"></i> حفظ الإعدادات</button>
 <div class="message-container"><div id="notifications-message" class="message"></div></div>
 </div>
 </div>
@@ -430,84 +435,738 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 </div>
 </div>
 
-<script>
-// ====== UI Logic (يعمل بدون إنترنت) ======
-const sudanStates=["الخرطوم","الجزيرة","البحر الأحمر","كسلا","القضارف","سنار","النيل الأبيض","النيل الأزرق","الشمالية","نهر النيل","شمال كردفان","جنوب كردفان","غرب كردفان","شمال دارفور","جنوب دارفور","غرب دارفور","وسط دارفور","شرق دارفور"];
-const citiesByState={"الخرطوم":["الخرطوم","أم درمان","بحري"],"الجزيرة":["ود مدني","الحصاحيصا","المناقل"],"البحر الأحمر":["بورتسودان","سواكن","طوكر"],"كسلا":["كسلا","حلفا الجديدة","أروما"],"القضارف":["القضارف","القلابات","الفو"],"سنار":["سنار","الدالي والمزموم","ود النيل"],"النيل الأبيض":["ربك","كوستي","الدويم"],"النيل الأزرق":["الدمازين","الروصيرص","الكرمك"],"الشمالية":["دنقلا","عطبرة","كريمة"],"نهر النيل":["الدامر","شندي","عطبرة"],"شمال كردفان":["الأبيض","أم روابة","الرهد"],"جنوب كردفان":["كادقلي","أبو جبيهة","تلودي"],"غرب كردفان":["الفولة","النهود","المجلد"],"شمال دارفور":["الفاشر","كبكابية","مليط"],"جنوب دارفور":["نيالا","الضعين","برام"],"غرب دارفور":["الجنينة","كرينك","كلبس"],"وسط دارفور":["زالنجي","ودعة","أم دخن"],"شرق دارفور":["الضعين","عديلة","أبوكارنكا"]};
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged, signOut, updateProfile,
+  EmailAuthProvider, reauthenticateWithCredential, updatePassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-let msgTimeouts={};
-function showMessage(elId,msg,type){
-const el=document.getElementById(elId);if(!el)return;
-if(msgTimeouts[elId])clearTimeout(msgTimeouts[elId]);
-el.className='message';void el.offsetWidth;el.textContent=msg;el.classList.add('show',type+'-message');
-msgTimeouts[elId]=setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.className='message',300);},type==='error'?6000:4000);
-}
-function escapeHtml(s){if(s==null)return'';return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-
-// الهيدر
-const menuBtn=document.getElementById('mobile-menu-button');
-const closeBtn=document.getElementById('close-menu');
-const mobileMenu=document.getElementById('mobile-menu');
-if(menuBtn&&mobileMenu)menuBtn.addEventListener('click',()=>mobileMenu.classList.add('open'));
-if(closeBtn&&mobileMenu)closeBtn.addEventListener('click',()=>mobileMenu.classList.remove('open'));
-
-const avatarBtn=document.getElementById('user-avatar-btn');
-const userDropdown=document.getElementById('user-dropdown');
-if(avatarBtn&&userDropdown){
-avatarBtn.addEventListener('click',e=>{e.stopPropagation();userDropdown.classList.toggle('show')});
-document.addEventListener('click',e=>{if(!avatarBtn.contains(e.target)&&!userDropdown.contains(e.target))userDropdown.classList.remove('show')});
-}
-
-// الولاية/المدينة
-const stateSel=document.getElementById('input-state');
-const citySel=document.getElementById('input-city');
-if(stateSel){
-sudanStates.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;stateSel.appendChild(o)});
-stateSel.addEventListener('change',()=>{
-if(!citySel)return;citySel.innerHTML='<option value="">اختر مدينة</option>';
-(citiesByState[stateSel.value]||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;citySel.appendChild(o)});
-});
-}
-
-// التبويبات الرئيسية
-function switchTab(tab){
-document.querySelectorAll('#tabs-container .tab-btn').forEach(b=>b.classList.remove('active'));
-document.querySelector('[data-tab="'+tab+'"]').classList.add('active');
-document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-const panel=document.getElementById('panel-'+tab);if(panel)panel.classList.add('active');
-}
-window.scrollToSettings=function(){
-switchTab('settings');
-const el=document.getElementById('basic-edit-anchor');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+/* ========================================================================
+   إعدادات المشروع - قاعدتان منفصلتان:
+   1) Firestore (Firebase) لكل البيانات النصية للملف الشخصي.
+   2) Cloudinary لرفع كل الصور فقط (الغلاف، الصورة الشخصية، معرض الأعمال).
+   ======================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+  authDomain: "shaglni-c64c0.firebaseapp.com",
+  projectId: "shaglni-c64c0",
+  storageBucket: "shaglni-c64c0.firebasestorage.app",
+  messagingSenderId: "768887356636",
+  appId: "1:768887356636:web:11ec1d6991add3309c8819",
+  measurementId: "G-98GQGZS09W"
 };
 
-// التبويبات الفرعية
-function switchSubTab(key){
-document.querySelectorAll('#panel-jobs [data-subtab]').forEach(b=>b.classList.remove('active'));
-document.querySelector('[data-subtab="'+key+'"]').classList.add('active');
-['saved','applied','history'].forEach(k=>{const el=document.getElementById('subpanel-'+k);if(el)el.classList.toggle('hidden',k!==key)});
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dbmjg23hl/image/upload";
+const CLOUDINARY_UPLOAD_PRESET = "Companies_emploies";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let userRole = "employee";
+let userCollection = "employees";
+let profileData = {};
+let authHandled = false; // يمنع تكرار المعالجة إذا أطلق Firebase الحدث أكثر من مرة
+
+const sudanStates = ["الخرطوم","الجزيرة","البحر الأحمر","كسلا","القضارف","سنار","النيل الأبيض","النيل الأزرق","الشمالية","نهر النيل","شمال كردفان","جنوب كردفان","غرب كردفان","شمال دارفور","جنوب دارفور","غرب دارفور","وسط دارفور","شرق دارفور"];
+const citiesByState = {"الخرطوم":["الخرطوم","أم درمان","بحري"],"الجزيرة":["ود مدني","الحصاحيصا","المناقل"],"البحر الأحمر":["بورتسودان","سواكن","طوكر"],"كسلا":["كسلا","حلفا الجديدة","أروما"],"القضارف":["القضارف","القلابات","الفو"],"سنار":["سنار","الدالي والمزموم","ود النيل"],"النيل الأبيض":["ربك","كوستي","الدويم"],"النيل الأزرق":["الدمازين","الروصيرص","الكرمك"],"الشمالية":["دنقلا","عطبرة","كريمة"],"نهر النيل":["الدامر","شندي","عطبرة"],"شمال كردفان":["الأبيض","أم روابة","الرهد"],"جنوب كردفان":["كادقلي","أبو جبيهة","تلودي"],"غرب كردفان":["الفولة","النهود","المجلد"],"شمال دارفور":["الفاشر","كبكابية","مليط"],"جنوب دارفور":["نيالا","الضعين","برام"],"غرب دارفور":["الجنينة","كرينك","كلبس"],"وسط دارفور":["زالنجي","ودعة","أم دخن"],"شرق دارفور":["الضعين","عديلة","أبوكارنكا"]};
+
+/* ==================== أدوات مساعدة ==================== */
+function esc(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 }
 
-// تبديل التعديل
-function toggleEditSection(name){
-const editEl=document.getElementById(name+'-edit');
-const viewEl=document.getElementById(name+'-view');
-if(editEl)editEl.classList.toggle('hidden');
-if(viewEl)viewEl.classList.toggle('hidden');
-if(window.populateEditForm&&!editEl.classList.contains('hidden'))window.populateEditForm(name);
+let msgTimeouts = {};
+function showMsg(elId, msg, type) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (msgTimeouts[elId]) clearTimeout(msgTimeouts[elId]);
+  el.className = "message";
+  void el.offsetWidth;
+  el.textContent = msg;
+  el.classList.add("show", type + "-message");
+  msgTimeouts[elId] = setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => { el.className = "message"; }, 300);
+  }, type === "error" ? 6000 : 4000);
 }
 
-// Safety timeout: إخفاء اللودر بعد 6 ثوانٍ مهما حدث
-setTimeout(()=>{
-const loader=document.getElementById('page-loader');
-if(loader&&!loader.classList.contains('hidden')){
-loader.classList.add('hidden');
-if(!window.__profileAppLoaded){
-document.getElementById('network-retry').classList.remove('hidden');
+// شريط الخطأ العام الظاهر أعلى الشاشة - مهم جداً لأن أخطاء كثيرة لا تظهر بوضوح في الكونسول على الموبايل
+function showGlobalError(msg) {
+  const banner = document.getElementById("global-error-banner");
+  if (!banner) return;
+  banner.textContent = "⚠️ " + msg;
+  banner.style.display = "block";
+  setTimeout(() => { banner.style.display = "none"; }, 8000);
 }
+window.addEventListener("error", (e) => {
+  console.error("Uncaught error:", e.error || e.message);
+  showGlobalError("حدث خطأ غير متوقع في الصفحة: " + (e.message || "unknown"));
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("Unhandled promise rejection:", e.reason);
+  showGlobalError("حدث خطأ أثناء تحميل البيانات: " + (e.reason && e.reason.message ? e.reason.message : "unknown"));
+});
+
+/* ====================================================================
+   إدارة حالة الصفحة (الأهم في هذا الإصلاح):
+   نتحكم بشاشة التحميل وشاشة فشل الشبكة عبر style.display مباشرة فقط،
+   وليس عبر classList، لأن الكلاس ".hidden" من Tailwind له خصوصية (specificity)
+   أقل من قاعدة الـ ID المعرّفة لهذين العنصرين في CSS، فكان "hidden" لا يغلب
+   "display:flex" الموجود على #page-loader مهما فعلنا - وهذا كان سبب بقاء
+   شاشة "جاري التحميل" ظاهرة للأبد رغم اكتمال تحميل البيانات فعلياً في الخلفية.
+   ==================================================================== */
+function showAppState(state) {
+  const loader = document.getElementById("page-loader");
+  const notLoggedIn = document.getElementById("not-logged-in");
+  const networkRetry = document.getElementById("network-retry");
+  const header = document.getElementById("main-header");
+  const content = document.getElementById("page-content");
+
+  loader.style.display = state === "loading" ? "flex" : "none";
+  networkRetry.style.display = state === "network-error" ? "block" : "none";
+
+  if (state === "no-user") {
+    notLoggedIn.classList.remove("hidden");
+    header.style.display = "none";
+    content.classList.add("hidden");
+  } else {
+    notLoggedIn.classList.add("hidden");
+  }
+
+  if (state === "content") {
+    header.style.display = "";
+    content.classList.remove("hidden");
+  } else if (state !== "no-user") {
+    header.style.display = "none";
+    content.classList.add("hidden");
+  }
 }
-},6000);
+
+// أمان إضافي: إذا تجمّد أي شيء لأي سبب، لا تترك المستخدم عالقاً على اللودر أكثر من 12 ثانية
+const forceTimeout = setTimeout(() => {
+  if (!authHandled) {
+    showAppState("network-error");
+    document.getElementById("network-retry-detail").textContent = "انتهت مهلة الاتصال بـ Firebase.";
+  }
+}, 12000);
+
+/* ==================== الهيدر: القائمة الجانبية وقائمة المستخدم ==================== */
+const menuBtn = document.getElementById("mobile-menu-button");
+const closeBtn = document.getElementById("close-menu");
+const mobileMenu = document.getElementById("mobile-menu");
+if (menuBtn && mobileMenu) menuBtn.addEventListener("click", () => mobileMenu.classList.add("open"));
+if (closeBtn && mobileMenu) closeBtn.addEventListener("click", () => mobileMenu.classList.remove("open"));
+
+const avatarBtn = document.getElementById("user-avatar-btn");
+const userDropdown = document.getElementById("user-dropdown");
+if (avatarBtn && userDropdown) {
+  avatarBtn.addEventListener("click", (e) => { e.stopPropagation(); userDropdown.classList.toggle("show"); });
+  document.addEventListener("click", (e) => {
+    if (!avatarBtn.contains(e.target) && !userDropdown.contains(e.target)) userDropdown.classList.remove("show");
+  });
+}
+document.getElementById("logout-btn").addEventListener("click", () => {
+  signOut(auth).then(() => { window.location.href = "index.html"; });
+});
+
+/* ==================== الولاية / المدينة ==================== */
+const stateSel = document.getElementById("input-state");
+const citySel = document.getElementById("input-city");
+sudanStates.forEach(s => {
+  const o = document.createElement("option"); o.value = s; o.textContent = s;
+  stateSel.appendChild(o);
+});
+stateSel.addEventListener("change", () => {
+  citySel.innerHTML = '<option value="">اختر مدينة</option>';
+  (citiesByState[stateSel.value] || []).forEach(c => {
+    const o = document.createElement("option"); o.value = c; o.textContent = c;
+    citySel.appendChild(o);
+  });
+});
+
+/* ==================== التبويبات ==================== */
+window.switchTab = function(tab) {
+  document.querySelectorAll("#tabs-container .tab-btn").forEach(b => b.classList.remove("active"));
+  const btn = document.querySelector('[data-tab="' + tab + '"]');
+  if (btn) btn.classList.add("active");
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  const panel = document.getElementById("panel-" + tab);
+  if (panel) panel.classList.add("active");
+};
+window.scrollToSettings = function() {
+  switchTab("settings");
+  const el = document.getElementById("basic-edit-anchor");
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+/* ==================== تبديل قسم للتعديل ==================== */
+window.toggleEditSection = function(name) {
+  const editEl = document.getElementById(name + "-edit");
+  const viewEl = document.getElementById(name + "-view");
+  if (!editEl) return;
+  const willShow = editEl.classList.contains("hidden");
+  editEl.classList.toggle("hidden");
+  if (viewEl) viewEl.classList.toggle("hidden");
+  if (willShow) populateEditForm(name);
+};
+
+/* ==================== حساب اكتمال الملف الشخصي ==================== */
+function calcCompletion(d) {
+  let score = 30;
+  if (d.profileImageUrl) score += 12;
+  if (d.coverPhotoUrl) score += 5;
+  if (Array.isArray(d.previousWorksUrls) && d.previousWorksUrls.length >= 5) score += 15;
+  else if (Array.isArray(d.previousWorksUrls) && d.previousWorksUrls.length > 0) score += 8;
+  if (Array.isArray(d.skills) && d.skills.length > 0) score += 8;
+  if (d.bio) score += 8;
+  if (d.experience) score += 5;
+  if (Array.isArray(d.education) && d.education.length > 0) score += 5;
+  if (Array.isArray(d.workExperience) && d.workExperience.length > 0) score += 5;
+  if (Array.isArray(d.languages) && d.languages.length > 0) score += 3;
+  if (d.links && d.links.cv) score += 2;
+  if (d.contact && d.contact.location && d.contact.location.city) score += 2;
+  return Math.min(score, 100);
+}
+
+/* ==================== تحميل بيانات المستخدم ==================== */
+onAuthStateChanged(auth, async (user) => {
+  try {
+    if (!user) {
+      authHandled = true;
+      clearTimeout(forceTimeout);
+      showAppState("no-user");
+      return;
+    }
+    currentUser = user;
+
+    const name = user.displayName || user.email.split("@")[0];
+    document.getElementById("dropdown-username").textContent = name;
+    document.getElementById("dropdown-email").textContent = user.email;
+    document.getElementById("user-initial").textContent = name.charAt(0).toUpperCase();
+
+    let snap = await getDoc(doc(db, "employees", user.uid));
+    if (snap.exists()) {
+      userRole = "employee"; userCollection = "employees"; profileData = snap.data();
+    } else {
+      snap = await getDoc(doc(db, "All_jops", user.uid));
+      if (snap.exists()) {
+        userRole = "employer"; userCollection = "All_jops"; profileData = snap.data();
+      } else {
+        profileData = { uid: user.uid, name: user.displayName || "مستخدم جديد", email: user.email, role: "employee" };
+        userCollection = "employees";
+      }
+    }
+
+    renderAll();
+    authHandled = true;
+    clearTimeout(forceTimeout);
+    showAppState("content");
+  } catch (err) {
+    console.error("خطأ في تحميل الملف الشخصي:", err);
+    authHandled = true;
+    clearTimeout(forceTimeout);
+    document.getElementById("network-retry-detail").textContent = err.message || "تعذر الاتصال بقاعدة البيانات.";
+    showAppState("network-error");
+  }
+});
+
+/* ==================== العرض ==================== */
+function renderAll() {
+  if (userRole === "employer") {
+    const st = document.getElementById("tab-btn-skills");
+    if (st) st.style.display = "none";
+  }
+  renderHeader();
+  renderOverview();
+  renderSkillsPanel();
+  renderPortfolio();
+  renderSettings();
+}
+
+function renderHeader() {
+  const name = profileData.name || (currentUser && currentUser.displayName) || "مستخدم";
+  document.getElementById("display-name").textContent = name;
+  document.getElementById("user-initial").textContent = name.charAt(0).toUpperCase();
+
+  const headline = userRole === "employer"
+    ? (profileData.companyInfo && profileData.companyInfo.businessType) || "صاحب عمل"
+    : profileData.headline || "مبدع مستقل";
+  document.getElementById("display-headline").textContent = headline;
+
+  const loc = userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.location) : (profileData.contact && profileData.contact.location);
+  const city = (loc && loc.city) || "";
+  const state = (loc && loc.state) || "";
+  document.getElementById("display-location").innerHTML = '<i class="fas fa-map-marker-alt ml-1"></i>' + (city && state ? city + "، " + state : "الموقع غير محدد");
+
+  const avatarUrl = userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.logoUrl) : profileData.profileImageUrl;
+  document.getElementById("profile-avatar").src = avatarUrl || ("https://ui-avatars.com/api/?background=2563eb&color=fff&name=" + encodeURIComponent(name));
+
+  const coverUrl = profileData.coverPhotoUrl;
+  const coverImg = document.getElementById("cover-photo");
+  const coverFallback = document.getElementById("cover-fallback");
+  if (coverUrl) { coverImg.src = coverUrl; coverImg.classList.remove("hidden"); coverFallback.classList.add("hidden"); }
+  else { coverImg.classList.add("hidden"); coverFallback.classList.remove("hidden"); }
+
+  const statusBadge = document.getElementById("job-status-badge");
+  if (userRole === "employee") {
+    const status = profileData.jobStatus || "متاح للعمل";
+    statusBadge.innerHTML = '<span class="' + (status === "متاح للعمل" ? "status-available" : "status-not-looking") + '">' + status + "</span>";
+  } else { statusBadge.innerHTML = ""; }
+
+  const verifiedWrap = document.getElementById("verified-badge-wrap");
+  if (userRole === "employer" && profileData.verification && profileData.verification.isVerified) {
+    verifiedWrap.innerHTML = '<span class="verified-badge"><i class="fas fa-badge-check"></i> شركة موثقة</span>';
+  } else { verifiedWrap.innerHTML = ""; }
+
+  const ratingWrap = document.getElementById("display-rating-wrap");
+  if (profileData.averageRating) {
+    ratingWrap.innerHTML = '<span class="rating-simple"><i class="fas fa-star text-amber-500"></i> ' + parseFloat(profileData.averageRating).toFixed(1) + "</span>";
+  } else { ratingWrap.innerHTML = ""; }
+
+  const pct = calcCompletion(profileData);
+  document.getElementById("completion-percentage").textContent = pct + "%";
+  const bar = document.getElementById("completion-bar");
+  bar.style.width = pct + "%";
+  bar.classList.toggle("complete", pct >= 100);
+  document.getElementById("completion-hint").textContent = pct >= 100
+    ? "رائع! ملفك الشخصي مكتمل بالكامل."
+    : "أكمل بياناتك (المهارات، الصور، النبذة الشخصية) لزيادة فرصك في الحصول على عمل.";
+
+  document.getElementById("input-name").value = profileData.name || "";
+  document.getElementById("input-headline").value = profileData.headline || "";
+  document.getElementById("input-email-readonly").value = (currentUser && currentUser.email) || "";
+  document.getElementById("input-job-status").value = profileData.jobStatus || "متاح للعمل";
+  document.getElementById("stat-views").textContent = profileData.profileViews || 0;
+  document.getElementById("stat-applications").textContent = profileData.applications || 0;
+  document.getElementById("stat-offers").textContent = profileData.jobOffers || 0;
+}
+
+function renderOverview() {
+  document.getElementById("bio-view").textContent = profileData.bio || "لم تتم إضافة نبذة بعد.";
+  document.getElementById("view-email").textContent = (currentUser && currentUser.email) || "—";
+  document.getElementById("view-phone").textContent = (profileData.contact && profileData.contact.phone) || (profileData.companyInfo && profileData.companyInfo.phone) || "غير مضاف";
+  const loc = userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.location) : (profileData.contact && profileData.contact.location);
+  document.getElementById("view-full-location").textContent = (loc && (loc.city || loc.state)) ? [loc.city, loc.state].filter(Boolean).join("، ") : "غير محدد";
+  document.getElementById("view-linkedin").textContent = (profileData.links && profileData.links.linkedin) || "غير مضاف";
+
+  const langWrap = document.getElementById("languages-view-mini");
+  const langs = profileData.languages || [];
+  langWrap.innerHTML = langs.map(l => '<span class="skill-tag">' + esc(l.name) + " · " + esc(l.level) + "</span>").join("");
+  document.getElementById("languages-view-mini-empty").classList.toggle("hidden", langs.length > 0);
+}
+
+function renderRepeatable(viewId, emptyId, items, templateFn) {
+  const wrap = document.getElementById(viewId);
+  const empty = document.getElementById(emptyId);
+  const list = Array.isArray(items) ? items : [];
+  empty.classList.toggle("hidden", list.length > 0);
+  wrap.innerHTML = list.map(templateFn).join("");
+}
+
+function renderSkillsPanel() {
+  const tagsWrap = document.getElementById("skills-view-tags");
+  const skills = profileData.skills || [];
+  tagsWrap.innerHTML = skills.length
+    ? skills.map(s => '<span class="skill-tag">' + esc(s) + "</span>").join("")
+    : '<p class="text-gray-400 text-sm">لم تتم إضافة مهارات بعد.</p>';
+  document.getElementById("experience-view").textContent = profileData.experience || "غير محدد";
+
+  renderRepeatable("languages-view", "languages-view-empty", profileData.languages, l =>
+    '<div class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2"><span class="font-bold text-gray-700 text-sm">' + esc(l.name) + '</span><span class="skill-tag !m-0">' + esc(l.level) + "</span></div>");
+
+  renderRepeatable("workexp-view", "workexp-view-empty", profileData.workExperience, it =>
+    '<div class="timeline-item"><span class="timeline-dot"></span><p class="font-bold text-gray-800">' + esc(it.title) + '</p><p class="text-blue-600 text-sm font-medium">' + esc(it.company) + '</p><p class="text-gray-400 text-xs mb-1">' + esc(it.duration) + '</p><p class="text-gray-600 text-sm">' + esc(it.description) + "</p></div>");
+
+  renderRepeatable("education-view", "education-view-empty", profileData.education, it =>
+    '<div class="timeline-item"><span class="timeline-dot"></span><p class="font-bold text-gray-800">' + esc(it.degree) + '</p><p class="text-blue-600 text-sm font-medium">' + esc(it.institution) + '</p><p class="text-gray-400 text-xs">' + esc(it.year) + "</p></div>");
+
+  renderRepeatable("certs-view", "certs-view-empty", profileData.certifications, it =>
+    '<div class="timeline-item"><span class="timeline-dot"></span><p class="font-bold text-gray-800">' + esc(it.name) + '</p><p class="text-blue-600 text-sm font-medium">' + esc(it.issuer) + " · " + esc(it.year) + "</p>" + (it.url ? '<a href="' + esc(it.url) + '" target="_blank" class="text-xs text-gray-500 hover:text-blue-600"><i class="fas fa-link ml-1"></i>عرض الشهادة</a>' : "") + "</div>");
+}
+
+function renderPortfolio() {
+  const grid = document.getElementById("portfolio-grid");
+  const works = profileData.previousWorksUrls || [];
+  document.getElementById("portfolio-empty").classList.toggle("hidden", works.length > 0);
+  grid.innerHTML = works.map((url, i) =>
+    '<div class="portfolio-item"><img src="' + url + '" loading="lazy" alt="عمل سابق"><button class="portfolio-remove" onclick="removeWork(' + i + ')" title="حذف"><i class="fas fa-times"></i></button></div>'
+  ).join("");
+  const cvView = document.getElementById("view-cv");
+  if (profileData.links && profileData.links.cv) {
+    cvView.innerHTML = '<a href="' + esc(profileData.links.cv) + '" target="_blank" class="text-blue-600 hover:underline font-bold">عرض السيرة الذاتية</a>';
+  } else {
+    cvView.textContent = "لا يوجد رابط سيرة ذاتية";
+  }
+}
+
+function renderSettings() {
+  const n = profileData.notificationSettings || {};
+  document.getElementById("notif-email").checked = n.emailNotifications !== false;
+  document.getElementById("notif-jobalerts").checked = n.jobAlerts !== false;
+  document.getElementById("notif-messages").checked = n.messageNotifications !== false;
+  document.getElementById("notif-applications").checked = n.applicationUpdates !== false;
+}
+
+/* ==================== تعبئة نماذج التعديل ==================== */
+function populateEditForm(name) {
+  if (name === "bio") {
+    document.getElementById("input-bio").value = profileData.bio || "";
+  }
+  if (name === "contact") {
+    document.getElementById("input-phone").value = (profileData.contact && profileData.contact.phone) || "";
+    document.getElementById("input-linkedin").value = (profileData.links && profileData.links.linkedin) || "";
+    const loc = (profileData.contact && profileData.contact.location) || {};
+    stateSel.value = loc.state || "";
+    citySel.innerHTML = '<option value="">اختر مدينة</option>';
+    (citiesByState[loc.state] || []).forEach(c => {
+      const o = document.createElement("option"); o.value = c; o.textContent = c;
+      citySel.appendChild(o);
+    });
+    citySel.value = loc.city || "";
+  }
+  if (name === "skills") {
+    const container = document.getElementById("skills-input-container");
+    container.innerHTML = "";
+    const skills = (profileData.skills && profileData.skills.length) ? profileData.skills : [""];
+    skills.forEach(s => addSkillRow(s));
+    document.getElementById("input-experience").value = profileData.experience || "";
+  }
+  if (name === "languages") {
+    const container = document.getElementById("languages-input-container");
+    container.innerHTML = "";
+    const langs = (profileData.languages && profileData.languages.length) ? profileData.languages : [{ name: "", level: "متوسط" }];
+    langs.forEach(l => addLangRow(l));
+  }
+  if (name === "workexp") {
+    const container = document.getElementById("workexp-input-container");
+    container.innerHTML = "";
+    const items = (profileData.workExperience && profileData.workExperience.length) ? profileData.workExperience : [{}];
+    items.forEach(it => addWorkRow(it));
+  }
+  if (name === "education") {
+    const container = document.getElementById("education-input-container");
+    container.innerHTML = "";
+    const items = (profileData.education && profileData.education.length) ? profileData.education : [{}];
+    items.forEach(it => addEduRow(it));
+  }
+  if (name === "certs") {
+    const container = document.getElementById("certs-input-container");
+    container.innerHTML = "";
+    const items = (profileData.certifications && profileData.certifications.length) ? profileData.certifications : [{}];
+    items.forEach(it => addCertRow(it));
+  }
+  if (name === "links") {
+    document.getElementById("input-cv").value = (profileData.links && profileData.links.cv) || "";
+  }
+}
+
+/* ==================== صفوف ديناميكية ==================== */
+function addSkillRow(v) {
+  const container = document.getElementById("skills-input-container");
+  if (container.children.length >= 6) {
+    document.getElementById("skills-limit-message").classList.remove("hidden");
+    return;
+  }
+  document.getElementById("skills-limit-message").classList.add("hidden");
+  const row = document.createElement("div");
+  row.className = "mb-2 flex items-center gap-2";
+  row.innerHTML = '<input type="text" class="field-input skill-input" placeholder="مثال: React.js" value="' + esc(v || "") + '">';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-minus"></i>';
+  removeBtn.addEventListener("click", () => {
+    row.remove();
+    document.getElementById("skills-limit-message").classList.add("hidden");
+  });
+  row.appendChild(removeBtn);
+  container.appendChild(row);
+}
+window.addSkillRow = addSkillRow;
+(function addSkillAdderButtonOnce() {
+  // زر "إضافة مهارة" يُضاف مرة واحدة أسفل حاوية المهارات
+  const wrap = document.getElementById("skills-input-container");
+  const btn = document.createElement("button");
+  btn.type = "button"; btn.className = "add-item-btn mt-1";
+  btn.innerHTML = '<i class="fas fa-plus ml-1"></i> إضافة مهارة';
+  btn.addEventListener("click", () => addSkillRow(""));
+  wrap.parentElement.insertBefore(btn, wrap.nextSibling);
+})();
+
+window.addLangRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("languages-input-container");
+  const row = document.createElement("div");
+  row.className = "flex items-center gap-2";
+  row.innerHTML =
+    '<input type="text" class="field-input lang-name" placeholder="اللغة" value="' + esc(item.name || "") + '">' +
+    '<select class="field-select lang-level" style="max-width:140px"><option value="مبتدئ">مبتدئ</option><option value="متوسط">متوسط</option><option value="متقدم">متقدم</option><option value="لغة أم">لغة أم</option></select>';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-minus"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.appendChild(removeBtn);
+  const sel = row.querySelector(".lang-level");
+  sel.value = item.level || "متوسط";
+  container.appendChild(row);
+};
+
+window.addWorkRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("workexp-input-container");
+  const row = document.createElement("div");
+  row.className = "border border-gray-200 rounded-xl p-4 space-y-2 relative";
+  row.innerHTML =
+    '<div class="flex justify-end remove-wrap"></div>' +
+    '<input type="text" class="field-input we-title" placeholder="المسمى الوظيفي" value="' + esc(item.title || "") + '">' +
+    '<input type="text" class="field-input we-company" placeholder="اسم الشركة / الجهة" value="' + esc(item.company || "") + '">' +
+    '<input type="text" class="field-input we-duration" placeholder="المدة (مثال: 2022 - حتى الآن)" value="' + esc(item.duration || "") + '">' +
+    '<textarea class="field-textarea we-description" rows="2" placeholder="وصف مختصر للمهام والإنجازات">' + esc(item.description || "") + "</textarea>";
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.querySelector(".remove-wrap").appendChild(removeBtn);
+  container.appendChild(row);
+};
+
+window.addEduRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("education-input-container");
+  const row = document.createElement("div");
+  row.className = "border border-gray-200 rounded-xl p-4 space-y-2";
+  row.innerHTML =
+    '<div class="flex justify-end remove-wrap"></div>' +
+    '<input type="text" class="field-input ed-degree" placeholder="الدرجة العلمية / التخصص" value="' + esc(item.degree || "") + '">' +
+    '<input type="text" class="field-input ed-institution" placeholder="اسم الجامعة / المعهد" value="' + esc(item.institution || "") + '">' +
+    '<input type="text" class="field-input ed-year" placeholder="سنة التخرج" value="' + esc(item.year || "") + '">';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.querySelector(".remove-wrap").appendChild(removeBtn);
+  container.appendChild(row);
+};
+
+window.addCertRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("certs-input-container");
+  const row = document.createElement("div");
+  row.className = "border border-gray-200 rounded-xl p-4 space-y-2";
+  row.innerHTML =
+    '<div class="flex justify-end remove-wrap"></div>' +
+    '<input type="text" class="field-input cert-name" placeholder="اسم الشهادة" value="' + esc(item.name || "") + '">' +
+    '<input type="text" class="field-input cert-issuer" placeholder="الجهة المانحة" value="' + esc(item.issuer || "") + '">' +
+    '<input type="text" class="field-input cert-year" placeholder="سنة الحصول عليها" value="' + esc(item.year || "") + '">' +
+    '<input type="url" class="field-input cert-url" placeholder="رابط الشهادة (اختياري)" value="' + esc(item.url || "") + '">';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.querySelector(".remove-wrap").appendChild(removeBtn);
+  container.appendChild(row);
+};
+
+/* ==================== الحفظ في Firestore ==================== */
+async function saveField(updates, msgElId, sectionToClose) {
+  try {
+    if (!currentUser) throw new Error("لا يوجد مستخدم مسجل دخول.");
+    await updateDoc(doc(db, userCollection, currentUser.uid), Object.assign({}, updates, { updatedAt: new Date() }));
+    Object.assign(profileData, updates);
+    renderAll();
+    showMsg(msgElId, "تم الحفظ بنجاح.", "success");
+    if (sectionToClose) {
+      setTimeout(() => {
+        const editEl = document.getElementById(sectionToClose + "-edit");
+        const viewEl = document.getElementById(sectionToClose + "-view");
+        if (editEl) editEl.classList.add("hidden");
+        if (viewEl) viewEl.classList.remove("hidden");
+      }, 700);
+    }
+  } catch (err) {
+    console.error(err);
+    showMsg(msgElId, "حدث خطأ أثناء الحفظ: " + (err.message || "غير معروف"), "error");
+  }
+}
+
+window.saveBio = () => saveField({ bio: document.getElementById("input-bio").value.trim() }, "bio-message", "bio");
+
+window.saveContact = () => saveField({
+  contact: {
+    phone: document.getElementById("input-phone").value.trim(),
+    location: {
+      state: stateSel.value,
+      city: citySel.value,
+      area: (profileData.contact && profileData.contact.location && profileData.contact.location.area) || null
+    }
+  },
+  links: Object.assign({}, profileData.links || {}, { linkedin: document.getElementById("input-linkedin").value.trim() })
+}, "contact-message", "contact");
+
+window.saveJobStatus = (v) => saveField({ jobStatus: v }, "jobstatus-message", null);
+
+window.saveSkills = () => {
+  const skills = Array.from(document.querySelectorAll("#skills-input-container .skill-input")).map(i => i.value.trim()).filter(Boolean);
+  saveField({ skills, experience: document.getElementById("input-experience").value }, "skills-message", "skills");
+};
+
+window.saveLanguages = () => {
+  const languages = Array.from(document.querySelectorAll("#languages-input-container > div")).map(row => ({
+    name: row.querySelector(".lang-name").value.trim(),
+    level: row.querySelector(".lang-level").value
+  })).filter(l => l.name);
+  saveField({ languages }, "languages-message", "languages");
+};
+
+window.saveWorkExp = () => {
+  const workExperience = Array.from(document.querySelectorAll("#workexp-input-container > div")).map(row => ({
+    title: row.querySelector(".we-title").value.trim(),
+    company: row.querySelector(".we-company").value.trim(),
+    duration: row.querySelector(".we-duration").value.trim(),
+    description: row.querySelector(".we-description").value.trim()
+  })).filter(w => w.title || w.company);
+  saveField({ workExperience }, "workexp-message", "workexp");
+};
+
+window.saveEducation = () => {
+  const education = Array.from(document.querySelectorAll("#education-input-container > div")).map(row => ({
+    degree: row.querySelector(".ed-degree").value.trim(),
+    institution: row.querySelector(".ed-institution").value.trim(),
+    year: row.querySelector(".ed-year").value.trim()
+  })).filter(e => e.degree || e.institution);
+  saveField({ education }, "education-message", "education");
+};
+
+window.saveCerts = () => {
+  const certifications = Array.from(document.querySelectorAll("#certs-input-container > div")).map(row => ({
+    name: row.querySelector(".cert-name").value.trim(),
+    issuer: row.querySelector(".cert-issuer").value.trim(),
+    year: row.querySelector(".cert-year").value.trim(),
+    url: row.querySelector(".cert-url").value.trim()
+  })).filter(c => c.name);
+  saveField({ certifications }, "certs-message", "certs");
+};
+
+window.saveLinks = () => saveField({ links: Object.assign({}, profileData.links || {}, { cv: document.getElementById("input-cv").value.trim() }) }, "links-message", "links");
+
+window.saveBasicInfo = async () => {
+  const name = document.getElementById("input-name").value.trim();
+  const headline = document.getElementById("input-headline").value.trim();
+  if (!name) { showMsg("basic-message", "يرجى إدخال الاسم الكامل.", "error"); return; }
+  try {
+    await updateProfile(currentUser, { displayName: name });
+    await saveField({ name, headline }, "basic-message", null);
+  } catch (err) {
+    showMsg("basic-message", "حدث خطأ أثناء حفظ البيانات الأساسية.", "error");
+  }
+};
+
+window.savePassword = async () => {
+  const current = document.getElementById("input-current-password").value;
+  const next = document.getElementById("input-new-password").value;
+  const confirmVal = document.getElementById("input-confirm-password").value;
+  if (!current || !next) { showMsg("password-message", "يرجى تعبئة جميع الحقول.", "error"); return; }
+  if (next.length < 6) { showMsg("password-message", "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.", "error"); return; }
+  if (next !== confirmVal) { showMsg("password-message", "كلمة المرور الجديدة وتأكيدها غير متطابقين.", "error"); return; }
+  const btn = document.getElementById("save-password-btn");
+  const original = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span> جاري التحديث...';
+  try {
+    const credential = EmailAuthProvider.credential(currentUser.email, current);
+    await reauthenticateWithCredential(currentUser, credential);
+    await updatePassword(currentUser, next);
+    showMsg("password-message", "تم تحديث كلمة المرور بنجاح.", "success");
+    document.getElementById("input-current-password").value = "";
+    document.getElementById("input-new-password").value = "";
+    document.getElementById("input-confirm-password").value = "";
+  } catch (err) {
+    let msg = "حدث خطأ أثناء تحديث كلمة المرور.";
+    if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") msg = "كلمة المرور الحالية غير صحيحة.";
+    showMsg("password-message", msg, "error");
+  } finally {
+    btn.disabled = false; btn.innerHTML = original;
+  }
+};
+
+window.saveNotifications = () => saveField({
+  notificationSettings: {
+    emailNotifications: document.getElementById("notif-email").checked,
+    jobAlerts: document.getElementById("notif-jobalerts").checked,
+    messageNotifications: document.getElementById("notif-messages").checked,
+    applicationUpdates: document.getElementById("notif-applications").checked
+  }
+}, "notifications-message", null);
+
+/* ==================== رفع الصور عبر Cloudinary ==================== */
+async function uploadImageToCloudinary(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  const response = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+  if (!response.ok) {
+    const errText = await response.text().catch(() => "");
+    console.error("Cloudinary upload error:", response.status, errText);
+    throw new Error("فشل رفع الصورة إلى Cloudinary (كود " + response.status + ")");
+  }
+  const data = await response.json();
+  if (!data.secure_url) throw new Error("لم يتم استلام رابط الصورة من Cloudinary.");
+  return data.secure_url;
+}
+
+document.getElementById("cover-input").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  showMsg("header-message", "جاري رفع صورة الغلاف...", "success");
+  try {
+    const url = await uploadImageToCloudinary(file);
+    await saveField({ coverPhotoUrl: url }, "header-message", null);
+  } catch (err) {
+    showMsg("header-message", "تعذر رفع صورة الغلاف: " + err.message, "error");
+  }
+  e.target.value = "";
+});
+
+document.getElementById("avatar-input").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  showMsg("header-message", "جاري رفع الصورة الشخصية...", "success");
+  try {
+    const url = await uploadImageToCloudinary(file);
+    const field = userRole === "employer"
+      ? { companyInfo: Object.assign({}, profileData.companyInfo || {}, { logoUrl: url }) }
+      : { profileImageUrl: url };
+    await saveField(field, "header-message", null);
+  } catch (err) {
+    showMsg("header-message", "تعذر رفع الصورة الشخصية: " + err.message, "error");
+  }
+  e.target.value = "";
+});
+
+window.handlePortfolioUpload = async function(input) {
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+  showMsg("portfolio-message", "جاري رفع الصور...", "success");
+  try {
+    const urls = await Promise.all(files.map(f => uploadImageToCloudinary(f)));
+    const previousWorksUrls = (profileData.previousWorksUrls || []).concat(urls);
+    await saveField({ previousWorksUrls }, "portfolio-message", null);
+  } catch (err) {
+    showMsg("portfolio-message", "تعذر رفع بعض الصور: " + err.message, "error");
+  }
+  input.value = "";
+};
+
+window.removeWork = async function(index) {
+  const urls = (profileData.previousWorksUrls || []).slice();
+  urls.splice(index, 1);
+  await saveField({ previousWorksUrls: urls }, "portfolio-message", null);
+};
 </script>
-<script type="module" src="profile-app.js"></script>
 </body>
 </html>
