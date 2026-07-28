@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الموظفون المتاحون - شغلني</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --light: #f9fafb;
+            --dark: #1f2937;
+            --gray: #6b7280;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        .employee-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #bfdbfe;
+        }
+
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #eef2ff;
+            color: #4338ca;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            margin: 0.125rem;
+            transition: all 0.2s;
+        }
+        .skill-tag:hover {
+            background-color: #e0e7ff;
+            transform: scale(1.05);
+        }
+
+        .status-available {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .status-not-looking {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .previous-works-gallery {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .previous-works-gallery::-webkit-scrollbar {
+            height: 8px;
+        }
+        .previous-works-gallery::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+        .previous-works-gallery::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+
+        .previous-works-gallery img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        .previous-works-gallery img:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 1002;
+        }
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+        }
+
+        .swiper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .swiper-slide img {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .swiper-button-prev, .swiper-button-next {
+            display: none !important;
+        }
+
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        /* تصميم التقييم الجديد */
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            border: 1px solid #fcd34d;
+            box-shadow: 0 2px 4px rgba(251, 191, 36, 0.2);
+        }
+        .rating-badge i {
+            color: #f59e0b;
+            font-size: 0.8rem;
+        }
+        .rating-badge.empty {
+            background: #f3f4f6;
+            color: #9ca3af;
+            border-color: #e5e7eb;
+        }
+        .rating-badge.empty i {
+            color: #d1d5db;
+        }
+
+        /* زر المفضلة */
+        .fav-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .fav-btn:hover {
+            border-color: #f43f5e;
+            color: #f43f5e;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+        }
+        .fav-btn.active {
+            background: #ffe4e6;
+            border-color: #f43f5e;
+            color: #f43f5e;
+        }
+        .fav-btn.active:hover {
+            background: #fecdd3;
+        }
+
+        /* شريط البحث المحسن */
+        .search-box {
+            position: relative;
+            transition: all 0.3s;
+        }
+        .search-box:focus-within {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* زر الموقع */
+        .location-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .location-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        .location-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* تأثيرات دخول البطاقات */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* شارة التوثيق */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="index.html"><img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain"></a>
+                <div class="hidden md:flex space-x-1 space-x-reverse mr-6">
+                    <a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition">الرئيسية</a>
+                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition">الوظائف</a>
+                    <a href="employee_listing_page.html" class="px-4 py-2 text-blue-600 font-bold">الموظفون</a>
+                    <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600 transition">أضف وظيفة</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="profile.html" class="hidden md:flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 transition">
+                    <i class="fas fa-user-circle text-xl"></i>
+                    <span class="font-medium">ملفي</span>
+                </a>
+                <a href="login.html" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition shadow-md shadow-blue-200">دخول</a>
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition p-2">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
+
+        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+            <div class="flex justify-between items-center mb-8">
+                <img src="shagelnie.png.png" alt="شغلني" class="h-12">
+                <button id="close-menu" class="text-gray-500 hover:text-gray-700 transition w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <nav class="flex flex-col space-y-1">
+                <a href="index.html" class="text-gray-600 py-3 px-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">الرئيسية</a>
+                <a href="job_listing_page.html" class="text-gray-600 py-3 px-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">الوظائف</a>
+                <a href="employee_listing_page.html" class="text-blue-600 font-bold py-3 px-3 rounded-lg bg-blue-50">الموظفون</a>
+                <a href="jop_posting_page.html" class="text-gray-600 py-3 px-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">أضف وظيفة</a>
+                <a href="profile.html" class="text-gray-600 py-3 px-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">ملفي الشخصي</a>
+                <div class="border-t border-gray-100 my-2"></div>
+                <a href="login.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">دخول</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- العنوان والبحث -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-black text-gray-900 mb-1">الموظفون المتاحون</h1>
+                <p class="text-gray-500 text-sm">اكتشف أفضل الكفاءات والمواهب في السودان</p>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <div class="search-box relative flex-1 md:w-80">
+                    <input type="text" id="searchInput" placeholder="ابحث بالاسم، المهارة، أو الموقع..."
+                           class="w-full pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right bg-white shadow-sm transition-all">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+                <button id="locationBtn" class="location-btn shadow-lg shadow-emerald-200" onclick="detectLocation()">
+                    <i class="fas fa-location-arrow"></i>
+                    <span class="hidden sm:inline">الأقرب لي</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- الفلاتر -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+            <div class="flex flex-col md:flex-row md:space-x-4 rtl:space-x-reverse gap-4">
+                <div class="w-full md:w-1/3">
+                    <label for="stateFilter" class="block text-sm font-bold text-gray-700 mb-1.5">الولاية</label>
+                    <select id="stateFilter" class="block w-full pl-3 pr-10 py-2.5 text-base border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-xl bg-gray-50 transition-all cursor-pointer">
+                        <option value="">جميع الولايات</option>
+                        <option value="الخرطوم">ولاية الخرطوم</option>
+                        <option value="الجزيرة">ولاية الجزيرة</option>
+                        <option value="البحر الأحمر">ولاية البحر الأحمر</option>
+                        <option value="كسلا">ولاية كسلا</option>
+                        <option value="القضارف">ولاية القضارف</option>
+                        <option value="سنار">ولاية سنار</option>
+                        <option value="النيل الأبيض">ولاية النيل الأبيض</option>
+                        <option value="النيل الأزرق">ولاية النيل الأزرق</option>
+                        <option value="الشمالية">الولاية الشمالية</option>
+                        <option value="نهر النيل">ولاية نهر النيل</option>
+                        <option value="شمال كردفان">ولاية شمال كردفان</option>
+                        <option value="جنوب كردفان">ولاية جنوب كردفان</option>
+                        <option value="غرب كردفان">ولاية غرب كردفان</option>
+                        <option value="شمال دارفور">ولاية شمال دارفور</option>
+                        <option value="جنوب دارفور">ولاية جنوب دارفور</option>
+                        <option value="غرب دارفور">ولاية غرب دارفور</option>
+                        <option value="وسط دارفور">ولاية وسط دارفور</option>
+                        <option value="شرق دارفور">ولاية شرق دارفور</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-1/3">
+                    <label for="cityFilter" class="block text-sm font-bold text-gray-700 mb-1.5">المدينة</label>
+                    <select id="cityFilter" disabled class="block w-full pl-3 pr-10 py-2.5 text-base border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-xl bg-gray-50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                        <option value="">جميع المدن</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-1/3">
+                    <label for="expFilter" class="block text-sm font-bold text-gray-700 mb-1.5">مستوى الخبرة</label>
+                    <select id="expFilter" class="block w-full pl-3 pr-10 py-2.5 text-base border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-xl bg-gray-50 transition-all cursor-pointer">
+                        <option value="">الكل</option>
+                        <option value="مبتدئ">مبتدئ (0-2 سنوات)</option>
+                        <option value="متوسط">متوسط (2-5 سنوات)</option>
+                        <option value="خبير">خبير (5+ سنوات)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة الموظفين -->
+        <div id="employeesList" class="space-y-4">
+            <div id="loadingIndicator" class="text-center py-16">
+                <div class="inline-block w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                <p class="text-gray-500 text-lg">جاري تحميل الموظفين...</p>
+            </div>
+            <div id="noEmployeesFound" class="hidden text-center py-16">
+                <div class="bg-gray-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-search text-4xl text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">لا توجد نتائج</h3>
+                <p class="text-gray-500">جرب تغيير معايير البحث أو الفلاتر</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال الصور -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper"></div>
+        </div>
+    </div>
+
+    <!-- Toast الإشعارات -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl z-[100] transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3">
+        <i id="toast-icon" class="fas fa-check-circle text-emerald-400"></i>
+        <span id="toast-message">تمت العملية بنجاح</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+          authDomain: "shaglni-c64c0.firebaseapp.com",
+          projectId: "shaglni-c64c0",
+          storageBucket: "shaglni-c64c0.firebasestorage.app",
+          messagingSenderId: "768887356636",
+          appId: "1:768887356636:web:11ec1d6991add3309c8819",
+          measurementId: "G-98GQGZS09W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const employeesList = document.getElementById('employeesList');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const noEmployeesFound = document.getElementById('noEmployeesFound');
+        const searchInput = document.getElementById('searchInput');
+        const stateFilter = document.getElementById('stateFilter');
+        const cityFilter = document.getElementById('cityFilter');
+        const expFilter = document.getElementById('expFilter');
+        const imageModal = document.getElementById("imageModal");
+        const locationBtn = document.getElementById('locationBtn');
+        const toast = document.getElementById('toast');
+
+        let allEmployees = [];
+        let swiperInstance = null;
+        let currentUser = null;
+        let userFavorites = new Set();
+
+        const cityCoordinates = {
+            'الخرطوم': { lat: 15.5007, lng: 32.5599, state: 'الخرطوم' },
+            'أم درمان': { lat: 15.6475, lng: 32.4807, state: 'الخرطوم' },
+            'بحري': { lat: 15.6340, lng: 32.5326, state: 'الخرطوم' },
+            'ود مدني': { lat: 14.4000, lng: 33.5200, state: 'الجزيرة' },
+            'بورتسودان': { lat: 19.6167, lng: 37.2167, state: 'البحر الأحمر' },
+            'كسلا': { lat: 15.4500, lng: 36.4000, state: 'كسلا' },
+            'القضارف': { lat: 14.9342, lng: 33.5192, state: 'القضارف' },
+            'سنار': { lat: 13.5500, lng: 33.5833, state: 'سنار' },
+            'ربك': { lat: 13.1833, lng: 32.9000, state: 'النيل الأبيض' },
+            'الدمازين': { lat: 11.7700, lng: 34.3500, state: 'النيل الأزرق' },
+            'دنقلا': { lat: 18.2167, lng: 30.7500, state: 'الشمالية' },
+            'الدامر': { lat: 17.5833, lng: 33.9500, state: 'نهر النيل' },
+            'شندي': { lat: 16.6833, lng: 33.4333, state: 'نهر النيل' },
+            'عطبرة': { lat: 17.7000, lng: 33.9833, state: 'نهر النيل' },
+            'الأبيض': { lat: 13.1833, lng: 30.2167, state: 'شمال كردفان' },
+            'كادقلي': { lat: 11.0167, lng: 29.7167, state: 'جنوب كردفان' },
+            'الفاشر': { lat: 13.6333, lng: 25.3500, state: 'شمال دارفور' },
+            'نيالا': { lat: 12.0500, lng: 24.8833, state: 'جنوب دارفور' },
+            'الجنينة': { lat: 13.4500, lng: 22.4500, state: 'غرب دارفور' },
+            'زالنجي': { lat: 12.9000, lng: 23.4667, state: 'وسط دارفور' },
+            'الضعين': { lat: 11.4500, lng: 26.1333, state: 'شرق دارفور' }
+        };
+
+        const citiesByState = {
+            'الخرطوم': ['الخرطوم', 'أم درمان', 'بحري'],
+            'الجزيرة': ['ود مدني', 'الحصاحيصا', 'المناقل'],
+            'البحر الأحمر': ['بورتسودان', 'سواكن', 'طوكر'],
+            'كسلا': ['كسلا', 'حلفا الجديدة', 'أروما'],
+            'القضارف': ['القضارف', 'القلابات', 'الفو'],
+            'سنار': ['سنار', 'الدالي والمزموم', 'ود النيل'],
+            'النيل الأبيض': ['ربك', 'كوستي', 'الدويم'],
+            'النيل الأزرق': ['الدمازين', 'الروصيرص', 'الكرمك'],
+            'الشمالية': ['دنقلا', 'عطبرة', 'كريمة'],
+            'نهر النيل': ['الدامر', 'شندي', 'عطبرة'],
+            'شمال كردفان': ['الأبيض', 'أم روابة', 'الرهد'],
+            'جنوب كردفان': ['كادقلي', 'أبو جبيهة', 'تلودي'],
+            'غرب كردفان': ['الفولة', 'النهود', 'المجلد'],
+            'شمال دارفور': ['الفاشر', 'كبكابية', 'مليط'],
+            'جنوب دارفور': ['نيالا', 'الضعين', 'برام'],
+            'غرب دارفور': ['الجنينة', 'كرينك', 'كلبس'],
+            'وسط دارفور': ['زالنجي', 'ودعة', 'أم دخن'],
+            'شرق دارفور': ['الضعين', 'عديلة', 'أبوكارنكا']
+        };
+
+        function showToast(message, type = 'success') {
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+            msg.textContent = message;
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-emerald-400';
+            } else if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle text-red-400';
+            } else if (type === 'info') {
+                icon.className = 'fas fa-info-circle text-blue-400';
+            }
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function findNearestCity(userLat, userLng) {
+            let nearestCity = null;
+            let minDistance = Infinity;
+            for (const [cityName, coords] of Object.entries(cityCoordinates)) {
+                const distance = calculateDistance(userLat, userLng, coords.lat, coords.lng);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestCity = { name: cityName, state: coords.state, distance: distance };
+                }
+            }
+            return nearestCity;
+        }
+
+        window.detectLocation = function() {
+            if (!navigator.geolocation) {
+                showToast('المتصفح لا يدعم خدمة الموقع الجغرافي', 'error');
+                return;
+            }
+            locationBtn.disabled = true;
+            locationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديد...';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    const nearest = findNearestCity(userLat, userLng);
+                    if (nearest) {
+                        stateFilter.value = nearest.state;
+                        updateCitiesList();
+                        setTimeout(() => {
+                            cityFilter.value = nearest.name;
+                            filterAndRenderEmployees();
+                            locationBtn.innerHTML = `<i class="fas fa-check"></i> ${nearest.name}`;
+                            locationBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                            showToast(`تم تحديد موقعك: ${nearest.name} (${nearest.distance.toFixed(1)} كم)`);
+                        }, 100);
+                    }
+                },
+                (error) => {
+                    console.error('خطأ GPS:', error);
+                    showToast('تعذر تحديد الموقع. يرجى الاختيار يدوياً.', 'error');
+                    locationBtn.disabled = false;
+                    locationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> الأقرب لي';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        };
+
+        async function loadFavorites() {
+            if (!currentUser) return;
+            try {
+                const snap = await getDocs(collection(db, "favorites", currentUser.uid, "items"));
+                userFavorites = new Set(snap.docs.map(d => d.id));
+            } catch (e) {
+                console.log("Favorites load skipped");
+            }
+        }
+
+        window.toggleFavorite = async function(employeeId, btn) {
+            if (!currentUser) {
+                showToast('يجب تسجيل الدخول لإضافة المفضلة', 'error');
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return;
+            }
+            const favRef = doc(db, "favorites", currentUser.uid, "items", employeeId);
+            try {
+                if (userFavorites.has(employeeId)) {
+                    await deleteDoc(favRef);
+                    userFavorites.delete(employeeId);
+                    btn.classList.remove('active');
+                    btn.innerHTML = '<i class="far fa-heart"></i>';
+                    showToast('تمت الإزالة من المفضلة');
+                } else {
+                    const emp = allEmployees.find(e => e.id === employeeId);
+                    await setDoc(favRef, {
+                        employeeId,
+                        name: emp?.name || '',
+                        savedAt: new Date()
+                    });
+                    userFavorites.add(employeeId);
+                    btn.classList.add('active');
+                    btn.innerHTML = '<i class="fas fa-heart"></i>';
+                    showToast('تمت الإضافة للمفضلة');
+                }
+            } catch (err) {
+                showToast('حدث خطأ، حاول مرة أخرى', 'error');
+            }
+        };
+
+        async function fetchEmployees() {
+            loadingIndicator.classList.remove('hidden');
+            try {
+                const querySnapshot = await getDocs(collection(db, "employees"));
+                allEmployees = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return { 
+                        id: doc.id, 
+                        ...data,
+                        // استخدام البيانات الحقيقية فقط - لا عشوائية
+                        averageRating: data.averageRating || 0,
+                        totalReviews: data.totalReviews || 0
+                    };
+                });
+                allEmployees.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)); 
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const searchParam = urlParams.get('search');
+                if (searchParam) searchInput.value = decodeURIComponent(searchParam);
+
+                await loadFavorites();
+                filterAndRenderEmployees();
+            } catch (error) {
+                console.error("خطأ في جلب الموظفين:", error);
+                employeesList.innerHTML = '<div class="text-center text-red-500 p-8 bg-red-50 rounded-2xl">حدث خطأ أثناء تحميل بيانات الموظفين.</div>';
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        function renderStarRating(rating, total) {
+            if (!rating || rating === 0) {
+                return `<span class="rating-badge empty"><i class="far fa-star"></i> لا يوجد تقييم</span>`;
+            }
+            const fullStars = Math.floor(rating);
+            const hasHalf = rating % 1 >= 0.5;
+            let starsHtml = '';
+            for (let i = 0; i < fullStars; i++) starsHtml += '<i class="fas fa-star"></i>';
+            if (hasHalf) starsHtml += '<i class="fas fa-star-half-alt"></i>';
+            const empty = 5 - fullStars - (hasHalf ? 1 : 0);
+            for (let i = 0; i < empty; i++) starsHtml += '<i class="far fa-star"></i>';
+            return `<span class="rating-badge">${starsHtml} <span class="mr-1">${parseFloat(rating).toFixed(1)}</span> ${total > 0 ? `<span class="text-xs opacity-70 font-normal">(${total})</span>` : ''}</span>`;
+        }
+
+        function renderEmployees(employees) {
+            employeesList.innerHTML = '';
+            if (employees.length === 0) {
+                noEmployeesFound.classList.remove('hidden');
+                return;
+            }
+            noEmployeesFound.classList.add('hidden');
+            
+            employees.forEach((employee, index) => {
+                const skillsHtml = Array.isArray(employee.skills) && employee.skills.length > 0
+                    ? employee.skills.slice(0, 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('') +
+                      (employee.skills.length > 5 ? `<span class="skill-tag" style="background:#f3f4f6;color:#6b7280">+${employee.skills.length - 5}</span>` : '')
+                    : '<span class="text-gray-400 text-sm">لا توجد مهارات مسجلة</span>';
+                
+                const statusClass = employee.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
+                const employeeCity = employee.contact?.location?.city || 'غير محدد';
+                const employeeState = employee.contact?.location?.state || 'غير محدد';
+                const locationText = `${employeeCity}، ${employeeState}`;
+                const profilePhotoURL = employee.profileImageUrl || `https://ui-avatars.com/api/?background=2563eb&color=fff&name=${encodeURIComponent(employee.name || 'مستخدم')}&size=128`;
+
+                const previousWorksHtml = Array.isArray(employee.previousWorksUrls) && employee.previousWorksUrls.length > 0
+                    ? `<div class="mb-4">
+                        <h4 class="font-bold text-sm mb-2 text-gray-700">أعمال سابقة:</h4>
+                        <div class="previous-works-gallery">
+                            ${employee.previousWorksUrls.map((url, idx) => `
+                                <img src="${url}" alt="صورة عمل سابق" onclick="openModal('${employee.id}', ${idx}, 'works')" loading="lazy">
+                            `).join('')}
+                        </div>
+                       </div>`
+                    : '';
+
+                const isFav = userFavorites.has(employee.id);
+                const favIcon = isFav ? 'fas fa-heart' : 'far fa-heart';
+                const favClass = isFav ? 'active' : '';
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl shadow-sm employee-card overflow-hidden p-6 animate-card';
+                card.style.animationDelay = `${index * 0.05}s`;
+                
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-start gap-5">
+                        <!-- الصورة والبيانات الأساسية -->
+                        <div class="flex items-start gap-4 flex-1">
+                            <div class="relative flex-shrink-0">
+                                <img src="${profilePhotoURL}" alt="${employee.name || 'موظف'}" 
+                                     class="w-20 h-20 rounded-2xl object-cover cursor-pointer border-2 border-gray-100 hover:border-blue-300 transition shadow-sm"
+                                     onclick="openModal('${employee.id}', 0, 'profile')" loading="lazy">
+                                ${employee.jobStatus === 'متاح للعمل' ? '<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" title="متاح للعمل"></span>' : ''}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2 flex-wrap">
+                                    <div>
+                                        <div class="flex items-center gap-2 flex-wrap mb-1">
+                                            <h3 class="font-black text-xl text-gray-900">${employee.name || 'موظف غير معروف'}</h3>
+                                            ${employee.verified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i> موثق</span>' : ''}
+                                        </div>
+                                        <p class="text-blue-600 font-bold text-sm mb-2">${employee.headline || 'بدون عنوان وظيفي'}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-3 py-1 rounded-full ${statusClass} text-xs font-bold">${employee.jobStatus || 'الحالة غير محددة'}</span>
+                                        <button class="fav-btn ${favClass}" onclick="toggleFavorite('${employee.id}', this)" title="حفظ في المفضلة">
+                                            <i class="${favIcon}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-4 text-gray-500 text-sm mt-2 flex-wrap">
+                                    <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt text-blue-400"></i> ${locationText}</span>
+                                    <span class="hidden sm:inline text-gray-300">|</span>
+                                    <span class="flex items-center gap-1"><i class="fas fa-briefcase text-blue-400"></i> ${employee.experience || 'غير محدد'}</span>
+                                    <span class="hidden sm:inline text-gray-300">|</span>
+                                    ${renderStarRating(employee.averageRating, employee.totalReviews)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 pt-4 border-t border-gray-50">
+                        <p class="text-gray-600 leading-relaxed mb-4 text-sm line-clamp-2">${employee.bio || 'لا توجد نبذة شخصية'}...</p>
+                        
+                        <div class="mb-4">
+                            <div class="flex flex-wrap gap-1">${skillsHtml}</div>
+                        </div>
+                        
+                        ${previousWorksHtml}
+                        
+                        <div class="flex flex-wrap items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                            <div class="flex items-center gap-4 text-gray-400 text-sm">
+                                <span class="flex items-center gap-1"><i class="fas fa-clock"></i> ${getTimeElapsed(employee.timestamp)}</span>
+                                ${employee.profileViews ? `<span class="flex items-center gap-1"><i class="fas fa-eye"></i> ${employee.profileViews} مشاهدة</span>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2 mt-3 sm:mt-0">
+                                <a href="profile.html?uid=${employee.id}&view=public" 
+                                   class="px-5 py-2.5 border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 text-sm font-bold transition-colors">
+                                    <i class="fas fa-user ml-1"></i> الملف
+                                </a>
+                                <a href="chat.html?employeeId=${employee.id}&employeeName=${encodeURIComponent(employee.name)}&employeePhoto=${encodeURIComponent(employee.profileImageUrl || '')}"
+                                    class="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm font-bold transition-all shadow-lg shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-0.5">
+                                    <i class="fas fa-envelope ml-1"></i> تواصل
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                employeesList.appendChild(card);
+            });
+        }
+
+        function filterAndRenderEmployees() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedState = stateFilter.value;
+            const selectedCity = cityFilter.value;
+            const selectedExp = expFilter.value;
+
+            const filteredEmployees = allEmployees.filter(employee => {
+                const employeeText = `${employee.name || ''} ${employee.headline || ''} ${employee.contact?.location?.state || ''} ${employee.contact?.location?.city || ''} ${employee.experience || ''} ${employee.skills?.join(' ') || ''} ${employee.bio || ''}`.toLowerCase();
+                const matchesSearch = !searchTerm || employeeText.includes(searchTerm);
+                const matchesState = selectedState === '' || (employee.contact?.location?.state === selectedState);
+                const matchesCity = selectedCity === '' || (employee.contact?.location?.city === selectedCity);
+                const matchesExp = selectedExp === '' || (employee.experience === selectedExp);
+                return matchesSearch && matchesState && matchesCity && matchesExp;
+            });
+
+            renderEmployees(filteredEmployees);
+        }
+
+        function updateCitiesList() {
+            const selectedState = stateFilter.value;
+            cityFilter.innerHTML = '<option value="">جميع المدن</option>';
+            cityFilter.disabled = true;
+            if (selectedState && citiesByState[selectedState]) {
+                citiesByState[selectedState].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    cityFilter.appendChild(option);
+                });
+                cityFilter.disabled = false;
+            }
+        }
+
+        function getTimeElapsed(timestamp) {
+            if (!timestamp) return 'غير محدد';
+            const now = new Date();
+            const employeeDate = new Date(timestamp.seconds * 1000);
+            const diffInSeconds = Math.floor((now - employeeDate) / 1000);
+            if (diffInSeconds < 60) return 'الآن';
+            const minutes = Math.floor(diffInSeconds / 60);
+            if (minutes < 60) return `منذ ${minutes} دقيقة`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `منذ ${hours} ساعة`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `منذ ${days} يوم`;
+            const weeks = Math.floor(days / 7);
+            if (weeks < 4) return `منذ ${weeks} أسبوع`;
+            const months = Math.floor(days / 30);
+            if (months < 12) return `منذ ${months} شهر`;
+            const years = Math.floor(days / 365);
+            return `منذ ${years} سنة`;
+        }
+
+        function openModal(employeeId, index, galleryType) {
+            const employee = allEmployees.find(emp => emp.id === employeeId);
+            if (!employee) return;
+            let images = [];
+            if (galleryType === 'profile') {
+                images.push(employee.profileImageUrl || `https://ui-avatars.com/api/?background=2563eb&color=fff&name=${encodeURIComponent(employee.name || 'مستخدم')}`);
+            } else if (galleryType === 'works') {
+                images = employee.previousWorksUrls;
+            } else return;
+            if (!images || images.length === 0) return;
+            const swiperWrapper = document.querySelector('.swiper-wrapper');
+            swiperWrapper.innerHTML = '';
+            images.forEach(url => {
+                const slide = document.createElement('div');
+                slide.className = 'swiper-slide';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'صورة مكبرة';
+                img.loading = "lazy";
+                slide.appendChild(img);
+                swiperWrapper.appendChild(slide);
+            });
+            if (swiperInstance) swiperInstance.destroy(true, true);
+            swiperInstance = new Swiper(".mySwiper", {
+                loop: false,
+                initialSlide: index,
+                keyboard: { enabled: true },
+            });
+            imageModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            history.pushState({ modalOpen: true }, '');
+        }
+
+        function closeModal() {
+            if (swiperInstance) {
+                swiperInstance.destroy(true, true);
+                swiperInstance = null;
+            }
+            imageModal.style.display = "none";
+            document.body.style.overflow = '';
+        }
+
+        window.addEventListener('popstate', () => {
+            if (imageModal.style.display === 'flex') closeModal();
+        });
+
+        // القائمة الجانبية
+        const menuButton = document.getElementById('mobile-menu-button');
+        const closeButton = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuButton.addEventListener('click', () => mobileMenu.classList.add('open'));
+        closeButton.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
+        // Auth state
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) loadFavorites();
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchEmployees);
+        searchInput.addEventListener('input', filterAndRenderEmployees);
+        stateFilter.addEventListener('change', () => { updateCitiesList(); filterAndRenderEmployees(); });
+        cityFilter.addEventListener('change', filterAndRenderEmployees);
+        expFilter.addEventListener('change', filterAndRenderEmployees);
+
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+    </script>
+</body>
+</html>
