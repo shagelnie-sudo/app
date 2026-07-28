@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملفي الشخصي - شغلني</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        body { font-family: 'Tajawal', sans-serif; overflow-x: hidden; background-color: #f5f7fa; }
+
+        .gradient-bg { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
+
+        /* ==================== الهيدر (مطابق لبقية الموقع) ==================== */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open { transform: translateX(0); }
+
+        .user-avatar-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 9999px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white; font-weight: 700; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            cursor: pointer; transition: all 0.2s ease; overflow: hidden; flex-shrink: 0;
+        }
+        .user-avatar-btn:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
+        .user-avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+
+        .user-dropdown {
+            position: absolute; top: calc(100% + 0.5rem); left: 0; width: 14rem;
+            background: white; border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e5e7eb; padding: 0.5rem 0; z-index: 50; display: none;
+        }
+        .user-dropdown.show { display: block; animation: dropdownFade 0.2s ease; }
+        @keyframes dropdownFade { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .user-dropdown-item { display: block; width: 100%; padding: 0.625rem 1rem; font-size: 0.875rem; color: #374151; transition: all 0.15s ease; text-align: right; }
+        .user-dropdown-item:hover { background-color: #eff6ff; color: #2563eb; }
+        .user-dropdown-divider { border-top: 1px solid #f3f4f6; margin: 0.25rem 0; }
+
+        /* ==================== عناصر مشتركة من الموقع ==================== */
+        .skill-tag {
+            background-color: #f3f4f6; color: #374151;
+            padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; margin: 3px;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .status-available { background-color: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .status-not-looking { background-color: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .rating-simple {
+            display: inline-flex; align-items: center; gap: 0.25rem; background: #fef3c7; color: #92400e;
+            padding: 0.25rem 0.6rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600;
+        }
+        .section-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem; background: #eff6ff; color: #2563eb;
+            padding: 0.4rem 0.9rem; border-radius: 2rem; font-weight: 600; font-size: 0.8rem; margin-bottom: 0.75rem;
+        }
+        .verified-badge {
+            display: inline-flex; align-items: center; gap: 0.35rem; background: #dbeafe; color: #1d4ed8;
+            padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;
+        }
+
+        /* ==================== بطاقات لوحة التحكم ==================== */
+        .dash-card {
+            background: white; border-radius: 1rem; border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03); padding: 1.5rem;
+        }
+
+        /* غلاف الملف الشخصي */
+        .cover-wrapper { position: relative; border-radius: 1.25rem; overflow: hidden; height: 190px; }
+        .cover-wrapper img, .cover-wrapper .cover-fallback { width: 100%; height: 100%; object-fit: cover; }
+        .cover-edit-btn {
+            position: absolute; top: 1rem; left: 1rem; background: rgba(255,255,255,0.9); color: #2563eb;
+            padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.8rem; font-weight: 700;
+            display: flex; align-items: center; gap: 0.4rem; cursor: pointer; border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all .2s;
+        }
+        .cover-edit-btn:hover { background: white; transform: translateY(-2px); }
+
+        .avatar-ring {
+            width: 128px; height: 128px; border-radius: 9999px; border: 5px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12); object-fit: cover; background: #eff6ff;
+        }
+        .avatar-edit-btn {
+            position: absolute; bottom: 4px; left: 4px; width: 34px; height: 34px; border-radius: 9999px;
+            background: #2563eb; color: white; display: flex; align-items: center; justify-content: center;
+            border: 3px solid white; cursor: pointer; font-size: 0.8rem; transition: all .2s;
+        }
+        .avatar-edit-btn:hover { background: #1d4ed8; transform: scale(1.08); }
+
+        /* شريط اكتمال الملف الشخصي */
+        .progress-track { width: 100%; height: 10px; background: #eef2f7; border-radius: 9999px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 9999px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: width .6s ease; }
+        .progress-fill.complete { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+
+        /* التبويبات */
+        #tabs-container {
+            display: flex; overflow-x: auto; gap: 0.5rem; scrollbar-width: none; scroll-snap-type: x proximity;
+        }
+        #tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            flex: 0 0 auto; scroll-snap-align: start; white-space: nowrap;
+            padding: 0.65rem 1.1rem; border-radius: 0.75rem; font-weight: 700; font-size: 0.875rem;
+            color: #6b7280; background: white; border: 1px solid #e5e7eb; transition: all .2s; cursor: pointer;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .tab-btn i { font-size: 0.85rem; }
+        .tab-btn:hover { color: #2563eb; border-color: #bfdbfe; }
+        .tab-btn.active { background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 6px 12px rgba(37,99,235,0.25); }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeInPanel .3s ease; }
+        @keyframes fadeInPanel { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* رأس القسم القابل للتعديل */
+        .section-head {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;
+        }
+        .section-edit-btn {
+            width: 34px; height: 34px; border-radius: 0.6rem; background: #eff6ff; color: #2563eb;
+            display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: all .2s;
+        }
+        .section-edit-btn:hover { background: #2563eb; color: white; }
+
+        .field-input, .field-select, .field-textarea {
+            width: 100%; padding: 0.6rem 0.9rem; border: 1px solid #d1d5db; border-radius: 0.6rem;
+            font-family: 'Tajawal', sans-serif; font-size: 0.9rem; text-align: right; transition: all .15s;
+        }
+        .field-input:focus, .field-select:focus, .field-textarea:focus {
+            outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .field-label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem; }
+
+        .save-btn {
+            padding: 0.55rem 1.4rem; background: #2563eb; color: white; border-radius: 0.6rem; font-weight: 700;
+            font-size: 0.875rem; border: none; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        .save-btn:hover { background: #1d4ed8; }
+        .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .cancel-btn {
+            padding: 0.55rem 1.4rem; background: #f3f4f6; color: #4b5563; border-radius: 0.6rem; font-weight: 700;
+            font-size: 0.875rem; border: none; cursor: pointer; transition: all .2s;
+        }
+        .cancel-btn:hover { background: #e5e7eb; }
+
+        /* عناصر السجل (تعليم / خبرة / شهادات) */
+        .timeline-item { position: relative; padding-right: 1.75rem; padding-bottom: 1.5rem; border-right: 2px solid #e5e7eb; }
+        .timeline-item:last-child { border-color: transparent; padding-bottom: 0; }
+        .timeline-dot {
+            position: absolute; right: -7px; top: 2px; width: 12px; height: 12px; border-radius: 9999px;
+            background: #2563eb; border: 3px solid #dbeafe;
+        }
+        .item-remove-btn {
+            width: 28px; height: 28px; border-radius: 0.5rem; background: #fee2e2; color: #991b1b;
+            display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; flex-shrink: 0;
+        }
+        .item-remove-btn:hover { background: #fecaca; }
+        .add-item-btn {
+            width: 100%; padding: 0.7rem; border: 2px dashed #bfdbfe; border-radius: 0.75rem; background: #f8fafc;
+            color: #2563eb; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: all .2s;
+        }
+        .add-item-btn:hover { background: #eff6ff; border-color: #2563eb; }
+
+        /* مفتاح التبديل للإشعارات */
+        .toggle-switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; inset: 0; background-color: #d1d5db; transition: .3s; border-radius: 9999px;
+        }
+        .toggle-slider::before {
+            position: absolute; content: ""; height: 20px; width: 20px; right: 3px; bottom: 3px; background-color: white;
+            transition: .3s; border-radius: 9999px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .toggle-switch input:checked + .toggle-slider { background-color: #2563eb; }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(-20px); }
+
+        /* معرض الأعمال */
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .portfolio-item { position: relative; border-radius: 0.85rem; overflow: hidden; aspect-ratio: 1/1; background: #f3f4f6; }
+        .portfolio-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+        .portfolio-item:hover img { transform: scale(1.08); }
+        .portfolio-remove {
+            position: absolute; top: 6px; left: 6px; width: 26px; height: 26px; border-radius: 9999px;
+            background: rgba(239,68,68,0.9); color: white; display: flex; align-items: center; justify-content: center;
+            border: none; cursor: pointer; font-size: 0.7rem;
+        }
+
+        /* بطاقات الوظائف المصغرة */
+        .job-mini-card {
+            display: flex; align-items: center; gap: 1rem; background: white; border: 1px solid #e5e7eb;
+            border-radius: 0.9rem; padding: 1rem; transition: all .2s;
+        }
+        .job-mini-card:hover { border-color: #93c5fd; box-shadow: 0 6px 14px rgba(37,99,235,0.08); }
+        .job-mini-icon {
+            width: 48px; height: 48px; border-radius: 0.7rem; background: #eff6ff; color: #2563eb;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .status-pill { padding: 3px 10px; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; }
+        .status-pill.pending { background: #fef3c7; color: #92400e; }
+        .status-pill.accepted { background: #d1fae5; color: #065f46; }
+        .status-pill.rejected { background: #fee2e2; color: #991b1b; }
+        .status-pill.reviewing { background: #dbeafe; color: #1d4ed8; }
+
+        .empty-state { text-align: center; padding: 3rem 1rem; color: #9ca3af; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; color: #d1d5db; }
+
+        .message-container { margin-top: 0.85rem; }
+        .message {
+            text-align: center; padding: 0.75rem; border-radius: 0.6rem; display: none; font-size: 0.875rem;
+            animation: slideDown 0.3s ease-out; margin-bottom: 0.5rem;
+        }
+        .message.show { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .success-message { background-color: #dcfce7; color: #065f46; border: 1px solid #10b981; }
+        .error-message { background-color: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+
+        .loading-spinner {
+            display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #page-loader {
+            position: fixed; inset: 0; background: #f5f7fa; z-index: 200;
+            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem;
+        }
+        .big-spinner {
+            width: 48px; height: 48px; border: 4px solid #dbeafe; border-top-color: #2563eb; border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @media (max-width: 768px) {
+            .avatar-ring { width: 96px; height: 96px; }
+            .cover-wrapper { height: 130px; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- شاشة التحميل الأولية -->
+    <div id="page-loader">
+        <div class="big-spinner"></div>
+        <p class="text-gray-500 font-bold">جاري تحميل ملفك الشخصي...</p>
+    </div>
+
+    <!-- ==================== الهيدر ==================== -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="index.html"><img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain"></a>
+                <div class="hidden md:flex space-x-1 space-x-reverse mr-6">
+                    <a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
+                    <a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
+                    <a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
+                    <a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative" id="user-menu-wrapper">
+                    <button id="user-avatar-btn" class="user-avatar-btn" title="حسابي">
+                        <span id="user-initial">ش</span>
+                    </button>
+                    <div id="user-dropdown" class="user-dropdown">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <p class="text-sm font-bold text-gray-800" id="dropdown-username">زائر</p>
+                            <p class="text-xs text-gray-500 mt-0.5" id="dropdown-email">تسجيل الدخول للمتابعة</p>
+                        </div>
+                        <a href="profile.html" class="user-dropdown-item"><i class="fas fa-user ml-2 text-gray-400"></i> ملفي الشخصي</a>
+                        <div class="user-dropdown-divider"></div>
+                        <button class="user-dropdown-item text-red-600 hover:text-red-700 hover:bg-red-50" id="logout-btn">
+                            <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                        </button>
+                    </div>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 p-1"><i class="fas fa-bars text-2xl"></i></button>
+            </div>
+        </nav>
+
+        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-64 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+            <div class="flex justify-between items-center mb-8">
+                <img src="shagelnie.png.png" class="h-10">
+                <button id="close-menu" class="text-gray-500"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            <nav class="flex flex-col space-y-4">
+                <a href="index.html" class="text-gray-600 py-2 border-b border-gray-50">الرئيسية</a>
+                <a href="job_listing_page.html" class="text-gray-600 py-2 border-b border-gray-50">الوظائف</a>
+                <a href="employee_listing_page.html" class="text-gray-600 py-2 border-b border-gray-50">الموظفون</a>
+                <a href="chats.html" class="text-gray-600 py-2 border-b border-gray-50">رسائلي</a>
+                <a href="profile.html" class="text-blue-600 font-bold py-2 border-b border-gray-50">ملفي الشخصي</a>
+                <a href="jop_posting_page.html" class="text-gray-600 py-2 border-b border-gray-50">أضف وظيفة</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ==================== محتوى الصفحة ==================== -->
+    <div id="page-content" class="container mx-auto px-4 py-8 hidden">
+
+        <!-- بطاقة الغلاف والصورة الشخصية -->
+        <div class="dash-card !p-0 overflow-visible mb-6">
+            <div class="cover-wrapper">
+                <div class="cover-fallback gradient-bg" id="cover-fallback"></div>
+                <img id="cover-photo" class="hidden" alt="صورة الغلاف">
+                <button class="cover-edit-btn" id="edit-cover-btn">
+                    <i class="fas fa-camera"></i> <span>تغيير الغلاف</span>
+                </button>
+                <input type="file" id="cover-input" accept="image/*" class="hidden">
+            </div>
+
+            <div class="px-6 md:px-8 pb-6">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between -mt-14 md:-mt-16 gap-4">
+                    <div class="flex items-end gap-4">
+                        <div class="relative">
+                            <img id="profile-avatar" class="avatar-ring" src="" alt="الصورة الشخصية">
+                            <button class="avatar-edit-btn" id="edit-avatar-btn" title="تغيير الصورة"><i class="fas fa-camera"></i></button>
+                            <input type="file" id="avatar-input" accept="image/*" class="hidden">
+                        </div>
+                        <div class="pb-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h1 class="text-xl md:text-2xl font-black text-gray-900" id="display-name">—</h1>
+                                <span id="job-status-badge"></span>
+                                <span id="verified-badge-wrap"></span>
+                            </div>
+                            <p class="text-blue-600 font-bold text-sm md:text-base mt-1" id="display-headline">—</p>
+                            <div class="flex items-center gap-3 text-gray-500 text-xs md:text-sm mt-1 flex-wrap">
+                                <span id="display-location"><i class="fas fa-map-marker-alt ml-1"></i>—</span>
+                                <span id="display-rating-wrap"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="save-btn !bg-blue-50 !text-blue-600 hover:!bg-blue-600 hover:!text-white self-start md:self-auto" id="scroll-to-basic-edit">
+                        <i class="fas fa-pen"></i> تعديل البيانات الأساسية
+                    </button>
+                </div>
+
+                <!-- شريط اكتمال الملف الشخصي -->
+                <div class="mt-6 bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-gray-700 text-sm"><i class="fas fa-chart-line ml-1 text-blue-600"></i> اكتمال الملف الشخصي</span>
+                        <span class="font-black text-blue-600" id="completion-percentage">0%</span>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" id="completion-bar" style="width:0%"></div></div>
+                    <p class="text-xs text-gray-500 mt-2" id="completion-hint">أكمل بياناتك لزيادة فرصك في الحصول على عمل.</p>
+                </div>
+
+                <div class="message-container"><div id="header-message" class="message"></div></div>
+            </div>
+        </div>
+
+        <!-- التبويبات -->
+        <div id="tabs-container" class="mb-6 pb-1">
+            <button class="tab-btn active" data-tab="overview"><i class="fas fa-user"></i> نظرة عامة</button>
+            <button class="tab-btn" data-tab="skills" id="tab-btn-skills"><i class="fas fa-layer-group"></i> المهارات والخبرات</button>
+            <button class="tab-btn" data-tab="portfolio" id="tab-btn-portfolio"><i class="fas fa-briefcase"></i> معرض الأعمال</button>
+            <button class="tab-btn" data-tab="jobs" id="tab-btn-jobs"><i class="fas fa-bookmark"></i> الوظائف <span class="text-[0.65rem] opacity-70">(قريباً)</span></button>
+            <button class="tab-btn" data-tab="settings"><i class="fas fa-gear"></i> الإعدادات</button>
+        </div>
+
+        <!-- ============ تبويب: نظرة عامة ============ -->
+        <div class="tab-panel active" id="panel-overview">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="dash-card">
+                        <div class="section-head">
+                            <h2 class="text-lg font-bold text-gray-800">نبذة عني</h2>
+                            <button class="section-edit-btn" data-edit-toggle="bio-edit"><i class="fas fa-pen"></i></button>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed" id="bio-view">لم تتم إضافة نبذة بعد.</p>
+                        <div class="hidden space-y-3" id="bio-edit">
+                            <textarea class="field-textarea" id="input-bio" rows="5" placeholder="اكتب نبذة مختصرة عنك وعن خبراتك المهنية"></textarea>
+                            <div class="flex gap-2">
+                                <button class="save-btn" data-save="bio"><i class="fas fa-check"></i> حفظ</button>
+                                <button class="cancel-btn" data-cancel="bio-edit">إلغاء</button>
+                            </div>
+                            <div class="message-container"><div id="bio-message" class="message"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="dash-card">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-chart-simple ml-1 text-blue-600"></i> إحصائياتي</h2>
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div class="bg-blue-50 rounded-xl p-4">
+                                <p class="text-2xl font-black text-blue-600" id="stat-views">0</p>
+                                <p class="text-xs text-gray-500 mt-1">مشاهدة للملف</p>
+                            </div>
+                            <div class="bg-emerald-50 rounded-xl p-4">
+                                <p class="text-2xl font-black text-emerald-600" id="stat-applications">0</p>
+                                <p class="text-xs text-gray-500 mt-1">طلب توظيف</p>
+                            </div>
+                            <div class="bg-amber-50 rounded-xl p-4">
+                                <p class="text-2xl font-black text-amber-600" id="stat-offers">0</p>
+                                <p class="text-xs text-gray-500 mt-1">عرض عمل</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="dash-card">
+                        <div class="section-head">
+                            <h2 class="text-lg font-bold text-gray-800">معلومات التواصل</h2>
+                            <button class="section-edit-btn" data-edit-toggle="contact-edit"><i class="fas fa-pen"></i></button>
+                        </div>
+                        <div class="space-y-3 text-sm" id="contact-view">
+                            <div class="flex items-center gap-3 text-gray-600"><i class="fas fa-envelope w-5 text-blue-500"></i><span id="view-email">—</span></div>
+                            <div class="flex items-center gap-3 text-gray-600"><i class="fas fa-phone w-5 text-blue-500"></i><span id="view-phone">غير مضاف</span></div>
+                            <div class="flex items-center gap-3 text-gray-600"><i class="fas fa-map-marker-alt w-5 text-blue-500"></i><span id="view-full-location">غير محدد</span></div>
+                            <div class="flex items-center gap-3 text-gray-600"><i class="fab fa-linkedin w-5 text-blue-500"></i><span id="view-linkedin">غير مضاف</span></div>
+                        </div>
+                        <div class="hidden space-y-3" id="contact-edit">
+                            <div>
+                                <label class="field-label">رقم الهاتف للتواصل</label>
+                                <input type="tel" class="field-input" id="input-phone" placeholder="اختياري">
+                            </div>
+                            <div>
+                                <label class="field-label">الولاية</label>
+                                <select class="field-select" id="input-state"><option value="">اختر ولاية</option></select>
+                            </div>
+                            <div>
+                                <label class="field-label">المدينة</label>
+                                <select class="field-select" id="input-city"><option value="">اختر مدينة</option></select>
+                            </div>
+                            <div>
+                                <label class="field-label">رابط لينكد إن</label>
+                                <input type="url" class="field-input" id="input-linkedin" placeholder="https://linkedin.com/in/...">
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="save-btn" data-save="contact"><i class="fas fa-check"></i> حفظ</button>
+                                <button class="cancel-btn" data-cancel="contact-edit">إلغاء</button>
+                            </div>
+                            <div class="message-container"><div id="contact-message" class="message"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="dash-card">
+                        <div class="section-head">
+                            <h2 class="text-lg font-bold text-gray-800">حالة البحث عن عمل</h2>
+                        </div>
+                        <select class="field-select" id="input-job-status">
+                            <option value="متاح للعمل">متاح للعمل</option>
+                            <option value="لا أبحث حالياً">لا أبحث حالياً</option>
+                        </select>
+                        <div class="message-container"><div id="jobstatus-message" class="message"></div></div>
+                    </div>
+
+                    <div class="dash-card">
+                        <h2 class="text-lg font-bold text-gray-800 mb-3"><i class="fas fa-language ml-1 text-blue-600"></i> اللغات</h2>
+                        <div id="languages-view-mini" class="flex flex-wrap gap-1"></div>
+                        <p class="text-gray-400 text-sm" id="languages-view-mini-empty">لم تتم إضافة لغات بعد.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ تبويب: المهارات والخبرات ============ -->
+        <div class="tab-panel" id="panel-skills">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- المهارات -->
+                <div class="dash-card">
+                    <div class="section-head">
+                        <h2 class="text-lg font-bold text-gray-800">المهارات ومستوى الخبرة</h2>
+                        <button class="section-edit-btn" data-edit-toggle="skills-edit"><i class="fas fa-pen"></i></button>
+                    </div>
+                    <div id="skills-view">
+                        <div class="flex flex-wrap mb-3" id="skills-view-tags"></div>
+                        <p class="text-gray-600 text-sm">مستوى الخبرة: <span class="font-bold" id="experience-view">غير محدد</span></p>
+                    </div>
+                    <div class="hidden space-y-4" id="skills-edit">
+                        <div>
+                            <label class="field-label">المهارات (حتى 6 مهارات)</label>
+                            <div id="skills-input-container"></div>
+                            <p id="skills-limit-message" class="text-red-500 text-sm hidden">لا يمكنك إضافة أكثر من 6 مهارات.</p>
+                        </div>
+                        <div>
+                            <label class="field-label">مستوى الخبرة</label>
+                            <select class="field-select" id="input-experience">
+                                <option value="">اختر مستوى الخبرة</option>
+                                <option value="مبتدئ">مبتدئ (0-2 سنوات)</option>
+                                <option value="متوسط">متوسط (2-5 سنوات)</option>
+                                <option value="خبير">خبير (5+ سنوات)</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="save-btn" data-save="skills"><i class="fas fa-check"></i> حفظ</button>
+                            <button class="cancel-btn" data-cancel="skills-edit">إلغاء</button>
+                        </div>
+                        <div class="message-container"><div id="skills-message" class="message"></div></div>
+                    </div>
+                </div>
+
+                <!-- اللغات -->
+                <div class="dash-card">
+                    <div class="section-head">
+                        <h2 class="text-lg font-bold text-gray-800">اللغات</h2>
+                        <button class="section-edit-btn" data-edit-toggle="languages-edit"><i class="fas fa-pen"></i></button>
+                    </div>
+                    <div id="languages-view" class="space-y-2"></div>
+                    <p class="text-gray-400 text-sm" id="languages-view-empty">لم تتم إضافة لغات بعد.</p>
+                    <div class="hidden space-y-3" id="languages-edit">
+                        <div id="languages-input-container" class="space-y-2"></div>
+                        <button type="button" class="add-item-btn" id="add-language-btn"><i class="fas fa-plus ml-1"></i> إضافة لغة</button>
+                        <div class="flex gap-2">
+                            <button class="save-btn" data-save="languages"><i class="fas fa-check"></i> حفظ</button>
+                            <button class="cancel-btn" data-cancel="languages-edit">إلغاء</button>
+                        </div>
+                        <div class="message-container"><div id="languages-message" class="message"></div></div>
+                    </div>
+                </div>
+
+                <!-- الخبرة العملية -->
+                <div class="dash-card lg:col-span-2">
+                    <div class="section-head">
+                        <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-suitcase ml-1 text-blue-600"></i> الخبرة العملية</h2>
+                        <button class="section-edit-btn" data-edit-toggle="workexp-edit"><i class="fas fa-pen"></i></button>
+                    </div>
+                    <div id="workexp-view"></div>
+                    <p class="text-gray-400 text-sm" id="workexp-view-empty">لم تتم إضافة خبرات عملية بعد.</p>
+                    <div class="hidden space-y-3" id="workexp-edit">
+                        <div id="workexp-input-container" class="space-y-4"></div>
+                        <button type="button" class="add-item-btn" id="add-workexp-btn"><i class="fas fa-plus ml-1"></i> إضافة خبرة عملية</button>
+                        <div class="flex gap-2">
+                            <button class="save-btn" data-save="workexp"><i class="fas fa-check"></i> حفظ</button>
+                            <button class="cancel-btn" data-cancel="workexp-edit">إلغاء</button>
+                        </div>
+                        <div class="message-container"><div id="workexp-message" class="message"></div></div>
+                    </div>
+                </div>
+
+                <!-- التعليم -->
+                <div class="dash-card">
+                    <div class="section-head">
+                        <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-graduation-cap ml-1 text-blue-600"></i> التعليم</h2>
+                        <button class="section-edit-btn" data-edit-toggle="education-edit"><i class="fas fa-pen"></i></button>
+                    </div>
+                    <div id="education-view"></div>
+                    <p class="text-gray-400 text-sm" id="education-view-empty">لم تتم إضافة مؤهلات تعليمية بعد.</p>
+                    <div class="hidden space-y-3" id="education-edit">
+                        <div id="education-input-container" class="space-y-4"></div>
+                        <button type="button" class="add-item-btn" id="add-education-btn"><i class="fas fa-plus ml-1"></i> إضافة مؤهل</button>
+                        <div class="flex gap-2">
+                            <button class="save-btn" data-save="education"><i class="fas fa-check"></i> حفظ</button>
+                            <button class="cancel-btn" data-cancel="education-edit">إلغاء</button>
+                        </div>
+                        <div class="message-container"><div id="education-message" class="message"></div></div>
+                    </div>
+                </div>
+
+                <!-- الشهادات -->
+                <div class="dash-card">
+                    <div class="section-head">
+                        <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-certificate ml-1 text-blue-600"></i> الشهادات</h2>
+                        <button class="section-edit-btn" data-edit-toggle="certs-edit"><i class="fas fa-pen"></i></button>
+                    </div>
+                    <div id="certs-view"></div>
+                    <p class="text-gray-400 text-sm" id="certs-view-empty">لم تتم إضافة شهادات بعد.</p>
+                    <div class="hidden space-y-3" id="certs-edit">
+                        <div id="certs-input-container" class="space-y-4"></div>
+                        <button type="button" class="add-item-btn" id="add-cert-btn"><i class="fas fa-plus ml-1"></i> إضافة شهادة</button>
+                        <div class="flex gap-2">
+                            <button class="save-btn" data-save="certs"><i class="fas fa-check"></i> حفظ</button>
+                            <button class="cancel-btn" data-cancel="certs-edit">إلغاء</button>
+                        </div>
+                        <div class="message-container"><div id="certs-message" class="message"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ تبويب: معرض الأعمال ============ -->
+        <div class="tab-panel" id="panel-portfolio">
+            <div class="dash-card mb-6">
+                <div class="section-head">
+                    <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-images ml-1 text-blue-600"></i> صور من أعمالك السابقة</h2>
+                    <label class="section-edit-btn cursor-pointer" title="إضافة صور">
+                        <i class="fas fa-plus"></i>
+                        <input type="file" id="portfolio-input" accept="image/*" multiple class="hidden">
+                    </label>
+                </div>
+                <div class="portfolio-grid" id="portfolio-grid"></div>
+                <p class="empty-state hidden" id="portfolio-empty"><i class="far fa-image"></i><br>لم تتم إضافة أعمال بعد. أضف صوراً من أعمالك لجذب أصحاب العمل.</p>
+                <div class="message-container"><div id="portfolio-message" class="message"></div></div>
+            </div>
+
+            <div class="dash-card">
+                <div class="section-head">
+                    <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-file-lines ml-1 text-blue-600"></i> السيرة الذاتية والروابط</h2>
+                    <button class="section-edit-btn" data-edit-toggle="links-edit"><i class="fas fa-pen"></i></button>
+                </div>
+                <div id="links-view" class="space-y-3 text-sm">
+                    <div class="flex items-center gap-3 text-gray-600"><i class="fas fa-file-pdf w-5 text-red-500"></i><span id="view-cv">لا يوجد رابط سيرة ذاتية</span></div>
+                </div>
+                <div class="hidden space-y-3" id="links-edit">
+                    <div>
+                        <label class="field-label">رابط السيرة الذاتية (CV)</label>
+                        <input type="url" class="field-input" id="input-cv" placeholder="https://docs.google.com/your-cv">
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="save-btn" data-save="links"><i class="fas fa-check"></i> حفظ</button>
+                        <button class="cancel-btn" data-cancel="links-edit">إلغاء</button>
+                    </div>
+                    <div class="message-container"><div id="links-message" class="message"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ تبويب: الوظائف ============ -->
+        <div class="tab-panel" id="panel-jobs">
+            <div class="flex gap-2 mb-6 flex-wrap">
+                <button class="tab-btn active" data-subtab="saved">الوظائف المحفوظة</button>
+                <button class="tab-btn" data-subtab="applied">الوظائف المتقدم لها</button>
+                <button class="tab-btn" data-subtab="history">سجل الطلبات</button>
+            </div>
+
+            <div class="space-y-3" id="subpanel-saved">
+                <div id="saved-jobs-list" class="space-y-3"></div>
+                <div class="empty-state hidden" id="saved-jobs-empty"><i class="far fa-bookmark"></i><br>لا توجد وظائف محفوظة حالياً.<br><a href="job_listing_page.html" class="text-blue-600 font-bold hover:underline">تصفح الوظائف المتاحة</a></div>
+            </div>
+
+            <div class="space-y-3 hidden" id="subpanel-applied">
+                <div id="applied-jobs-list" class="space-y-3"></div>
+                <div class="empty-state hidden" id="applied-jobs-empty"><i class="far fa-paper-plane"></i><br>لم تتقدم لأي وظيفة بعد.<br><a href="job_listing_page.html" class="text-blue-600 font-bold hover:underline">ابدأ التقديم الآن</a></div>
+            </div>
+
+            <div class="space-y-3 hidden" id="subpanel-history">
+                <div id="history-jobs-list" class="space-y-3"></div>
+                <div class="empty-state hidden" id="history-jobs-empty"><i class="fas fa-clock-rotate-left"></i><br>لا يوجد سجل طلبات بعد.</div>
+            </div>
+        </div>
+
+        <!-- ============ تبويب: الإعدادات ============ -->
+        <div class="tab-panel" id="panel-settings">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="dash-card">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-id-card ml-1 text-blue-600"></i> بيانات الحساب</h2>
+                    <div class="space-y-4" id="basic-edit-anchor">
+                        <div>
+                            <label class="field-label">الاسم الكامل</label>
+                            <input type="text" class="field-input" id="input-name" placeholder="الاسم الثلاثي أو الرباعي">
+                        </div>
+                        <div>
+                            <label class="field-label">العنوان الاحترافي</label>
+                            <input type="text" class="field-input" id="input-headline" placeholder="مثال: مصمم واجهات مستخدم">
+                        </div>
+                        <div>
+                            <label class="field-label">البريد الإلكتروني</label>
+                            <input type="email" class="field-input bg-gray-100" id="input-email-readonly" disabled>
+                        </div>
+                        <button class="save-btn" id="save-basic-btn"><i class="fas fa-check"></i> حفظ التغييرات</button>
+                        <div class="message-container"><div id="basic-message" class="message"></div></div>
+                    </div>
+                </div>
+
+                <div class="dash-card">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-lock ml-1 text-blue-600"></i> الأمان وكلمة المرور</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="field-label">كلمة المرور الحالية</label>
+                            <input type="password" class="field-input" id="input-current-password">
+                        </div>
+                        <div>
+                            <label class="field-label">كلمة المرور الجديدة</label>
+                            <input type="password" class="field-input" id="input-new-password">
+                        </div>
+                        <div>
+                            <label class="field-label">تأكيد كلمة المرور الجديدة</label>
+                            <input type="password" class="field-input" id="input-confirm-password">
+                        </div>
+                        <button class="save-btn" id="save-password-btn"><i class="fas fa-key"></i> تحديث كلمة المرور</button>
+                        <div class="message-container"><div id="password-message" class="message"></div></div>
+                    </div>
+                </div>
+
+                <div class="dash-card lg:col-span-2">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-bell ml-1 text-blue-600"></i> إعدادات الإشعارات</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                            <div>
+                                <p class="font-bold text-gray-700 text-sm">إشعارات البريد الإلكتروني</p>
+                                <p class="text-xs text-gray-400">استلام تحديثات مهمة عبر البريد الإلكتروني</p>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" id="notif-email" checked><span class="toggle-slider"></span></label>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                            <div>
+                                <p class="font-bold text-gray-700 text-sm">تنبيهات الوظائف الجديدة</p>
+                                <p class="text-xs text-gray-400">تنبيه عند نشر وظائف تطابق مهاراتك</p>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" id="notif-jobalerts" checked><span class="toggle-slider"></span></label>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                            <div>
+                                <p class="font-bold text-gray-700 text-sm">إشعارات الرسائل</p>
+                                <p class="text-xs text-gray-400">تنبيه عند استلام رسالة جديدة</p>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" id="notif-messages" checked><span class="toggle-slider"></span></label>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <div>
+                                <p class="font-bold text-gray-700 text-sm">تحديثات طلبات التوظيف</p>
+                                <p class="text-xs text-gray-400">تنبيه عند تغيير حالة أحد طلباتك</p>
+                            </div>
+                            <label class="toggle-switch"><input type="checkbox" id="notif-applications" checked><span class="toggle-slider"></span></label>
+                        </div>
+                        <button class="save-btn" id="save-notifications-btn"><i class="fas fa-check"></i> حفظ الإعدادات</button>
+                        <div class="message-container"><div id="notifications-message" class="message"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- حالة عدم تسجيل الدخول -->
+    <div id="not-logged-in" class="hidden container mx-auto px-4 py-24 text-center">
+        <i class="fas fa-user-lock text-5xl text-gray-300 mb-4"></i>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">يجب تسجيل الدخول أولاً</h2>
+        <p class="text-gray-500 mb-6">سجّل دخولك لعرض ملفك الشخصي وإدارة بياناتك.</p>
+        <a href="login.html" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">تسجيل الدخول</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import {
+            getAuth, onAuthStateChanged, signOut, updateProfile,
+            EmailAuthProvider, reauthenticateWithCredential, updatePassword
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+        // نفس إعدادات Firebase المستخدمة في بقية صفحات الموقع
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+            authDomain: "shaglni-c64c0.firebaseapp.com",
+            projectId: "shaglni-c64c0",
+            storageBucket: "shaglni-c64c0.firebasestorage.app",
+            messagingSenderId: "768887356636",
+            appId: "1:768887356636:web:11ec1d6991add3309c8819",
+            measurementId: "G-98GQGZS09W"
+        };
+
+        // --- إعدادات Cloudinary (تُستخدم لرفع كل الصور: الغلاف، الصورة الشخصية، معرض الأعمال) ---
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dbmjg23hl/image/upload";
+        const CLOUDINARY_UPLOAD_PRESET = "Companies_emploies";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let userRole = 'employee';       // 'employee' أو 'employer'
+        let userCollection = 'employees'; // employees أو All_jops
+        let profileData = {};             // نسخة محلية من بيانات المستند الحالي
+
+        // مجموعتا "jobs" و "applications" غير موجودتين بعد في قاعدة بياناتك (صفحة الوظائف لم تُبنَ بعد).
+        // لذلك لا نحاول القراءة منهما الآن - هذا هو سبب خطأ "Missing or insufficient permissions" السابق.
+        // بمجرد أن تُنشئ صفحة الوظائف وتضيف المجموعتين + قواعد الأمان المناسبة في Firebase،
+        // غيّر القيمة التالية إلى true وسيعمل قسم "الوظائف" (المحفوظة/المتقدم لها/السجل) تلقائياً.
+        const JOBS_FEATURE_ENABLED = false;
+
+        const sudanStates = ["الخرطوم","الجزيرة","البحر الأحمر","كسلا","القضارف","سنار","النيل الأبيض","النيل الأزرق","الشمالية","نهر النيل","شمال كردفان","جنوب كردفان","غرب كردفان","شمال دارفور","جنوب دارفور","غرب دارفور","وسط دارفور","شرق دارفور"];
+        const citiesByState = {
+            'الخرطوم': ['الخرطوم', 'أم درمان', 'بحري'],
+            'الجزيرة': ['ود مدني', 'الحصاحيصا', 'المناقل'],
+            'البحر الأحمر': ['بورتسودان', 'سواكن', 'طوكر'],
+            'كسلا': ['كسلا', 'حلفا الجديدة', 'أروما'],
+            'القضارف': ['القضارف', 'القلابات', 'الفو'],
+            'سنار': ['سنار', 'الدالي والمزموم', 'ود النيل'],
+            'النيل الأبيض': ['ربك', 'كوستي', 'الدويم'],
+            'النيل الأزرق': ['الدمازين', 'الروصيرص', 'الكرمك'],
+            'الشمالية': ['دنقلا', 'عطبرة', 'كريمة'],
+            'نهر النيل': ['الدامر', 'شندي', 'عطبرة'],
+            'شمال كردفان': ['الأبيض', 'أم روابة', 'الرهد'],
+            'جنوب كردفان': ['كادقلي', 'أبو جبيهة', 'تلودي'],
+            'غرب كردفان': ['الفولة', 'النهود', 'المجلد'],
+            'شمال دارفور': ['الفاشر', 'كبكابية', 'مليط'],
+            'جنوب دارفور': ['نيالا', 'الضعين', 'برام'],
+            'غرب دارفور': ['الجنينة', 'كرينك', 'كلبس'],
+            'وسط دارفور': ['زالنجي', 'ودعة', 'أم دخن'],
+            'شرق دارفور': ['الضعين', 'عديلة', 'أبوكارنكا']
+        };
+
+        // ==================== الهيدر: القائمة الجانبية وقائمة المستخدم ====================
+        const menuButton = document.getElementById('mobile-menu-button');
+        const closeButton = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuButton.addEventListener('click', () => mobileMenu.classList.add('open'));
+        closeButton.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
+        const userAvatarBtn = document.getElementById('user-avatar-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        userAvatarBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
+        document.addEventListener('click', (e) => {
+            if (!userAvatarBtn.contains(e.target) && !userDropdown.contains(e.target)) userDropdown.classList.remove('show');
+        });
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = 'index.html'; });
+        });
+
+        // ==================== أدوات مساعدة عامة ====================
+        let messageTimeouts = {};
+        function showMessage(elementId, msg, type) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            if (messageTimeouts[elementId]) clearTimeout(messageTimeouts[elementId]);
+            element.className = 'message';
+            void element.offsetWidth;
+            element.textContent = msg;
+            element.classList.add('show', `${type}-message`);
+            messageTimeouts[elementId] = setTimeout(() => {
+                element.classList.remove('show');
+                setTimeout(() => { element.className = 'message'; }, 300);
+            }, type === 'error' ? 6000 : 4000);
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+
+        function toggleEdit(sectionId, show) {
+            const viewId = sectionId.replace('-edit', '-view');
+            const editEl = document.getElementById(sectionId);
+            const viewEl = document.getElementById(viewId);
+            if (editEl) editEl.classList.toggle('hidden', !show);
+            if (viewEl) viewEl.classList.toggle('hidden', show);
+        }
+
+        document.querySelectorAll('[data-edit-toggle]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-edit-toggle');
+                populateEditForm(target);
+                toggleEdit(target, true);
+            });
+        });
+        document.querySelectorAll('[data-cancel]').forEach(btn => {
+            btn.addEventListener('click', () => toggleEdit(btn.getAttribute('data-cancel'), false));
+        });
+
+        // ==================== التبويبات الرئيسية ====================
+        document.querySelectorAll('#tabs-container .tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+        document.getElementById('scroll-to-basic-edit').addEventListener('click', () => {
+            document.querySelectorAll('#tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-tab="settings"]').classList.add('active');
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-settings').classList.add('active');
+            document.getElementById('basic-edit-anchor').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // تبويبات فرعية للوظائف (محفوظة / متقدم لها / سجل)
+        document.querySelectorAll('#panel-jobs [data-subtab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#panel-jobs [data-subtab]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                ['saved', 'applied', 'history'].forEach(key => {
+                    document.getElementById('subpanel-' + key).classList.toggle('hidden', key !== btn.dataset.subtab);
+                });
+            });
+        });
+
+        // ==================== الولاية / المدينة في نموذج التواصل ====================
+        const stateSelect = document.getElementById('input-state');
+        const citySelect = document.getElementById('input-city');
+        sudanStates.forEach(s => {
+            const opt = document.createElement('option'); opt.value = s; opt.textContent = s;
+            stateSelect.appendChild(opt);
+        });
+        stateSelect.addEventListener('change', () => {
+            citySelect.innerHTML = '<option value="">اختر مدينة</option>';
+            const cities = citiesByState[stateSelect.value] || [];
+            cities.forEach(c => {
+                const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+                citySelect.appendChild(opt);
+            });
+        });
+
+        // ==================== حساب اكتمال الملف الشخصي ====================
+        function calcCompletion(data) {
+            let score = 30;
+            if (data.profileImageUrl) score += 12;
+            if (data.coverPhotoUrl) score += 5;
+            if (Array.isArray(data.previousWorksUrls) && data.previousWorksUrls.length >= 5) score += 15;
+            else if (Array.isArray(data.previousWorksUrls) && data.previousWorksUrls.length > 0) score += 8;
+            if (Array.isArray(data.skills) && data.skills.length > 0) score += 8;
+            if (data.bio) score += 8;
+            if (data.experience) score += 5;
+            if (Array.isArray(data.education) && data.education.length > 0) score += 5;
+            if (Array.isArray(data.workExperience) && data.workExperience.length > 0) score += 5;
+            if (Array.isArray(data.languages) && data.languages.length > 0) score += 3;
+            if (data.links?.cv) score += 2;
+            if (data.contact?.location?.city) score += 2;
+            return Math.min(score, 100);
+        }
+
+        // ==================== تحميل بيانات المستخدم ====================
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                document.getElementById('page-loader').classList.add('hidden');
+                document.getElementById('not-logged-in').classList.remove('hidden');
+                return;
+            }
+            currentUser = user;
+            document.getElementById('dropdown-username').textContent = user.displayName || user.email.split('@')[0];
+            document.getElementById('dropdown-email').textContent = user.email;
+
+            try {
+                let snap = await getDoc(doc(db, 'employees', user.uid));
+                if (snap.exists()) {
+                    userRole = 'employee'; userCollection = 'employees';
+                } else {
+                    snap = await getDoc(doc(db, 'All_jops', user.uid));
+                    if (snap.exists()) { userRole = 'employer'; userCollection = 'All_jops'; }
+                }
+
+                if (!snap.exists()) {
+                    // لا يوجد مستند بعد - نبني ملفاً أولياً بسيطاً من بيانات الحساب
+                    profileData = { uid: user.uid, name: user.displayName || 'مستخدم جديد', email: user.email, role: 'employee' };
+                    userCollection = 'employees';
+                } else {
+                    profileData = snap.data();
+                }
+
+                renderAll();
+                await loadJobsData();
+                document.getElementById('page-loader').classList.add('hidden');
+                document.getElementById('page-content').classList.remove('hidden');
+            } catch (err) {
+                console.error('خطأ في تحميل الملف الشخصي:', err);
+                document.getElementById('page-loader').classList.add('hidden');
+                document.getElementById('page-content').classList.remove('hidden');
+                showMessage('header-message', 'حدث خطأ أثناء تحميل بيانات ملفك الشخصي.', 'error');
+            }
+        });
+
+        // إخفاء تبويبات خاصة بالموظفين إن كان الحساب صاحب عمل
+        function adjustTabsForRole() {
+            if (userRole === 'employer') {
+                document.getElementById('tab-btn-skills').style.display = 'none';
+            }
+        }
+
+        // ==================== عرض جميع البيانات ====================
+        function renderAll() {
+            adjustTabsForRole();
+            renderHeader();
+            renderOverview();
+            renderSkillsPanel();
+            renderPortfolio();
+            renderSettingsDefaults();
+        }
+
+        function renderHeader() {
+            const name = profileData.name || currentUser.displayName || 'مستخدم';
+            document.getElementById('display-name').textContent = name;
+            document.getElementById('user-initial').textContent = name.charAt(0).toUpperCase();
+
+            const headlineOrCompany = userRole === 'employer'
+                ? (profileData.companyInfo?.businessType || 'صاحب عمل')
+                : (profileData.headline || 'مبدع مستقل');
+            document.getElementById('display-headline').textContent = headlineOrCompany;
+
+            const city = userRole === 'employer' ? profileData.companyInfo?.location?.city : profileData.contact?.location?.city;
+            const state = userRole === 'employer' ? profileData.companyInfo?.location?.state : profileData.contact?.location?.state;
+            document.getElementById('display-location').innerHTML =
+                `<i class="fas fa-map-marker-alt ml-1"></i>${(city && state) ? city + '، ' + state : 'الموقع غير محدد'}`;
+
+            const avatarUrl = userRole === 'employer' ? profileData.companyInfo?.logoUrl : profileData.profileImageUrl;
+            const avatarImg = document.getElementById('profile-avatar');
+            avatarImg.src = avatarUrl || 'https://ui-avatars.com/api/?background=2563eb&color=fff&name=' + encodeURIComponent(name);
+
+            const coverUrl = profileData.coverPhotoUrl;
+            const coverImg = document.getElementById('cover-photo');
+            const coverFallback = document.getElementById('cover-fallback');
+            if (coverUrl) {
+                coverImg.src = coverUrl; coverImg.classList.remove('hidden'); coverFallback.classList.add('hidden');
+            } else {
+                coverImg.classList.add('hidden'); coverFallback.classList.remove('hidden');
+            }
+
+            const statusBadge = document.getElementById('job-status-badge');
+            if (userRole === 'employee') {
+                const status = profileData.jobStatus || 'متاح للعمل';
+                statusBadge.innerHTML = `<span class="${status === 'متاح للعمل' ? 'status-available' : 'status-not-looking'}">${status}</span>`;
+            } else {
+                statusBadge.innerHTML = '';
+            }
+
+            const verifiedWrap = document.getElementById('verified-badge-wrap');
+            if (userRole === 'employer' && profileData.verification?.isVerified) {
+                verifiedWrap.innerHTML = '<span class="verified-badge"><i class="fas fa-badge-check"></i> شركة موثقة</span>';
+            } else { verifiedWrap.innerHTML = ''; }
+
+            const ratingWrap = document.getElementById('display-rating-wrap');
+            if (profileData.averageRating) {
+                ratingWrap.innerHTML = `<span class="rating-simple"><i class="fas fa-star text-amber-500"></i> ${parseFloat(profileData.averageRating).toFixed(1)}</span>`;
+            } else { ratingWrap.innerHTML = ''; }
+
+            const pct = calcCompletion(profileData);
+            document.getElementById('completion-percentage').textContent = pct + '%';
+            const bar = document.getElementById('completion-bar');
+            bar.style.width = pct + '%';
+            bar.classList.toggle('complete', pct >= 100);
+            document.getElementById('completion-hint').textContent = pct >= 100
+                ? 'رائع! ملفك الشخصي مكتمل بالكامل.'
+                : 'أكمل بياناتك (المهارات، الصور، النبذة الشخصية) لزيادة فرصك في الحصول على عمل.';
+
+            document.getElementById('input-name').value = profileData.name || '';
+            document.getElementById('input-headline').value = profileData.headline || '';
+            document.getElementById('input-email-readonly').value = currentUser.email || '';
+            document.getElementById('input-job-status').value = profileData.jobStatus || 'متاح للعمل';
+
+            document.getElementById('stat-views').textContent = profileData.profileViews || 0;
+            document.getElementById('stat-applications').textContent = profileData.applications || 0;
+            document.getElementById('stat-offers').textContent = profileData.jobOffers || 0;
+        }
+
+        function renderOverview() {
+            document.getElementById('bio-view').textContent = profileData.bio || 'لم تتم إضافة نبذة بعد.';
+            document.getElementById('view-email').textContent = currentUser.email || '—';
+            document.getElementById('view-phone').textContent = profileData.contact?.phone || profileData.companyInfo?.phone || 'غير مضاف';
+            const loc = userRole === 'employer' ? profileData.companyInfo?.location : profileData.contact?.location;
+            document.getElementById('view-full-location').textContent = (loc?.city || loc?.state) ? [loc.city, loc.state].filter(Boolean).join('، ') : 'غير محدد';
+            document.getElementById('view-linkedin').textContent = profileData.links?.linkedin || 'غير مضاف';
+
+            const langMiniWrap = document.getElementById('languages-view-mini');
+            const langs = profileData.languages || [];
+            langMiniWrap.innerHTML = langs.map(l => `<span class="skill-tag">${escapeHtml(l.name)} · ${escapeHtml(l.level)}</span>`).join('');
+            document.getElementById('languages-view-mini-empty').classList.toggle('hidden', langs.length > 0);
+        }
+
+        function renderSkillsPanel() {
+            const tagsWrap = document.getElementById('skills-view-tags');
+            const skills = profileData.skills || [];
+            tagsWrap.innerHTML = skills.length ? skills.map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('')
+                : '<p class="text-gray-400 text-sm">لم تتم إضافة مهارات بعد.</p>';
+            document.getElementById('experience-view').textContent = profileData.experience || 'غير محدد';
+
+            renderRepeatableView('languages-view', 'languages-view-empty', profileData.languages, (item) => `
+                <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                    <span class="font-bold text-gray-700 text-sm">${escapeHtml(item.name)}</span>
+                    <span class="skill-tag !m-0">${escapeHtml(item.level)}</span>
+                </div>`);
+
+            renderRepeatableView('workexp-view', 'workexp-view-empty', profileData.workExperience, (item) => `
+                <div class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <p class="font-bold text-gray-800">${escapeHtml(item.title)}</p>
+                    <p class="text-blue-600 text-sm font-medium">${escapeHtml(item.company)}</p>
+                    <p class="text-gray-400 text-xs mb-1">${escapeHtml(item.duration)}</p>
+                    <p class="text-gray-600 text-sm">${escapeHtml(item.description)}</p>
+                </div>`, true);
+
+            renderRepeatableView('education-view', 'education-view-empty', profileData.education, (item) => `
+                <div class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <p class="font-bold text-gray-800">${escapeHtml(item.degree)}</p>
+                    <p class="text-blue-600 text-sm font-medium">${escapeHtml(item.institution)}</p>
+                    <p class="text-gray-400 text-xs">${escapeHtml(item.year)}</p>
+                </div>`, true);
+
+            renderRepeatableView('certs-view', 'certs-view-empty', profileData.certifications, (item) => `
+                <div class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <p class="font-bold text-gray-800">${escapeHtml(item.name)}</p>
+                    <p class="text-blue-600 text-sm font-medium">${escapeHtml(item.issuer)} · ${escapeHtml(item.year)}</p>
+                    ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" class="text-xs text-gray-500 hover:text-blue-600"><i class="fas fa-link ml-1"></i>عرض الشهادة</a>` : ''}
+                </div>`, true);
+        }
+
+        function renderRepeatableView(viewId, emptyId, items, templateFn, isTimeline) {
+            const wrap = document.getElementById(viewId);
+            const empty = document.getElementById(emptyId);
+            const list = Array.isArray(items) ? items : [];
+            empty.classList.toggle('hidden', list.length > 0);
+            wrap.innerHTML = list.map(templateFn).join('');
+        }
+
+        function renderPortfolio() {
+            const grid = document.getElementById('portfolio-grid');
+            const works = profileData.previousWorksUrls || [];
+            document.getElementById('portfolio-empty').classList.toggle('hidden', works.length > 0);
+            grid.innerHTML = works.map((url, i) => `
+                <div class="portfolio-item">
+                    <img src="${url}" loading="lazy" alt="عمل سابق">
+                    <button class="portfolio-remove" data-remove-work="${i}" title="حذف"><i class="fas fa-times"></i></button>
+                </div>`).join('');
+            grid.querySelectorAll('[data-remove-work]').forEach(btn => {
+                btn.addEventListener('click', () => removePortfolioImage(parseInt(btn.dataset.removeWork)));
+            });
+            document.getElementById('view-cv').textContent = profileData.links?.cv ? 'سيرة ذاتية مرفوعة' : 'لا يوجد رابط سيرة ذاتية';
+            if (profileData.links?.cv) {
+                document.getElementById('view-cv').innerHTML = `<a href="${escapeHtml(profileData.links.cv)}" target="_blank" class="text-blue-600 hover:underline font-bold">عرض السيرة الذاتية</a>`;
+            }
+        }
+
+        function renderSettingsDefaults() {
+            const n = profileData.notificationSettings || {};
+            document.getElementById('notif-email').checked = n.emailNotifications !== false;
+            document.getElementById('notif-jobalerts').checked = n.jobAlerts !== false;
+            document.getElementById('notif-messages').checked = n.messageNotifications !== false;
+            document.getElementById('notif-applications').checked = n.applicationUpdates !== false;
+        }
+
+        // ==================== تعبئة نماذج التعديل عند فتحها ====================
+        function populateEditForm(sectionId) {
+            if (sectionId === 'bio-edit') {
+                document.getElementById('input-bio').value = profileData.bio || '';
+            }
+            if (sectionId === 'contact-edit') {
+                document.getElementById('input-phone').value = profileData.contact?.phone || '';
+                document.getElementById('input-linkedin').value = profileData.links?.linkedin || '';
+                const loc = profileData.contact?.location || {};
+                stateSelect.value = loc.state || '';
+                citySelect.innerHTML = '<option value="">اختر مدينة</option>';
+                (citiesByState[loc.state] || []).forEach(c => {
+                    const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+                    citySelect.appendChild(opt);
+                });
+                citySelect.value = loc.city || '';
+            }
+            if (sectionId === 'skills-edit') {
+                const container = document.getElementById('skills-input-container');
+                container.innerHTML = '';
+                const skills = (profileData.skills && profileData.skills.length) ? profileData.skills : [''];
+                skills.forEach(s => addSkillInputRow(s));
+                document.getElementById('input-experience').value = profileData.experience || '';
+            }
+            if (sectionId === 'languages-edit') {
+                const container = document.getElementById('languages-input-container');
+                container.innerHTML = '';
+                const langs = (profileData.languages && profileData.languages.length) ? profileData.languages : [{ name: '', level: 'متوسط' }];
+                langs.forEach(l => addLanguageRow(l));
+            }
+            if (sectionId === 'workexp-edit') {
+                const container = document.getElementById('workexp-input-container');
+                container.innerHTML = '';
+                const items = (profileData.workExperience && profileData.workExperience.length) ? profileData.workExperience : [{}];
+                items.forEach(it => addWorkExpRow(it));
+            }
+            if (sectionId === 'education-edit') {
+                const container = document.getElementById('education-input-container');
+                container.innerHTML = '';
+                const items = (profileData.education && profileData.education.length) ? profileData.education : [{}];
+                items.forEach(it => addEducationRow(it));
+            }
+            if (sectionId === 'certs-edit') {
+                const container = document.getElementById('certs-input-container');
+                container.innerHTML = '';
+                const items = (profileData.certifications && profileData.certifications.length) ? profileData.certifications : [{}];
+                items.forEach(it => addCertRow(it));
+            }
+            if (sectionId === 'links-edit') {
+                document.getElementById('input-cv').value = profileData.links?.cv || '';
+            }
+        }
+
+        // ---- صفوف المهارات (تعيد استخدام نمط الإضافة/الحذف من صفحة التسجيل) ----
+        function addSkillInputRow(value) {
+            const container = document.getElementById('skills-input-container');
+            if (container.children.length >= 6) {
+                document.getElementById('skills-limit-message').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('skills-limit-message').classList.add('hidden');
+            const row = document.createElement('div');
+            row.className = 'mb-2 flex items-center gap-2';
+            row.innerHTML = `
+                <input type="text" class="field-input skill-input" placeholder="مثال: React.js" value="${escapeHtml(value || '')}">
+                <button type="button" class="item-remove-btn remove-skill-row"><i class="fas fa-minus"></i></button>`;
+            row.querySelector('.remove-skill-row').addEventListener('click', () => {
+                row.remove();
+                document.getElementById('skills-limit-message').classList.add('hidden');
+            });
+            container.appendChild(row);
+        }
+        // زر إضافة مهارة إضافي أسفل القائمة
+        (function addSkillAdderButton() {
+            const wrap = document.getElementById('skills-input-container');
+            const btn = document.createElement('button');
+            btn.type = 'button'; btn.className = 'add-item-btn mt-1'; btn.innerHTML = '<i class="fas fa-plus ml-1"></i> إضافة مهارة';
+            btn.addEventListener('click', () => addSkillInputRow(''));
+            wrap.parentElement.insertBefore(btn, wrap.nextSibling);
+        })();
+
+        function addLanguageRow(item = {}) {
+            const container = document.getElementById('languages-input-container');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2';
+            row.innerHTML = `
+                <input type="text" class="field-input lang-name" placeholder="اللغة (مثال: العربية)" value="${escapeHtml(item.name || '')}">
+                <select class="field-select lang-level" style="max-width:140px">
+                    <option value="مبتدئ">مبتدئ</option>
+                    <option value="متوسط">متوسط</option>
+                    <option value="متقدم">متقدم</option>
+                    <option value="لغة أم">لغة أم</option>
+                </select>
+                <button type="button" class="item-remove-btn remove-row"><i class="fas fa-minus"></i></button>`;
+            row.querySelector('.lang-level').value = item.level || 'متوسط';
+            row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+            container.appendChild(row);
+        }
+        document.getElementById('add-language-btn').addEventListener('click', () => addLanguageRow());
+
+        function addWorkExpRow(item = {}) {
+            const container = document.getElementById('workexp-input-container');
+            const row = document.createElement('div');
+            row.className = 'border border-gray-200 rounded-xl p-4 space-y-2 relative';
+            row.innerHTML = `
+                <div class="flex justify-end"><button type="button" class="item-remove-btn remove-row"><i class="fas fa-trash"></i></button></div>
+                <input type="text" class="field-input we-title" placeholder="المسمى الوظيفي" value="${escapeHtml(item.title || '')}">
+                <input type="text" class="field-input we-company" placeholder="اسم الشركة / الجهة" value="${escapeHtml(item.company || '')}">
+                <input type="text" class="field-input we-duration" placeholder="المدة (مثال: 2022 - حتى الآن)" value="${escapeHtml(item.duration || '')}">
+                <textarea class="field-textarea we-description" rows="2" placeholder="وصف مختصر للمهام والإنجازات">${escapeHtml(item.description || '')}</textarea>`;
+            row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+            container.appendChild(row);
+        }
+        document.getElementById('add-workexp-btn').addEventListener('click', () => addWorkExpRow());
+
+        function addEducationRow(item = {}) {
+            const container = document.getElementById('education-input-container');
+            const row = document.createElement('div');
+            row.className = 'border border-gray-200 rounded-xl p-4 space-y-2';
+            row.innerHTML = `
+                <div class="flex justify-end"><button type="button" class="item-remove-btn remove-row"><i class="fas fa-trash"></i></button></div>
+                <input type="text" class="field-input ed-degree" placeholder="الدرجة العلمية / التخصص" value="${escapeHtml(item.degree || '')}">
+                <input type="text" class="field-input ed-institution" placeholder="اسم الجامعة / المعهد" value="${escapeHtml(item.institution || '')}">
+                <input type="text" class="field-input ed-year" placeholder="سنة التخرج" value="${escapeHtml(item.year || '')}">`;
+            row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+            container.appendChild(row);
+        }
+        document.getElementById('add-education-btn').addEventListener('click', () => addEducationRow());
+
+        function addCertRow(item = {}) {
+            const container = document.getElementById('certs-input-container');
+            const row = document.createElement('div');
+            row.className = 'border border-gray-200 rounded-xl p-4 space-y-2';
+            row.innerHTML = `
+                <div class="flex justify-end"><button type="button" class="item-remove-btn remove-row"><i class="fas fa-trash"></i></button></div>
+                <input type="text" class="field-input cert-name" placeholder="اسم الشهادة" value="${escapeHtml(item.name || '')}">
+                <input type="text" class="field-input cert-issuer" placeholder="الجهة المانحة" value="${escapeHtml(item.issuer || '')}">
+                <input type="text" class="field-input cert-year" placeholder="سنة الحصول عليها" value="${escapeHtml(item.year || '')}">
+                <input type="url" class="field-input cert-url" placeholder="رابط الشهادة (اختياري)" value="${escapeHtml(item.url || '')}">`;
+            row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+            container.appendChild(row);
+        }
+        document.getElementById('add-cert-btn').addEventListener('click', () => addCertRow());
+
+        // ==================== حفظ التعديلات في Firestore ====================
+        async function saveField(updates, msgElId, sectionToClose) {
+            try {
+                await updateDoc(doc(db, userCollection, currentUser.uid), { ...updates, updatedAt: new Date() });
+                Object.assign(profileData, updates);
+                renderAll();
+                showMessage(msgElId, 'تم الحفظ بنجاح.', 'success');
+                if (sectionToClose) setTimeout(() => toggleEdit(sectionToClose, false), 700);
+            } catch (err) {
+                console.error(err);
+                showMessage(msgElId, 'حدث خطأ أثناء الحفظ. حاول مرة أخرى.', 'error');
+            }
+        }
+
+        document.querySelector('[data-save="bio"]').addEventListener('click', () => {
+            saveField({ bio: document.getElementById('input-bio').value.trim() }, 'bio-message', 'bio-edit');
+        });
+
+        document.querySelector('[data-save="contact"]').addEventListener('click', () => {
+            saveField({
+                contact: {
+                    phone: document.getElementById('input-phone').value.trim(),
+                    location: { state: stateSelect.value, city: citySelect.value, area: profileData.contact?.location?.area || null }
+                },
+                links: { ...(profileData.links || {}), linkedin: document.getElementById('input-linkedin').value.trim() }
+            }, 'contact-message', 'contact-edit');
+        });
+
+        document.getElementById('input-job-status').addEventListener('change', (e) => {
+            saveField({ jobStatus: e.target.value }, 'jobstatus-message', null);
+        });
+
+        document.querySelector('[data-save="skills"]').addEventListener('click', () => {
+            const skills = Array.from(document.querySelectorAll('#skills-input-container .skill-input'))
+                .map(i => i.value.trim()).filter(Boolean);
+            saveField({ skills, experience: document.getElementById('input-experience').value }, 'skills-message', 'skills-edit');
+        });
+
+        document.querySelector('[data-save="languages"]').addEventListener('click', () => {
+            const languages = Array.from(document.querySelectorAll('#languages-input-container > div')).map(row => ({
+                name: row.querySelector('.lang-name').value.trim(),
+                level: row.querySelector('.lang-level').value
+            })).filter(l => l.name);
+            saveField({ languages }, 'languages-message', 'languages-edit');
+        });
+
+        document.querySelector('[data-save="workexp"]').addEventListener('click', () => {
+            const workExperience = Array.from(document.querySelectorAll('#workexp-input-container > div')).map(row => ({
+                title: row.querySelector('.we-title').value.trim(),
+                company: row.querySelector('.we-company').value.trim(),
+                duration: row.querySelector('.we-duration').value.trim(),
+                description: row.querySelector('.we-description').value.trim()
+            })).filter(w => w.title || w.company);
+            saveField({ workExperience }, 'workexp-message', 'workexp-edit');
+        });
+
+        document.querySelector('[data-save="education"]').addEventListener('click', () => {
+            const education = Array.from(document.querySelectorAll('#education-input-container > div')).map(row => ({
+                degree: row.querySelector('.ed-degree').value.trim(),
+                institution: row.querySelector('.ed-institution').value.trim(),
+                year: row.querySelector('.ed-year').value.trim()
+            })).filter(e => e.degree || e.institution);
+            saveField({ education }, 'education-message', 'education-edit');
+        });
+
+        document.querySelector('[data-save="certs"]').addEventListener('click', () => {
+            const certifications = Array.from(document.querySelectorAll('#certs-input-container > div')).map(row => ({
+                name: row.querySelector('.cert-name').value.trim(),
+                issuer: row.querySelector('.cert-issuer').value.trim(),
+                year: row.querySelector('.cert-year').value.trim(),
+                url: row.querySelector('.cert-url').value.trim()
+            })).filter(c => c.name);
+            saveField({ certifications }, 'certs-message', 'certs-edit');
+        });
+
+        document.querySelector('[data-save="links"]').addEventListener('click', () => {
+            saveField({ links: { ...(profileData.links || {}), cv: document.getElementById('input-cv').value.trim() } }, 'links-message', 'links-edit');
+        });
+
+        document.getElementById('save-basic-btn').addEventListener('click', async () => {
+            const name = document.getElementById('input-name').value.trim();
+            const headline = document.getElementById('input-headline').value.trim();
+            if (!name) { showMessage('basic-message', 'يرجى إدخال الاسم الكامل.', 'error'); return; }
+            try {
+                await updateProfile(currentUser, { displayName: name });
+                await saveField({ name, headline }, 'basic-message', null);
+            } catch (err) {
+                showMessage('basic-message', 'حدث خطأ أثناء حفظ البيانات الأساسية.', 'error');
+            }
+        });
+
+        document.getElementById('save-password-btn').addEventListener('click', async () => {
+            const current = document.getElementById('input-current-password').value;
+            const next = document.getElementById('input-new-password').value;
+            const confirm = document.getElementById('input-confirm-password').value;
+            if (!current || !next) { showMessage('password-message', 'يرجى تعبئة جميع الحقول.', 'error'); return; }
+            if (next.length < 6) { showMessage('password-message', 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.', 'error'); return; }
+            if (next !== confirm) { showMessage('password-message', 'كلمة المرور الجديدة وتأكيدها غير متطابقين.', 'error'); return; }
+            const btn = document.getElementById('save-password-btn');
+            const original = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span> جاري التحديث...';
+            try {
+                const credential = EmailAuthProvider.credential(currentUser.email, current);
+                await reauthenticateWithCredential(currentUser, credential);
+                await updatePassword(currentUser, next);
+                showMessage('password-message', 'تم تحديث كلمة المرور بنجاح.', 'success');
+                document.getElementById('input-current-password').value = '';
+                document.getElementById('input-new-password').value = '';
+                document.getElementById('input-confirm-password').value = '';
+            } catch (err) {
+                let msg = 'حدث خطأ أثناء تحديث كلمة المرور.';
+                if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = 'كلمة المرور الحالية غير صحيحة.';
+                showMessage('password-message', msg, 'error');
+            } finally {
+                btn.disabled = false; btn.innerHTML = original;
+            }
+        });
+
+        document.getElementById('save-notifications-btn').addEventListener('click', () => {
+            saveField({
+                notificationSettings: {
+                    emailNotifications: document.getElementById('notif-email').checked,
+                    jobAlerts: document.getElementById('notif-jobalerts').checked,
+                    messageNotifications: document.getElementById('notif-messages').checked,
+                    applicationUpdates: document.getElementById('notif-applications').checked
+                }
+            }, 'notifications-message', null);
+        });
+
+        // ==================== رفع الصور عبر Cloudinary (الغلاف / الصورة الشخصية / معرض الأعمال) ====================
+        async function uploadImageAndGetUrl(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            if (!response.ok) {
+                const errText = await response.text().catch(() => '');
+                console.error('Cloudinary upload error:', response.status, errText);
+                throw new Error('cloudinary-upload-failed');
+            }
+            const data = await response.json();
+            if (!data.secure_url) throw new Error('cloudinary-no-url');
+            return data.secure_url;
+        }
+
+        document.getElementById('edit-cover-btn').addEventListener('click', () => document.getElementById('cover-input').click());
+        document.getElementById('cover-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            showMessage('header-message', 'جاري رفع صورة الغلاف...', 'success');
+            try {
+                const url = await uploadImageAndGetUrl(file);
+                await saveField({ coverPhotoUrl: url }, 'header-message', null);
+            } catch (err) {
+                showMessage('header-message', 'تعذر رفع صورة الغلاف. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
+            }
+            e.target.value = '';
+        });
+
+        document.getElementById('edit-avatar-btn').addEventListener('click', () => document.getElementById('avatar-input').click());
+        document.getElementById('avatar-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            showMessage('header-message', 'جاري رفع الصورة الشخصية...', 'success');
+            try {
+                const url = await uploadImageAndGetUrl(file);
+                const field = userRole === 'employer' ? { companyInfo: { ...(profileData.companyInfo || {}), logoUrl: url } } : { profileImageUrl: url };
+                await saveField(field, 'header-message', null);
+            } catch (err) {
+                showMessage('header-message', 'تعذر رفع الصورة الشخصية. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.', 'error');
+            }
+            e.target.value = '';
+        });
+
+        document.getElementById('portfolio-input').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+            showMessage('portfolio-message', 'جاري رفع الصور...', 'success');
+            try {
+                const urls = await Promise.all(files.map(f => uploadImageAndGetUrl(f)));
+                const previousWorksUrls = [...(profileData.previousWorksUrls || []), ...urls];
+                await saveField({ previousWorksUrls }, 'portfolio-message', null);
+            } catch (err) {
+                showMessage('portfolio-message', 'تعذر رفع بعض الصور. حاول مرة أخرى.', 'error');
+            }
+            e.target.value = '';
+        });
+
+        async function removePortfolioImage(index) {
+            const urls = [...(profileData.previousWorksUrls || [])];
+            urls.splice(index, 1);
+            await saveField({ previousWorksUrls: urls }, 'portfolio-message', null);
+        }
+
+        // ==================== الوظائف المحفوظة / المتقدم لها / سجل الطلبات ====================
+        // ملاحظة: هذه الوظيفة تفترض وجود مجموعة "jobs" في Firestore بنفس الحقول المستخدمة
+        // في صفحات عرض ونشر الوظائف (job_listing_page.html / jop_posting_page.html)، ومجموعة
+        // "applications" لتتبع طلبات التوظيف. إن اختلفت أسماء الحقول لديك، حدّثها هنا فقط.
+        function jobCardHtml(job, extra) {
+            const title = job.title || job.jobTitle || 'وظيفة غير معروفة';
+            const company = job.companyName || job.company || 'جهة غير محددة';
+            const location = job.location || job.city || '';
+            return `
+                <div class="job-mini-card">
+                    <div class="job-mini-icon"><i class="fas fa-briefcase"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-gray-800 truncate">${escapeHtml(title)}</p>
+                        <p class="text-gray-500 text-sm truncate">${escapeHtml(company)}${location ? ' · ' + escapeHtml(location) : ''}</p>
+                    </div>
+                    ${extra || ''}
+                </div>`;
+        }
+
+        async function loadJobsData() {
+            if (userRole !== 'employee') return;
+
+            if (!JOBS_FEATURE_ENABLED) {
+                // صفحة الوظائف ومجموعتا jobs/applications غير موجودتين بعد -
+                // نعرض حالة "قريباً" بدل محاولة القراءة من مجموعات غير موجودة (وهذا ما كان يسبب خطأ الصلاحيات).
+                showJobsComingSoon();
+                return;
+            }
+
+            await loadSavedJobs();
+            await loadAppliedAndHistory();
+        }
+
+        function showJobsComingSoon() {
+            const comingSoonInner = `<i class="fas fa-hourglass-half"></i><br>ميزة الوظائف (الحفظ والتقديم) ستُفعَّل قريباً بمجرد إطلاق صفحة الوظائف.`;
+            ['saved-jobs-list', 'applied-jobs-list', 'history-jobs-list'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            ['saved-jobs-empty', 'applied-jobs-empty', 'history-jobs-empty'].forEach(id => {
+                const el = document.getElementById(id);
+                el.innerHTML = comingSoonInner;
+                el.classList.remove('hidden');
+            });
+        }
+
+        // ملاحظة: الدالتان التاليتان جاهزتان للعمل فوراً بمجرد تفعيل JOBS_FEATURE_ENABLED = true
+        // وإنشاء مجموعتي "jobs" و "applications" مع قواعد الأمان المناسبة في Firebase.
+        async function loadSavedJobs() {
+            const listEl = document.getElementById('saved-jobs-list');
+            const emptyEl = document.getElementById('saved-jobs-empty');
+            const bookmarks = profileData.bookmarkedJobs || [];
+            if (!bookmarks.length) { emptyEl.classList.remove('hidden'); listEl.innerHTML = ''; return; }
+            try {
+                const jobs = await Promise.all(bookmarks.map(async (jobId) => {
+                    const jsnap = await getDoc(doc(db, 'jobs', jobId));
+                    return jsnap.exists() ? { id: jobId, ...jsnap.data() } : null;
+                }));
+                const validJobs = jobs.filter(Boolean);
+                emptyEl.classList.toggle('hidden', validJobs.length > 0);
+                listEl.innerHTML = validJobs.map(job => jobCardHtml(job,
+                    `<a href="job_listing_page.html?jobId=${job.id}" class="save-btn !py-2 !px-4 text-sm">عرض التفاصيل</a>`
+                )).join('');
+            } catch (err) {
+                console.warn('تعذر تحميل الوظائف المحفوظة:', err);
+                emptyEl.classList.remove('hidden');
+            }
+        }
+
+        async function loadAppliedAndHistory() {
+            const appliedList = document.getElementById('applied-jobs-list');
+            const appliedEmpty = document.getElementById('applied-jobs-empty');
+            const historyList = document.getElementById('history-jobs-list');
+            const historyEmpty = document.getElementById('history-jobs-empty');
+            try {
+                const q = query(collection(db, 'applications'), where('employeeId', '==', currentUser.uid));
+                const snap = await getDocs(q);
+                const applications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                const pendingOrReviewing = applications.filter(a => !a.status || a.status === 'pending' || a.status === 'reviewing');
+                const resolved = applications.filter(a => a.status === 'accepted' || a.status === 'rejected');
+
+                appliedEmpty.classList.toggle('hidden', pendingOrReviewing.length > 0);
+                appliedList.innerHTML = pendingOrReviewing.map(app => jobCardHtml(
+                    { title: app.jobTitle, companyName: app.companyName },
+                    `<span class="status-pill ${app.status === 'reviewing' ? 'reviewing' : 'pending'}">${app.status === 'reviewing' ? 'قيد المراجعة' : 'بانتظار الرد'}</span>`
+                )).join('');
+
+                historyEmpty.classList.toggle('hidden', resolved.length > 0);
+                historyList.innerHTML = resolved.map(app => jobCardHtml(
+                    { title: app.jobTitle, companyName: app.companyName },
+                    `<span class="status-pill ${app.status}">${app.status === 'accepted' ? 'تم القبول' : 'تم الرفض'}</span>`
+                )).join('');
+            } catch (err) {
+                console.warn('تعذر تحميل طلبات التوظيف:', err);
+                appliedEmpty.classList.remove('hidden');
+                historyEmpty.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
