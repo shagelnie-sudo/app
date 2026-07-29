@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الوظائف المتاحة - شغلني</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+body{font-family:'Tajawal',sans-serif;background-color:#f5f7fa}
+#mobile-menu{transition:transform .3s ease-in-out;transform:translateX(100%)}
+#mobile-menu.open{transform:translateX(0)}
+.skill-tag{display:inline-flex;align-items:center;background:#eef2ff;color:#4338ca;padding:.25rem .75rem;border-radius:9999px;font-size:.75rem;margin:.125rem}
+.job-card{background:white;border:1px solid #e5e7eb;border-radius:1rem;padding:1.4rem;transition:all .25s ease;box-shadow:0 4px 6px rgba(0,0,0,0.04);position:relative}
+.job-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08);border-color:#bfdbfe}
+.job-logo{width:52px;height:52px;border-radius:.85rem;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;flex-shrink:0;overflow:hidden}
+.job-logo img{width:100%;height:100%;object-fit:cover}
+.match-badge{display:inline-flex;align-items:center;gap:5px;background:#dcfce7;color:#065f46;border:1px solid #bbf7d0;padding:.25rem .7rem;border-radius:9999px;font-size:.72rem;font-weight:800}
+.job-type-badge{padding:.2rem .65rem;border-radius:.5rem;font-size:.72rem;font-weight:700}
+.type-full{background:#dbeafe;color:#1d4ed8}
+.type-part{background:#fef3c7;color:#92400e}
+.type-remote{background:#f5f3ff;color:#6d28d9}
+.type-temp{background:#fee2e2;color:#991b1b}
+.save-job-btn{width:38px;height:38px;border-radius:9999px;background:#f9fafb;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af;cursor:pointer;transition:all .2s;flex-shrink:0}
+.save-job-btn:hover{border-color:#2563eb;color:#2563eb}
+.save-job-btn.saved{background:#eff6ff;border-color:#2563eb;color:#2563eb}
+.apply-btn{padding:.6rem 1.4rem;background:#2563eb;color:white;border-radius:.6rem;font-weight:700;font-size:.85rem;border:none;cursor:pointer;transition:all .2s}
+.apply-btn:hover{background:#1d4ed8}
+.apply-btn:disabled{background:#d1d5db;cursor:not-allowed}
+.filter-chip{padding:.4rem 1rem;border-radius:9999px;font-size:.8rem;font-weight:600;border:1px solid #e5e7eb;background:white;color:#6b7280;cursor:pointer;transition:all .15s;white-space:nowrap}
+.filter-chip.active{background:#2563eb;color:white;border-color:#2563eb}
+.empty-state{text-align:center;padding:4rem 1rem;color:#9ca3af}
+.empty-state i{font-size:3rem;margin-bottom:1rem;color:#d1d5db}
+.suggested-strip{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem}
+.suggested-strip::-webkit-scrollbar{height:6px}
+</style>
+</head>
+<body>
+<header class="bg-white shadow-sm sticky top-0 z-50">
+<nav class="container mx-auto px-4 h-20 flex items-center justify-between">
+<div class="flex items-center">
+<a href="index.html"><img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain"></a>
+<div class="hidden md:flex space-x-1 space-x-reverse mr-6">
+<a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
+<a href="job_listing_page.html" class="px-4 py-2 text-blue-600 font-bold">الوظائف</a>
+<a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
+<a href="jop_posting_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">أضف وظيفة</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<a href="profile.html" id="login-link" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">دخول</a>
+<button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition"><i class="fas fa-bars text-2xl"></i></button>
+</div>
+</nav>
+<div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+<div class="flex justify-between items-center mb-8">
+<img src="shagelnie.png.png" alt="شغلني" class="h-12">
+<button id="close-menu" class="text-gray-500 hover:text-gray-700 transition"><i class="fas fa-times text-2xl"></i></button>
+</div>
+<nav class="flex flex-col space-y-4">
+<a href="index.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الرئيسية</a>
+<a href="job_listing_page.html" class="text-blue-600 font-bold py-2 border-b border-gray-100">الوظائف</a>
+<a href="employee_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">الموظفون</a>
+<a href="jop_posting_page.html" class="text-gray-600 py-2 border-b border-gray-100 hover:text-blue-600 transition">أضف وظيفة</a>
+<a href="profile.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold mt-4 hover:bg-blue-700 transition">دخول / ملفي</a>
+</nav>
+</div>
+</header>
+
+<div class="container mx-auto px-4 py-8">
+<h1 class="text-4xl font-extrabold text-gray-900 mb-2">الوظائف المتاحة</h1>
+<p class="text-gray-500 mb-6">اكتشف أحدث الفرص الوظيفية في السودان</p>
+
+<!-- الوظائف المقترحة حسب مهاراتك (تظهر فقط لموظف مسجل دخوله وله مهارات) -->
+<div id="suggestedSection" class="hidden mb-8">
+<div class="flex items-center gap-2 mb-3">
+<i class="fas fa-bolt text-amber-500"></i>
+<h2 class="text-lg font-bold text-gray-800">مقترحة لك بناءً على مهاراتك</h2>
+</div>
+<div id="suggestedStrip" class="suggested-strip"></div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-4 mb-6 space-y-4">
+<div class="relative">
+<input type="text" id="searchInput" placeholder="ابحث عن وظيفة، شركة، أو مهارة..." class="w-full pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right">
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-1" id="typeFilters">
+<button class="filter-chip active" data-type="">كل الأنواع</button>
+<button class="filter-chip" data-type="دوام كامل">دوام كامل</button>
+<button class="filter-chip" data-type="دوام جزئي">دوام جزئي</button>
+<button class="filter-chip" data-type="عن بعد">عن بعد</button>
+<button class="filter-chip" data-type="مؤقت">مؤقت</button>
+</div>
+<div class="flex flex-col sm:flex-row gap-3">
+<select id="stateFilter" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+<option value="">جميع الولايات</option>
+</select>
+<select id="sortSelect" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+<option value="newest">الأحدث أولاً</option>
+<option value="oldest">الأقدم أولاً</option>
+</select>
+</div>
+</div>
+
+<div id="jobsList" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div class="col-span-full text-center text-lg text-gray-500 p-8" id="loadingIndicator">جاري تحميل الوظائف...</div>
+</div>
+<div class="empty-state hidden" id="noJobsFound"><i class="fas fa-briefcase"></i><br>لم يتم العثور على وظائف مطابقة.</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, query, where, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+  authDomain: "shaglni-c64c0.firebaseapp.com",
+  projectId: "shaglni-c64c0",
+  storageBucket: "shaglni-c64c0.firebasestorage.app",
+  messagingSenderId: "768887356636",
+  appId: "1:768887356636:web:11ec1d6991add3309c8819",
+  measurementId: "G-98GQGZS09W"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const sudanStates = ["الخرطوم","الجزيرة","البحر الأحمر","كسلا","القضارف","سنار","النيل الأبيض","النيل الأزرق","الشمالية","نهر النيل","شمال كردفان","جنوب كردفان","غرب كردفان","شمال دارفور","جنوب دارفور","غرب دارفور","وسط دارفور","شرق دارفور"];
+
+let allJobs = [];
+let currentUser = null;
+let userRole = null;
+let userSkills = [];
+let savedJobIds = [];
+let appliedJobIds = [];
+let activeType = '';
+
+const stateFilter = document.getElementById('stateFilter');
+sudanStates.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; stateFilter.appendChild(o); });
+
+/* ==================== الهيدر ==================== */
+const menuButton = document.getElementById('mobile-menu-button');
+const closeButton = document.getElementById('close-menu');
+const mobileMenu = document.getElementById('mobile-menu');
+menuButton.addEventListener('click', () => mobileMenu.classList.add('open'));
+closeButton.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
+/* ==================== المصادقة ==================== */
+onAuthStateChanged(auth, async (user) => {
+  const loginLink = document.getElementById('login-link');
+  if (user) {
+    currentUser = user;
+    loginLink.textContent = 'ملفي الشخصي';
+    try {
+      const empSnap = await getDoc(doc(db, "employees", user.uid));
+      if (empSnap.exists()) {
+        userRole = 'employee';
+        const data = empSnap.data();
+        userSkills = data.skills || [];
+        savedJobIds = data.bookmarkedJobs || [];
+      } else {
+        const employerSnap = await getDoc(doc(db, "All_jops", user.uid));
+        if (employerSnap.exists()) userRole = 'employer';
+      }
+      if (userRole === 'employee') {
+        const appsQuery = query(collection(db, "applications"), where("employeeId", "==", user.uid));
+        const appsSnap = await getDocs(appsQuery);
+        appliedJobIds = appsSnap.docs.map(d => d.data().jobId);
+      }
+    } catch (e) { console.warn('تعذر تحميل بيانات المستخدم:', e); }
+  } else {
+    currentUser = null; userRole = null; userSkills = []; savedJobIds = []; appliedJobIds = [];
+    loginLink.textContent = 'دخول';
+  }
+  renderJobs();
+  renderSuggested();
+});
+
+/* ==================== جلب الوظائف ==================== */
+async function fetchJobs() {
+  try {
+    const snap = await getDocs(collection(db, "jobs"));
+    allJobs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(j => (j.status || 'active') === 'active');
+    renderJobs();
+  } catch (e) {
+    console.error('خطأ في جلب الوظائف:', e);
+    document.getElementById('jobsList').innerHTML = '';
+    document.getElementById('noJobsFound').classList.remove('hidden');
+    document.getElementById('noJobsFound').innerHTML = '<i class="fas fa-triangle-exclamation"></i><br>تعذر تحميل الوظائف حالياً. حاول لاحقاً.';
+  }
+}
+
+function typeBadgeClass(type) {
+  if (type === 'دوام كامل') return 'type-full';
+  if (type === 'دوام جزئي') return 'type-part';
+  if (type === 'عن بعد') return 'type-remote';
+  return 'type-temp';
+}
+
+function skillMatchScore(job) {
+  if (!userSkills.length || !Array.isArray(job.skillsRequired) || !job.skillsRequired.length) return 0;
+  const jobSkillsLower = job.skillsRequired.map(s => s.toLowerCase().trim());
+  const userSkillsLower = userSkills.map(s => s.toLowerCase().trim());
+  const overlap = jobSkillsLower.filter(s => userSkillsLower.includes(s));
+  return Math.round((overlap.length / jobSkillsLower.length) * 100);
+}
+
+function timeAgo(ts) {
+  if (!ts) return 'غير محدد';
+  const d = new Date((ts.seconds || 0) * 1000);
+  const diffDays = Math.floor((Date.now() - d) / 86400000);
+  if (diffDays <= 0) return 'اليوم';
+  if (diffDays === 1) return 'أمس';
+  if (diffDays < 7) return `منذ ${diffDays} أيام`;
+  if (diffDays < 30) return `منذ ${Math.floor(diffDays/7)} أسبوع`;
+  return `منذ ${Math.floor(diffDays/30)} شهر`;
+}
+
+function jobCardHtml(job, showMatch) {
+  const match = showMatch ? skillMatchScore(job) : 0;
+  const isSaved = savedJobIds.includes(job.id);
+  const isApplied = appliedJobIds.includes(job.id);
+  const logoInitial = (job.companyName || 'و').charAt(0);
+  const skillsHtml = Array.isArray(job.skillsRequired)
+    ? job.skillsRequired.slice(0, 4).map(s => `<span class="skill-tag">${s}</span>`).join('') : '';
+  return `
+    <div class="job-card">
+      <div class="flex items-start justify-between gap-3 mb-3">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <div class="job-logo">${job.employerLogoUrl ? `<img src="${job.employerLogoUrl}" alt="شعار">` : logoInitial}</div>
+          <div class="min-w-0">
+            <h3 class="font-bold text-gray-900 truncate">${job.title || 'وظيفة غير معروفة'}</h3>
+            <p class="text-gray-500 text-sm truncate">${job.companyName || 'جهة غير محددة'}</p>
+          </div>
+        </div>
+        <button class="save-job-btn${isSaved ? ' saved' : ''}" onclick="toggleSaveJob('${job.id}')" title="${isSaved ? 'إزالة من المحفوظات' : 'حفظ الوظيفة'}"><i class="${isSaved ? 'fas' : 'far'} fa-bookmark"></i></button>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="job-type-badge ${typeBadgeClass(job.jobType)}">${job.jobType || 'غير محدد'}</span>
+        ${match > 0 ? `<span class="match-badge"><i class="fas fa-bolt"></i> ${match}% توافق</span>` : ''}
+      </div>
+      ${skillsHtml ? `<div class="mb-3">${skillsHtml}</div>` : ''}
+      <p class="text-gray-600 text-sm mb-4 line-clamp-2">${(job.description || 'لا يوجد وصف').substring(0, 130)}${job.description && job.description.length > 130 ? '...' : ''}</p>
+      <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+        <div>
+          ${job.salaryText ? `<p class="font-bold text-blue-600 text-sm">${job.salaryText}</p>` : ''}
+          <p class="text-gray-400 text-xs"><i class="fas fa-map-marker-alt ml-1"></i>${job.location?.city || job.location?.state || 'غير محدد'} · ${timeAgo(job.postedAt)}</p>
+        </div>
+        <button class="apply-btn" onclick="applyToJob('${job.id}')" ${isApplied ? 'disabled' : ''}>${isApplied ? '<i class="fas fa-check ml-1"></i> تم التقديم' : 'تقدّم الآن'}</button>
+      </div>
+    </div>`;
+}
+
+function getFilteredJobs() {
+  const term = document.getElementById('searchInput').value.toLowerCase().trim();
+  const state = stateFilter.value;
+  const sort = document.getElementById('sortSelect').value;
+  let list = allJobs.filter(job => {
+    const text = `${job.title||''} ${job.companyName||''} ${(job.skillsRequired||[]).join(' ')}`.toLowerCase();
+    const matchesTerm = !term || text.includes(term);
+    const matchesType = !activeType || job.jobType === activeType;
+    const matchesState = !state || job.location?.state === state;
+    return matchesTerm && matchesType && matchesState;
+  });
+  list.sort((a, b) => {
+    const at = a.postedAt?.seconds || 0, bt = b.postedAt?.seconds || 0;
+    return sort === 'oldest' ? at - bt : bt - at;
+  });
+  return list;
+}
+
+function renderJobs() {
+  const list = getFilteredJobs();
+  const container = document.getElementById('jobsList');
+  const empty = document.getElementById('noJobsFound');
+  if (!list.length) {
+    container.innerHTML = '';
+    empty.classList.remove('hidden');
+    empty.innerHTML = '<i class="fas fa-briefcase"></i><br>لم يتم العثور على وظائف مطابقة.';
+    return;
+  }
+  empty.classList.add('hidden');
+  container.innerHTML = list.map(job => jobCardHtml(job, userRole === 'employee')).join('');
+}
+
+function renderSuggested() {
+  const section = document.getElementById('suggestedSection');
+  const strip = document.getElementById('suggestedStrip');
+  if (userRole !== 'employee' || !userSkills.length) { section.classList.add('hidden'); return; }
+  const scored = allJobs.map(j => ({ job: j, score: skillMatchScore(j) })).filter(x => x.score > 0);
+  scored.sort((a, b) => b.score - a.score);
+  const top = scored.slice(0, 6);
+  if (!top.length) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  strip.innerHTML = top.map(({ job }) => `<div style="min-width:280px">${jobCardHtml(job, true)}</div>`).join('');
+}
+
+/* ==================== حفظ وتقديم ==================== */
+window.toggleSaveJob = async function(jobId) {
+  if (!currentUser) { alert('يرجى تسجيل الدخول أولاً لحفظ الوظائف.'); return; }
+  if (userRole !== 'employee') { alert('حفظ الوظائف متاح لحسابات الموظفين فقط.'); return; }
+  const isSaved = savedJobIds.includes(jobId);
+  try {
+    await updateDoc(doc(db, "employees", currentUser.uid), {
+      bookmarkedJobs: isSaved ? arrayRemove(jobId) : arrayUnion(jobId)
+    });
+    savedJobIds = isSaved ? savedJobIds.filter(id => id !== jobId) : [...savedJobIds, jobId];
+    renderJobs(); renderSuggested();
+  } catch (e) { console.error(e); alert('حدث خطأ أثناء الحفظ.'); }
+};
+
+window.applyToJob = async function(jobId) {
+  if (!currentUser) { alert('يرجى تسجيل الدخول أولاً للتقديم على الوظيفة.'); return; }
+  if (userRole !== 'employee') { alert('التقديم على الوظائف متاح لحسابات الموظفين فقط.'); return; }
+  if (appliedJobIds.includes(jobId)) return;
+  const job = allJobs.find(j => j.id === jobId);
+  if (!job) return;
+  try {
+    await addDoc(collection(db, "applications"), {
+      employeeId: currentUser.uid,
+      jobId: jobId,
+      jobTitle: job.title || '',
+      companyName: job.companyName || '',
+      employerId: job.employerId || null,
+      status: 'pending',
+      appliedAt: serverTimestamp()
+    });
+    appliedJobIds.push(jobId);
+    renderJobs(); renderSuggested();
+  } catch (e) { console.error(e); alert('حدث خطأ أثناء التقديم، حاول مرة أخرى.'); }
+};
+
+/* ==================== الفلاتر ==================== */
+document.getElementById('typeFilters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-chip');
+  if (!btn) return;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeType = btn.dataset.type;
+  renderJobs();
+});
+document.getElementById('searchInput').addEventListener('input', renderJobs);
+stateFilter.addEventListener('change', renderJobs);
+document.getElementById('sortSelect').addEventListener('change', renderJobs);
+
+fetchJobs();
+</script>
+</body>
+</html>
