@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل حساب جديد - شغلني</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+body{font-family:'Tajawal',sans-serif;background-color:#f5f7fa}
+.password-requirement-item{display:flex;align-items:center;font-size:.875rem;color:#6b7280;margin-top:.5rem}
+.password-requirement-item.valid{color:#10b981}
+.iti{width:100%;direction:ltr}
+.iti__country-list{text-align:left}
+.password-toggle{cursor:pointer;position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#6b7280}
+.message{text-align:center;padding:1rem;border-radius:8px;margin-top:1rem}
+.success-message{background-color:#dcfce7;color:#065f46}
+.error-message{background-color:#fee2e2;color:#991b1b}
+.avatar-upload{width:100px;height:100px;border-radius:9999px;border:3px dashed #cbd5e1;background:#f8fafc;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:1.6rem;cursor:pointer;overflow:hidden;margin:0 auto;position:relative;transition:all .2s}
+.avatar-upload:hover{border-color:#2563eb;color:#2563eb}
+.avatar-upload img{width:100%;height:100%;object-fit:cover}
+.role-card{border:2px solid #e5e7eb;border-radius:.9rem;padding:1rem;cursor:pointer;transition:all .2s;text-align:center}
+.role-card:hover{border-color:#93c5fd}
+.role-card.selected{border-color:#2563eb;background:#eff6ff}
+.type-chip{border:2px solid #e5e7eb;border-radius:.7rem;padding:.7rem;cursor:pointer;transition:all .2s;text-align:center;font-size:.85rem}
+.type-chip:hover{border-color:#93c5fd}
+.type-chip.selected{border-color:#2563eb;background:#eff6ff;color:#2563eb;font-weight:700}
+.loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-radius:50%;border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body class="flex items-center justify-center min-h-screen py-10">
+<div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+<div class="text-center mb-6">
+<h2 class="text-2xl font-black text-gray-900">إنشاء حساب جديد</h2>
+<p class="text-gray-500 text-sm mt-1">بيانات أساسية سريعة — يمكنك إكمال الباقي لاحقاً</p>
+</div>
+
+<form id="registerForm" class="space-y-5">
+
+<!-- صورة الملف الشخصي -->
+<div>
+<label class="avatar-upload" id="avatarUploadLabel">
+<span id="avatarPlaceholder"><i class="fas fa-camera"></i></span>
+<img id="avatarPreview" class="hidden" alt="معاينة الصورة">
+<input type="file" id="profilePhotoInput" accept="image/*" class="hidden">
+</label>
+<p class="text-center text-xs text-gray-400 mt-2">صورة الملف الشخصي (اختياري)</p>
+</div>
+
+<!-- نوع الحساب -->
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-2">نوع الحساب</label>
+<div class="grid grid-cols-2 gap-3">
+<div class="role-card" data-role="employee" onclick="selectRole('employee')">
+<i class="fas fa-user-tie text-2xl text-blue-600 mb-1"></i>
+<p class="font-bold text-sm">أبحث عن عمل</p>
+</div>
+<div class="role-card" data-role="employer" onclick="selectRole('employer')">
+<i class="fas fa-building text-2xl text-blue-600 mb-1"></i>
+<p class="font-bold text-sm">شركة / صاحب عمل</p>
+</div>
+</div>
+</div>
+
+<!-- نوع الموظف (يظهر فقط عند اختيار "أبحث عن عمل") -->
+<div id="employeeTypeSection" class="hidden">
+<label class="block text-sm font-medium text-gray-700 mb-2">ما طبيعة عملك؟</label>
+<div class="grid grid-cols-2 gap-3">
+<div class="type-chip" data-type="craftsman" onclick="selectEmployeeType('craftsman')">
+<i class="fas fa-hammer mb-1 block"></i>عامل / حرفي
+</div>
+<div class="type-chip" data-type="professional" onclick="selectEmployeeType('professional')">
+<i class="fas fa-user-graduate mb-1 block"></i>موظف / مهندس / إداري
+</div>
+</div>
+</div>
+
+<div>
+<label for="name" class="block text-sm font-medium text-gray-700">الاسم الكامل</label>
+<input id="name" type="text" required placeholder="الاسم الثلاثي أو الرباعي"
+class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-right">
+</div>
+
+<div>
+<label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+<input id="email" type="email" required placeholder="example@mail.com"
+class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-right">
+</div>
+
+<div>
+<label for="mainPhone" class="block text-sm font-medium text-gray-700">رقم الهاتف</label>
+<div class="mt-1"><input id="mainPhone" type="tel" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"></div>
+</div>
+
+<div>
+<label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
+<div class="mt-1 relative">
+<input id="password" type="password" required placeholder="كلمة مرور قوية"
+class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-right">
+<i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('password')"></i>
+</div>
+<div class="mt-2" id="passwordRequirements">
+<div id="min-length" class="password-requirement-item"><i class="fas fa-times-circle ml-2 text-red-500"></i><span>6 أحرف على الأقل</span></div>
+<div id="has-upper" class="password-requirement-item"><i class="fas fa-times-circle ml-2 text-red-500"></i><span>حرف كبير واحد على الأقل</span></div>
+<div id="has-lower" class="password-requirement-item"><i class="fas fa-times-circle ml-2 text-red-500"></i><span>حرف صغير واحد على الأقل</span></div>
+<div id="has-number" class="password-requirement-item"><i class="fas fa-times-circle ml-2 text-red-500"></i><span>رقم واحد على الأقل</span></div>
+</div>
+</div>
+
+<div>
+<label for="confirmPassword" class="block text-sm font-medium text-gray-700">تأكيد كلمة المرور</label>
+<div class="mt-1 relative">
+<input id="confirmPassword" type="password" required placeholder="أعد إدخال كلمة المرور"
+class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-right">
+<i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('confirmPassword')"></i>
+</div>
+</div>
+
+<button type="submit" id="submitBtn" class="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2">
+<span>إنشاء الحساب</span>
+</button>
+
+<div id="message" class="message hidden"></div>
+</form>
+
+<div class="mt-6 text-center space-y-2">
+<p class="text-sm text-gray-600">هل لديك حساب بالفعل؟ <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">تسجيل الدخول</a></p>
+<p class="text-xs text-gray-400"><a href="forgot-password.html" class="hover:underline">نسيت كلمة المرور؟</a></p>
+</div>
+</div>
+
+<script>
+function togglePasswordVisibility(fieldId) {
+  const input = document.getElementById(fieldId);
+  const icon = input.nextElementSibling;
+  if (input.type === "password") { input.type = "text"; icon.classList.replace("fa-eye", "fa-eye-slash"); }
+  else { input.type = "password"; icon.classList.replace("fa-eye-slash", "fa-eye"); }
+}
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, getDocs, collection, query, where, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+  authDomain: "shaglni-c64c0.firebaseapp.com",
+  projectId: "shaglni-c64c0",
+  storageBucket: "shaglni-c64c0.firebasestorage.app",
+  messagingSenderId: "768887356636",
+  appId: "1:768887356636:web:11ec1d6991add3309c8819",
+  measurementId: "G-98GQGZS09W"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dbmjg23hl/image/upload";
+const CLOUDINARY_UPLOAD_PRESET = "Companies_emploies";
+
+async function uploadToCloudinary(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+  if (!res.ok) throw new Error("فشل رفع الصورة");
+  const data = await res.json();
+  if (!data.secure_url) throw new Error("لم يتم استلام رابط الصورة");
+  return data.secure_url;
+}
+
+/* ==================== الهاتف ==================== */
+const phoneInput = document.querySelector("#mainPhone");
+const iti = window.intlTelInput(phoneInput, {
+  initialCountry: "sd",
+  preferredCountries: ["sd", "sa", "ae", "eg"],
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
+});
+
+/* ==================== صورة الملف الشخصي ==================== */
+let selectedPhotoFile = null;
+document.getElementById("avatarUploadLabel").addEventListener("click", () => document.getElementById("profilePhotoInput").click());
+document.getElementById("profilePhotoInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  selectedPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById("avatarPreview").src = ev.target.result;
+    document.getElementById("avatarPreview").classList.remove("hidden");
+    document.getElementById("avatarPlaceholder").classList.add("hidden");
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ==================== نوع الحساب / نوع الموظف ==================== */
+let selectedRole = null;
+let selectedEmployeeType = null;
+window.selectRole = function(role) {
+  selectedRole = role;
+  document.querySelectorAll(".role-card").forEach(c => c.classList.toggle("selected", c.dataset.role === role));
+  document.getElementById("employeeTypeSection").classList.toggle("hidden", role !== "employee");
+};
+window.selectEmployeeType = function(type) {
+  selectedEmployeeType = type;
+  document.querySelectorAll(".type-chip").forEach(c => c.classList.toggle("selected", c.dataset.type === type));
+};
+
+/* ==================== التحقق من كلمة المرور ==================== */
+function validatePassword() {
+  const password = document.getElementById("password").value;
+  const checks = { minLength: password.length >= 6, hasUpper: /[A-Z]/.test(password), hasLower: /[a-z]/.test(password), hasNumber: /[0-9]/.test(password) };
+  const reqs = { minLength: document.getElementById("min-length"), hasUpper: document.getElementById("has-upper"), hasLower: document.getElementById("has-lower"), hasNumber: document.getElementById("has-number") };
+  for (const k in checks) {
+    const el = reqs[k];
+    if (checks[k]) { el.classList.add("valid"); el.querySelector("i").className = "fas fa-check-circle ml-2 text-green-500"; }
+    else { el.classList.remove("valid"); el.querySelector("i").className = "fas fa-times-circle ml-2 text-red-500"; }
+  }
+  return Object.values(checks).every(Boolean);
+}
+document.getElementById("password").addEventListener("input", validatePassword);
+
+function showMessage(msg, type) {
+  const el = document.getElementById("message");
+  el.textContent = msg;
+  el.className = "message " + type + "-message";
+  el.classList.remove("hidden");
+  window.scrollTo(0, 0);
+}
+
+async function isPhoneUnique(phoneNumber) {
+  const employeeQuery = query(collection(db, "employees"), where("contact.phone", "==", phoneNumber));
+  const employerQuery = query(collection(db, "All_jops"), where("companyInfo.phone", "==", phoneNumber));
+  const [employeeSnap, employerSnap] = await Promise.all([getDocs(employeeQuery), getDocs(employerQuery)]);
+  return employeeSnap.empty && employerSnap.empty;
+}
+
+/* ==================== الإرسال ==================== */
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if (!selectedRole) { showMessage("يرجى اختيار نوع الحساب.", "error"); return; }
+  if (selectedRole === "employee" && !selectedEmployeeType) { showMessage("يرجى تحديد طبيعة عملك.", "error"); return; }
+  if (!iti.isValidNumber()) { showMessage("يرجى إدخال رقم هاتف صحيح.", "error"); return; }
+  if (password !== confirmPassword) { showMessage("كلمة المرور وتأكيدها غير متطابقين.", "error"); return; }
+  if (!validatePassword()) { showMessage("كلمة المرور لا تستوفي جميع المتطلبات.", "error"); return; }
+
+  const submitBtn = document.getElementById("submitBtn");
+  const originalHtml = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="loading-spinner"></span><span>جاري إنشاء الحساب...</span>';
+
+  const finalPhone = iti.getNumber();
+
+  try {
+    const unique = await isPhoneUnique(finalPhone);
+    if (!unique) throw new Error("عذراً، هذا الرقم مسجل مسبقاً.");
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    let photoUrl = null;
+    if (selectedPhotoFile) {
+      try { photoUrl = await uploadToCloudinary(selectedPhotoFile); }
+      catch (err) { console.warn("تعذر رفع الصورة، سيُكمَل التسجيل بدونها:", err); }
+    }
+
+    await updateProfile(user, { displayName: name, photoURL: photoUrl || undefined });
+    await sendEmailVerification(user).catch(err => console.warn("تعذر إرسال بريد التوثيق:", err));
+
+    let userData;
+    let collectionName;
+
+    if (selectedRole === "employee") {
+      collectionName = "employees";
+      userData = {
+        uid: user.uid, name, email, role: "employee",
+        employeeType: selectedEmployeeType, // 'craftsman' | 'professional'
+        profileImageUrl: photoUrl,
+        contact: { phone: finalPhone, location: { state: null, city: null, area: null } },
+        jobStatus: "متاح للعمل",
+        isProfileComplete: false,
+        emailVerified: false,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+      };
+    } else {
+      collectionName = "All_jops";
+      userData = {
+        uid: user.uid, name, email, role: "employer",
+        companyInfo: { name: name, email, phone: finalPhone, logoUrl: photoUrl, businessType: null, description: null, location: { state: null, city: null, area: null } },
+        verification: { isVerified: false },
+        subRole: "hiring",
+        isProfileComplete: false,
+        emailVerified: false,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+      };
+    }
+
+    await setDoc(doc(db, collectionName, user.uid), userData);
+
+    await addDoc(collection(db, "notifications"), {
+      userId: user.uid, type: "welcome",
+      message: selectedRole === "employer"
+        ? "مرحباً بك في شغلني! أكمل بيانات شركتك وانشر أول وظيفة لك."
+        : "مرحباً بك في شغلني! أكمل ملفك الشخصي وأضف مهاراتك لزيادة فرصك.",
+      read: false, timestamp: serverTimestamp()
+    });
+
+    showMessage("تم إنشاء حسابك بنجاح! جاري تحويلك لإكمال ملفك الشخصي...", "success");
+    setTimeout(() => { window.location.href = "profile.html?welcome=1"; }, 1800);
+
+  } catch (error) {
+    console.error("Registration error:", error);
+    let msg = error.message || "حدث خطأ أثناء إنشاء الحساب.";
+    if (error.code === "auth/email-already-in-use") msg = "هذا البريد الإلكتروني مستخدم بالفعل.";
+    else if (error.code === "auth/invalid-email") msg = "صيغة البريد الإلكتروني غير صحيحة.";
+    else if (error.code === "auth/weak-password") msg = "كلمة المرور ضعيفة جداً.";
+    showMessage(msg, "error");
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalHtml;
+  }
+});
+</script>
+</body>
+</html>
