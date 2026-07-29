@@ -1065,3 +1065,554 @@ function renderSettings() {
     document.getElementById("craft-area-edit-wrap").classList.add("hidden");
   }
 }
+
+function populateEditForm(name) {
+  if (name === "bio") {
+    document.getElementById("input-bio").value = profileData.bio || "";
+  }
+  if (name === "contact") {
+    let phone = "", whatsapp = "", loc = {}, linkedin = "", website = "";
+    if (userRole === "employer") {
+      phone = profileData.companyInfo && profileData.companyInfo.phone;
+      loc = (profileData.companyInfo && profileData.companyInfo.location) || {};
+      website = profileData.companyInfo && profileData.companyInfo.website;
+    } else {
+      phone = profileData.contact && profileData.contact.phone;
+      whatsapp = profileData.contact && profileData.contact.whatsapp;
+      loc = (profileData.contact && profileData.contact.location) || {};
+      linkedin = profileData.links && profileData.links.linkedin;
+      website = profileData.links && profileData.links.website;
+    }
+    document.getElementById("input-phone").value = phone || "";
+    document.getElementById("input-whatsapp").value = whatsapp || "";
+    document.getElementById("input-linkedin").value = linkedin || "";
+    document.getElementById("input-website").value = website || "";
+    stateSel.value = loc.state || "";
+    citySel.innerHTML = '<option value="">اختر مدينة</option>';
+    (citiesByState[loc.state] || []).forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; citySel.appendChild(o); });
+    citySel.value = loc.city || "";
+    pickedLat = typeof loc.lat === "number" ? loc.lat : null;
+    pickedLng = typeof loc.lng === "number" ? loc.lng : null;
+    setTimeout(initLocationMap, 80);
+  }
+  if (name === "skills") {
+    const container = document.getElementById("skills-input-container");
+    container.innerHTML = "";
+    const skills = (profileData.skills && profileData.skills.length) ? profileData.skills : [""];
+    skills.forEach(s => addSkillRow(s));
+    document.getElementById("input-experience").value = profileData.experience || "";
+  }
+  if (name === "languages") {
+    const container = document.getElementById("languages-input-container");
+    container.innerHTML = "";
+    const langs = (profileData.languages && profileData.languages.length) ? profileData.languages : [{ name: "", level: "متوسط" }];
+    langs.forEach(l => addLangRow(l));
+  }
+  if (name === "workexp") {
+    const container = document.getElementById("workexp-input-container");
+    container.innerHTML = "";
+    const items = (profileData.workExperience && profileData.workExperience.length) ? profileData.workExperience : [{}];
+    items.forEach(it => addWorkRow(it));
+  }
+  if (name === "education") {
+    const container = document.getElementById("education-input-container");
+    container.innerHTML = "";
+    const items = (profileData.education && profileData.education.length) ? profileData.education : [{}];
+    items.forEach(it => addEduRow(it));
+  }
+  if (name === "certs") {
+    const container = document.getElementById("certs-input-container");
+    container.innerHTML = "";
+    const items = (profileData.certifications && profileData.certifications.length) ? profileData.certifications : [{}];
+    items.forEach(it => addCertRow(it));
+  }
+  if (name === "links") {
+    document.getElementById("input-cv").value = (profileData.links && profileData.links.cv) || "";
+  }
+}
+
+/* ==================== صفوف ديناميكية ==================== */
+function addSkillRow(v) {
+  const container = document.getElementById("skills-input-container");
+  if (container.children.length >= 8) {
+    document.getElementById("skills-limit-message").classList.remove("hidden");
+    return;
+  }
+  document.getElementById("skills-limit-message").classList.add("hidden");
+  const row = document.createElement("div");
+  row.className = "mb-2 flex items-center gap-2";
+  row.innerHTML = '<input type="text" class="field-input skill-input" placeholder="مثال: React.js" value="' + esc(v || "") + '">';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-minus"></i>';
+  removeBtn.addEventListener("click", () => { row.remove(); document.getElementById("skills-limit-message").classList.add("hidden"); });
+  row.appendChild(removeBtn);
+  container.appendChild(row);
+}
+window.addSkillRow = addSkillRow;
+
+(function addSkillAdderButtonOnce() {
+  const wrap = document.getElementById("skills-input-container");
+  if (!wrap) return;
+  const btn = document.createElement("button");
+  btn.type = "button"; btn.className = "add-item-btn mt-1";
+  btn.innerHTML = '<i class="fas fa-plus ml-1"></i> إضافة مهارة';
+  btn.addEventListener("click", () => addSkillRow(""));
+  wrap.parentElement.insertBefore(btn, wrap.nextSibling);
+})();
+
+window.addLangRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("languages-input-container");
+  const row = document.createElement("div");
+  row.className = "flex items-center gap-2";
+  row.innerHTML = '<input type="text" class="field-input lang-name" placeholder="اللغة" value="' + esc(item.name || "") + '">' +
+    '<select class="field-select lang-level" style="max-width:140px"><option value="مبتدئ">مبتدئ</option><option value="متوسط">متوسط</option><option value="متقدم">متقدم</option><option value="لغة أم">لغة أم</option></select>';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-minus"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.appendChild(removeBtn);
+  const sel = row.querySelector(".lang-level");
+  sel.value = item.level || "متوسط";
+  container.appendChild(row);
+};
+
+window.addWorkRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("workexp-input-container");
+  const row = document.createElement("div");
+  row.className = "border border-gray-200 rounded-xl p-4 space-y-2 relative";
+  row.innerHTML = '<div class="flex justify-end remove-wrap"></div>' +
+    '<input type="text" class="field-input we-title" placeholder="المسمى الوظيفي" value="' + esc(item.title || "") + '">' +
+    '<input type="text" class="field-input we-company" placeholder="اسم الشركة / الجهة" value="' + esc(item.company || "") + '">' +
+    '<input type="text" class="field-input we-duration" placeholder="المدة (مثال: 2022 - حتى الآن)" value="' + esc(item.duration || "") + '">' +
+    '<textarea class="field-textarea we-description" rows="2" placeholder="وصف مختصر للمهام والإنجازات">' + esc(item.description || "") + "</textarea>";
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.querySelector(".remove-wrap").appendChild(removeBtn);
+  container.appendChild(row);
+};
+
+window.addEduRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("education-input-container");
+  const row = document.createElement("div");
+  row.className = "border border-gray-200 rounded-xl p-4 space-y-2";
+  row.innerHTML = '<div class="flex justify-end remove-wrap"></div>' +
+    '<input type="text" class="field-input ed-degree" placeholder="الدرجة العلمية / التخصص" value="' + esc(item.degree || "") + '">' +
+    '<input type="text" class="field-input ed-institution" placeholder="اسم الجامعة / المعهد" value="' + esc(item.institution || "") + '">' +
+    '<input type="text" class="field-input ed-year" placeholder="سنة التخرج" value="' + esc(item.year || "") + '">';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.querySelector(".remove-wrap").appendChild(removeBtn);
+  container.appendChild(row);
+};
+
+window.addCertRow = function(item) {
+  item = item || {};
+  const container = document.getElementById("certs-input-container");
+  const row = document.createElement("div");
+  row.className = "border border-gray-200 rounded-xl p-4 space-y-2";
+  row.innerHTML = '<div class="flex justify-end remove-wrap"></div>' +
+    '<input type="text" class="field-input cert-name" placeholder="اسم الشهادة" value="' + esc(item.name || "") + '">' +
+    '<input type="text" class="field-input cert-issuer" placeholder="الجهة المانحة" value="' + esc(item.issuer || "") + '">' +
+    '<input type="text" class="field-input cert-year" placeholder="سنة الحصول عليها" value="' + esc(item.year || "") + '">' +
+    '<input type="url" class="field-input cert-url" placeholder="رابط الشهادة (اختياري)" value="' + esc(item.url || "") + '">';
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button"; removeBtn.className = "item-remove-btn";
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.querySelector(".remove-wrap").appendChild(removeBtn);
+  container.appendChild(row);
+};
+
+/* ==================== الحفظ في Firestore ==================== */
+async function saveField(updates, msgElId, sectionToClose) {
+  try {
+    if (!currentUser) throw new Error("لا يوجد مستخدم مسجل دخول.");
+    await updateDoc(doc(db, userCollection, currentUser.uid), Object.assign({}, updates, { updatedAt: new Date() }));
+    Object.assign(profileData, updates);
+    renderAll();
+    showMsg(msgElId, "تم الحفظ بنجاح.", "success");
+    if (sectionToClose) {
+      setTimeout(() => {
+        const editEl = document.getElementById(sectionToClose + "-edit");
+        const viewEl = document.getElementById(sectionToClose + "-view");
+        if (editEl) editEl.classList.add("hidden");
+        if (viewEl) viewEl.classList.remove("hidden");
+      }, 700);
+    }
+  } catch (err) {
+    console.error(err);
+    showMsg(msgElId, "حدث خطأ أثناء الحفظ: " + (err.message || "غير معروف"), "error");
+  }
+}
+
+window.saveBio = () => saveField({ bio: document.getElementById("input-bio").value.trim() }, "bio-message", "bio");
+
+window.saveContact = () => {
+  const phone = document.getElementById("input-phone").value.trim();
+  const whatsapp = document.getElementById("input-whatsapp").value.trim();
+  const linkedin = document.getElementById("input-linkedin").value.trim();
+  const website = document.getElementById("input-website").value.trim();
+  const location = {
+    state: stateSel.value,
+    city: citySel.value,
+    lat: pickedLat,
+    lng: pickedLng
+  };
+  if (userRole === "employer") {
+    saveField({
+      companyInfo: Object.assign({}, profileData.companyInfo || {}, { phone, location, website })
+    }, "contact-message", "contact");
+  } else {
+    saveField({
+      contact: Object.assign({}, profileData.contact || {}, { phone, whatsapp, location }),
+      links: Object.assign({}, profileData.links || {}, { linkedin, website })
+    }, "contact-message", "contact");
+  }
+};
+
+window.saveJobStatus = (v) => saveField({ jobStatus: v }, "jobstatus-message", null);
+
+window.saveSkills = () => {
+  const skills = Array.from(document.querySelectorAll("#skills-input-container .skill-input")).map(i => i.value.trim()).filter(Boolean);
+  saveField({ skills, experience: document.getElementById("input-experience").value }, "skills-message", "skills");
+};
+
+window.saveLanguages = () => {
+  const languages = Array.from(document.querySelectorAll("#languages-input-container > div")).map(row => ({
+    name: row.querySelector(".lang-name").value.trim(),
+    level: row.querySelector(".lang-level").value
+  })).filter(l => l.name);
+  saveField({ languages }, "languages-message", "languages");
+};
+
+window.saveWorkExp = () => {
+  const workExperience = Array.from(document.querySelectorAll("#workexp-input-container > div")).map(row => ({
+    title: row.querySelector(".we-title").value.trim(),
+    company: row.querySelector(".we-company").value.trim(),
+    duration: row.querySelector(".we-duration").value.trim(),
+    description: row.querySelector(".we-description").value.trim()
+  })).filter(w => w.title || w.company);
+  saveField({ workExperience }, "workexp-message", "workexp");
+};
+
+window.saveEducation = () => {
+  const education = Array.from(document.querySelectorAll("#education-input-container > div")).map(row => ({
+    degree: row.querySelector(".ed-degree").value.trim(),
+    institution: row.querySelector(".ed-institution").value.trim(),
+    year: row.querySelector(".ed-year").value.trim()
+  })).filter(e => e.degree || e.institution);
+  saveField({ education }, "education-message", "education");
+};
+
+window.saveCerts = () => {
+  const certifications = Array.from(document.querySelectorAll("#certs-input-container > div")).map(row => ({
+    name: row.querySelector(".cert-name").value.trim(),
+    issuer: row.querySelector(".cert-issuer").value.trim(),
+    year: row.querySelector(".cert-year").value.trim(),
+    url: row.querySelector(".cert-url").value.trim()
+  })).filter(c => c.name);
+  saveField({ certifications }, "certs-message", "certs");
+};
+
+window.saveLinks = () => saveField({ links: Object.assign({}, profileData.links || {}, { cv: document.getElementById("input-cv").value.trim() }) }, "links-message", "links");
+
+window.saveBasicInfo = async () => {
+  const name = document.getElementById("input-name").value.trim();
+  const headline = document.getElementById("input-headline").value.trim();
+  if (!name) { showMsg("basic-message", "يرجى إدخال الاسم الكامل.", "error"); return; }
+  try {
+    const updates = { name, headline };
+    if (userRole === "craftsman") {
+      const craftType = document.getElementById("input-craft-type").value;
+      const yearsOfExperience = parseInt(document.getElementById("input-craft-years").value) || 0;
+      const hourlyRate = document.getElementById("input-craft-rate").value.trim();
+      const serviceArea = document.getElementById("input-craft-area").value.trim();
+      updates.craftsmanInfo = Object.assign({}, profileData.craftsmanInfo || {}, { craftType, yearsOfExperience, hourlyRate, serviceArea });
+    } else if (userRole === "employer") {
+      updates.companyInfo = Object.assign({}, profileData.companyInfo || {}, { businessType: headline });
+    }
+    await updateProfile(currentUser, { displayName: name });
+    await saveField(updates, "basic-message", null);
+  } catch (err) {
+    showMsg("basic-message", "حدث خطأ أثناء حفظ البيانات الأساسية.", "error");
+  }
+};
+
+window.savePassword = async () => {
+  const current = document.getElementById("input-current-password").value;
+  const next = document.getElementById("input-new-password").value;
+  const confirmVal = document.getElementById("input-confirm-password").value;
+  if (!current || !next) { showMsg("password-message", "يرجى تعبئة جميع الحقول.", "error"); return; }
+  if (next.length < 6) { showMsg("password-message", "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.", "error"); return; }
+  if (next !== confirmVal) { showMsg("password-message", "كلمة المرور الجديدة وتأكيدها غير متطابقين.", "error"); return; }
+  const btn = document.getElementById("save-password-btn");
+  const original = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span> جاري التحديث...';
+  try {
+    const credential = EmailAuthProvider.credential(currentUser.email, current);
+    await reauthenticateWithCredential(currentUser, credential);
+    await updatePassword(currentUser, next);
+    showMsg("password-message", "تم تحديث كلمة المرور بنجاح.", "success");
+    document.getElementById("input-current-password").value = "";
+    document.getElementById("input-new-password").value = "";
+    document.getElementById("input-confirm-password").value = "";
+  } catch (err) {
+    let msg = "حدث خطأ أثناء تحديث كلمة المرور.";
+    if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") msg = "كلمة المرور الحالية غير صحيحة.";
+    showMsg("password-message", msg, "error");
+  } finally {
+    btn.disabled = false; btn.innerHTML = original;
+  }
+};
+
+window.saveNotifications = () => saveField({
+  notificationSettings: {
+    emailNotifications: document.getElementById("notif-email").checked,
+    jobAlerts: document.getElementById("notif-jobalerts").checked,
+    messageNotifications: document.getElementById("notif-messages").checked,
+    applicationUpdates: document.getElementById("notif-applications").checked
+  }
+}, "notifications-message", null);
+
+/* ==================== رفع الصور عبر Cloudinary ==================== */
+async function uploadImageToCloudinary(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  const response = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+  if (!response.ok) {
+    const errText = await response.text().catch(() => "");
+    console.error("Cloudinary upload error:", response.status, errText);
+    throw new Error("فشل رفع الصورة إلى Cloudinary (كود " + response.status + ")");
+  }
+  const data = await response.json();
+  if (!data.secure_url) throw new Error("لم يتم استلام رابط الصورة من Cloudinary.");
+  return data.secure_url;
+}
+
+document.getElementById("cover-input").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  showMsg("header-message", "جاري رفع صورة الغلاف...", "success");
+  try {
+    const url = await uploadImageToCloudinary(file);
+    await saveField({ coverPhotoUrl: url }, "header-message", null);
+  } catch (err) {
+    showMsg("header-message", "تعذر رفع صورة الغلاف: " + err.message, "error");
+  }
+  e.target.value = "";
+});
+
+document.getElementById("avatar-input").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  showMsg("header-message", "جاري رفع الصورة الشخصية...", "success");
+  try {
+    const url = await uploadImageToCloudinary(file);
+    if (userRole === "employer") {
+      await saveField({ companyInfo: Object.assign({}, profileData.companyInfo || {}, { logoUrl: url }) }, "header-message", null);
+    } else {
+      await saveField({ profileImageUrl: url }, "header-message", null);
+    }
+  } catch (err) {
+    showMsg("header-message", "تعذر رفع الصورة الشخصية: " + err.message, "error");
+  }
+  e.target.value = "";
+});
+
+window.handlePortfolioUpload = async function(input) {
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+  showMsg("portfolio-message", "جاري رفع الصور...", "success");
+  try {
+    const urls = await Promise.all(files.map(f => uploadImageToCloudinary(f)));
+    const previousWorksUrls = (profileData.previousWorksUrls || []).concat(urls);
+    await saveField({ previousWorksUrls }, "portfolio-message", null);
+  } catch (err) {
+    showMsg("portfolio-message", "تعذر رفع بعض الصور: " + err.message, "error");
+  }
+  input.value = "";
+};
+
+window.removeWork = async function(index) {
+  const urls = (profileData.previousWorksUrls || []).slice();
+  urls.splice(index, 1);
+  await saveField({ previousWorksUrls: urls }, "portfolio-message", null);
+};
+
+/* ==================== تبويب الوظائف ==================== */
+window.switchJobsSubTab = function(key) {
+  document.querySelectorAll("#jobs-subtabs [data-subtab]").forEach(b => b.classList.remove("active"));
+  const btn = document.querySelector('#jobs-subtabs [data-subtab="' + key + '"]');
+  if (btn) btn.classList.add("active");
+  ["saved", "applied", "history"].forEach(k => {
+    const el = document.getElementById("subpanel-" + k);
+    if (el) el.classList.toggle("hidden", k !== key);
+  });
+};
+
+function jobMiniCardHtml(title, company, extraHtml) {
+  return '<div class="job-mini-card"><div class="job-mini-icon"><i class="fas fa-briefcase"></i></div>' +
+    '<div class="flex-1 min-w-0"><p class="font-bold text-gray-800 truncate">' + esc(title) + '</p>' +
+    '<p class="text-gray-500 text-sm truncate">' + esc(company) + '</p></div>' +
+    (extraHtml || '') + '</div>';
+}
+
+async function loadJobsRelatedData() {
+  if (userRole === "employer") {
+    loadSuggestedEmployeesForEmployer();
+    return;
+  }
+  if (userRole === "craftsman") {
+    loadSuggestedProjectsForCraftsman();
+    return;
+  }
+  try {
+    const jobsSnap = await getDocs(collection(db, "jobs"));
+    allJobsCache = jobsSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(j => (j.status || "active") === "active");
+  } catch (e) {
+    console.warn("تعذر تحميل الوظائف:", e);
+    allJobsCache = [];
+  }
+  renderSavedJobs();
+  await renderAppliedAndHistory();
+  renderSuggestedJobsForEmployee();
+}
+
+function renderSavedJobs() {
+  const listEl = document.getElementById("saved-jobs-list");
+  const emptyEl = document.getElementById("saved-jobs-empty");
+  const bookmarks = profileData.bookmarkedJobs || [];
+  const jobs = bookmarks.map(id => allJobsCache.find(j => j.id === id)).filter(Boolean);
+  emptyEl.classList.toggle("hidden", jobs.length > 0);
+  listEl.innerHTML = jobs.map(job => jobMiniCardHtml(
+    job.title, job.companyName,
+    '<a href="job_listing_page.html" class="save-btn !py-2 !px-4 text-sm">عرض في صفحة الوظائف</a>'
+  )).join("");
+}
+
+async function renderAppliedAndHistory() {
+  const appliedList = document.getElementById("applied-jobs-list");
+  const appliedEmpty = document.getElementById("applied-jobs-empty");
+  const historyList = document.getElementById("history-jobs-list");
+  const historyEmpty = document.getElementById("history-jobs-empty");
+  try {
+    const q = query(collection(db, "applications"), where("employeeId", "==", currentUser.uid));
+    const snap = await getDocs(q);
+    const applications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const pending = applications.filter(a => !a.status || a.status === "pending" || a.status === "reviewing");
+    const resolved = applications.filter(a => a.status === "accepted" || a.status === "rejected");
+    appliedEmpty.classList.toggle("hidden", pending.length > 0);
+    appliedList.innerHTML = pending.map(a => jobMiniCardHtml(
+      a.jobTitle, a.companyName,
+      '<span class="status-pill ' + (a.status === "reviewing" ? "reviewing" : "pending") + '">' + (a.status === "reviewing" ? "قيد المراجعة" : "بانتظار الرد") + "</span>"
+    )).join("");
+    historyEmpty.classList.toggle("hidden", resolved.length > 0);
+    historyList.innerHTML = resolved.map(a => jobMiniCardHtml(
+      a.jobTitle, a.companyName,
+      '<span class="status-pill ' + a.status + '">' + (a.status === "accepted" ? "تم القبول" : "تم الرفض") + "</span>"
+    )).join("");
+  } catch (e) {
+    console.warn("تعذر تحميل طلبات التوظيف:", e);
+    appliedEmpty.classList.remove("hidden");
+    historyEmpty.classList.remove("hidden");
+  }
+}
+
+/* ==================== المقترحات ==================== */
+function skillOverlapScore(listA, listB) {
+  if (!Array.isArray(listA) || !Array.isArray(listB) || !listA.length || !listB.length) return 0;
+  const a = listA.map(s => (s || "").toLowerCase().trim());
+  const b = listB.map(s => (s || "").toLowerCase().trim());
+  const overlap = a.filter(s => b.includes(s));
+  return overlap.length;
+}
+
+function renderSuggestedJobsForEmployee() {
+  const listEl = document.getElementById("suggestions-list");
+  const emptyEl = document.getElementById("suggestions-empty");
+  document.getElementById("suggestions-title").innerHTML = '<i class="fas fa-bolt ml-1 text-amber-500"></i> وظائف تناسب مهاراتك';
+  const skills = profileData.skills || [];
+  if (!skills.length || !allJobsCache.length) { listEl.innerHTML = ""; emptyEl.classList.remove("hidden"); return; }
+  const scored = allJobsCache
+    .map(job => ({ job, score: skillOverlapScore(skills, job.skillsRequired || []) }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
+  if (!scored.length) { listEl.innerHTML = ""; emptyEl.classList.remove("hidden"); return; }
+  emptyEl.classList.add("hidden");
+  listEl.innerHTML = scored.map(({ job, score }) => jobMiniCardHtml(
+    job.title, job.companyName,
+    '<span class="status-pill accepted">' + score + ' مهارة مشتركة</span>'
+  )).join("");
+}
+
+async function loadSuggestedEmployeesForEmployer() {
+  const listEl = document.getElementById("suggestions-list");
+  const emptyEl = document.getElementById("suggestions-empty");
+  document.getElementById("suggestions-title").innerHTML = '<i class="fas fa-users ml-1 text-blue-500"></i> موظفون مقترحون لنشاطك';
+  const businessType = (profileData.companyInfo && profileData.companyInfo.businessType) || "";
+  const description = (profileData.companyInfo && profileData.companyInfo.description) || "";
+  const keywords = (businessType + " " + description).toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  if (!keywords.length) { emptyEl.classList.remove("hidden"); return; }
+  try {
+    const snap = await getDocs(collection(db, "employees"));
+    const employees = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const scored = employees.map(emp => {
+      const empText = ((emp.skills || []).join(" ") + " " + (emp.headline || "")).toLowerCase();
+      const score = keywords.filter(k => empText.includes(k)).length;
+      return { emp, score };
+    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 4);
+    if (!scored.length) { emptyEl.classList.remove("hidden"); return; }
+    emptyEl.classList.add("hidden");
+    listEl.innerHTML = scored.map(({ emp, score }) =>
+      '<div class="job-mini-card"><img src="' + (emp.profileImageUrl || ("https://ui-avatars.com/api/?background=2563eb&color=fff&name=" + encodeURIComponent(emp.name || "م"))) + '" class="w-10 h-10 rounded-full object-cover flex-shrink-0">' +
+      '<div class="flex-1 min-w-0"><p class="font-bold text-gray-800 truncate">' + esc(emp.name || "موظف") + '</p>' +
+      '<p class="text-gray-500 text-sm truncate">' + esc(emp.headline || "") + '</p></div>' +
+      '<a href="employee_listing_page.html?search=' + encodeURIComponent(emp.name || "") + '" class="save-btn !py-2 !px-4 text-sm">عرض</a></div>'
+    ).join("");
+  } catch (e) {
+    console.warn("تعذر تحميل الموظفين المقترحين:", e);
+    emptyEl.classList.remove("hidden");
+  }
+}
+
+async function loadSuggestedProjectsForCraftsman() {
+  const listEl = document.getElementById("suggestions-list");
+  const emptyEl = document.getElementById("suggestions-empty");
+  document.getElementById("suggestions-title").innerHTML = '<i class="fas fa-bolt ml-1 text-amber-500"></i> مشاريع مقترحة لك';
+  const craftType = (profileData.craftsmanInfo && profileData.craftsmanInfo.craftType) || "";
+  const skills = profileData.skills || [];
+  try {
+    const snap = await getDocs(collection(db, "projects"));
+    const projects = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => (p.status || "active") === "active");
+    const scored = projects.map(proj => {
+      const projText = ((proj.requiredSkills || []).join(" ") + " " + (proj.title || "") + " " + (proj.description || "")).toLowerCase();
+      const craftScore = craftType && projText.includes(craftType.toLowerCase()) ? 3 : 0;
+      const skillScore = skillOverlapScore(skills, proj.requiredSkills || []);
+      return { proj, score: craftScore + skillScore };
+    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 4);
+    if (!scored.length) { emptyEl.classList.remove("hidden"); return; }
+    emptyEl.classList.add("hidden");
+    listEl.innerHTML = scored.map(({ proj, score }) => jobMiniCardHtml(
+      proj.title, proj.clientName || "عميل",
+      '<span class="status-pill accepted">' + score + ' تطابق</span>'
+    )).join("");
+  } catch (e) {
+    console.warn("تعذر تحميل المشاريع المقترحة:", e);
+    emptyEl.classList.remove("hidden");
+  }
+}
+</script>
+</body>
+</html>
