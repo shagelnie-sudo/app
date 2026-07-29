@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نشر وظيفة جديدة - شغلني</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+body{font-family:'Tajawal',sans-serif;background-color:#f5f7fa}
+#mobile-menu{transition:transform .3s ease-in-out;transform:translateX(100%)}
+#mobile-menu.open{transform:translateX(0)}
+.field-input,.field-select,.field-textarea{width:100%;padding:.65rem .9rem;border:1px solid #d1d5db;border-radius:.6rem;font-family:'Tajawal',sans-serif;font-size:.9rem;text-align:right;transition:all .15s}
+.field-input:focus,.field-select:focus,.field-textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15)}
+.field-label{display:block;font-size:.85rem;font-weight:700;color:#374151;margin-bottom:.4rem}
+.skill-chip{background:#eef2ff;color:#4338ca;padding:.35rem .8rem;border-radius:9999px;font-size:.8rem;display:inline-flex;align-items:center;gap:6px;margin:3px}
+.skill-chip button{background:none;border:none;color:#4338ca;cursor:pointer;font-size:.7rem}
+.message{text-align:center;padding:.85rem;border-radius:.6rem;font-size:.875rem;margin-top:.75rem;display:none}
+.message.show{display:block}
+.success-message{background:#dcfce7;color:#065f46;border:1px solid #10b981}
+.error-message{background:#fee2e2;color:#991b1b;border:1px solid #ef4444}
+.job-row{display:flex;align-items:center;gap:1rem;background:white;border:1px solid #e5e7eb;border-radius:.9rem;padding:1rem;margin-bottom:.7rem}
+.status-active{background:#dcfce7;color:#065f46;padding:2px 10px;border-radius:9999px;font-size:.7rem;font-weight:700}
+.status-closed{background:#f3f4f6;color:#6b7280;padding:2px 10px;border-radius:9999px;font-size:.7rem;font-weight:700}
+.loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-radius:50%;border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header class="bg-white shadow-sm sticky top-0 z-50">
+<nav class="container mx-auto px-4 h-20 flex items-center justify-between">
+<div class="flex items-center">
+<a href="index.html"><img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain"></a>
+<div class="hidden md:flex space-x-1 space-x-reverse mr-6">
+<a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
+<a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
+<a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
+<a href="jop_posting_page.html" class="px-4 py-2 text-blue-600 font-bold">أضف وظيفة</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<a href="profile.html" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">ملفي الشخصي</a>
+<button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition"><i class="fas fa-bars text-2xl"></i></button>
+</div>
+</nav>
+<div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+<div class="flex justify-between items-center mb-8">
+<img src="shagelnie.png.png" alt="شغلني" class="h-12">
+<button id="close-menu" class="text-gray-500 hover:text-gray-700 transition"><i class="fas fa-times text-2xl"></i></button>
+</div>
+<nav class="flex flex-col space-y-4">
+<a href="index.html" class="text-gray-600 py-2 border-b border-gray-100">الرئيسية</a>
+<a href="job_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100">الوظائف</a>
+<a href="employee_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100">الموظفون</a>
+<a href="jop_posting_page.html" class="text-blue-600 font-bold py-2 border-b border-gray-100">أضف وظيفة</a>
+<a href="profile.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold mt-4">ملفي الشخصي</a>
+</nav>
+</div>
+</header>
+
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+
+<!-- حالة: غير مسجل دخول أو ليس صاحب عمل -->
+<div id="not-employer-state" class="hidden bg-white rounded-xl shadow-sm p-10 text-center">
+<i class="fas fa-lock text-4xl text-gray-300 mb-4"></i>
+<h2 class="text-xl font-bold text-gray-800 mb-2" id="not-employer-title">هذه الميزة لأصحاب العمل فقط</h2>
+<p class="text-gray-500 mb-6" id="not-employer-text">يجب أن يكون لديك حساب "شركة / صاحب عمل" لنشر وظيفة.</p>
+<a href="register.html" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">إنشاء حساب صاحب عمل</a>
+</div>
+
+<div id="employer-content" class="hidden">
+<h1 class="text-3xl font-extrabold text-gray-900 mb-1">نشر وظيفة جديدة</h1>
+<p class="text-gray-500 mb-6">املأ التفاصيل التالية لجذب أفضل الكفاءات المناسبة</p>
+
+<form id="jobForm" class="bg-white rounded-xl shadow-sm p-6 space-y-5">
+<div>
+<label class="field-label">عنوان الوظيفة</label>
+<input type="text" id="jobTitle" class="field-input" placeholder="مثال: كهربائي صناعي" required>
+</div>
+<div>
+<label class="field-label">وصف الوظيفة والمهام</label>
+<textarea id="jobDescription" class="field-textarea" rows="5" placeholder="اشرح طبيعة العمل والمهام المطلوبة" required></textarea>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="field-label">نوع الدوام</label>
+<select id="jobType" class="field-select" required>
+<option value="دوام كامل">دوام كامل</option>
+<option value="دوام جزئي">دوام جزئي</option>
+<option value="عن بعد">عن بعد</option>
+<option value="مؤقت">مؤقت</option>
+</select>
+</div>
+<div>
+<label class="field-label">الراتب (اختياري)</label>
+<input type="text" id="jobSalary" class="field-input" placeholder="مثال: 3,000 - 4,000 ج.س">
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="field-label">الولاية</label>
+<select id="jobState" class="field-select"><option value="">اختر ولاية</option></select>
+</div>
+<div>
+<label class="field-label">المدينة</label>
+<select id="jobCity" class="field-select" disabled><option value="">اختر مدينة</option></select>
+</div>
+</div>
+<div>
+<label class="field-label">المهارات المطلوبة (حتى 8 مهارات)</label>
+<div class="flex gap-2 mb-2">
+<input type="text" id="skillInput" class="field-input" placeholder="مثال: لحام، صيانة كهربائية...">
+<button type="button" id="addSkillBtn" class="px-4 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 flex-shrink-0"><i class="fas fa-plus"></i></button>
+</div>
+<div id="skillsWrap"></div>
+</div>
+<button type="submit" id="publishBtn" class="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2">
+<span>نشر الوظيفة</span>
+</button>
+<div class="message" id="formMessage"></div>
+</form>
+
+<div class="mt-10">
+<h2 class="text-xl font-bold text-gray-800 mb-4"><i class="fas fa-briefcase ml-1 text-blue-600"></i> وظائفي المنشورة</h2>
+<div id="myJobsList"></div>
+<p class="text-gray-400 text-sm text-center py-6 hidden" id="myJobsEmpty">لم تنشر أي وظيفة بعد.</p>
+</div>
+</div>
+
+<div id="page-loader" class="text-center py-24 text-gray-400">
+<i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+<p>جاري التحقق من حسابك...</p>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, where, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+  authDomain: "shaglni-c64c0.firebaseapp.com",
+  projectId: "shaglni-c64c0",
+  storageBucket: "shaglni-c64c0.firebasestorage.app",
+  messagingSenderId: "768887356636",
+  appId: "1:768887356636:web:11ec1d6991add3309c8819",
+  measurementId: "G-98GQGZS09W"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const sudanStates = ["الخرطوم","الجزيرة","البحر الأحمر","كسلا","القضارف","سنار","النيل الأبيض","النيل الأزرق","الشمالية","نهر النيل","شمال كردفان","جنوب كردفان","غرب كردفان","شمال دارفور","جنوب دارفور","غرب دارفور","وسط دارفور","شرق دارفور"];
+const citiesByState = {"الخرطوم":["الخرطوم","أم درمان","بحري"],"الجزيرة":["ود مدني","الحصاحيصا","المناقل"],"البحر الأحمر":["بورتسودان","سواكن","طوكر"],"كسلا":["كسلا","حلفا الجديدة","أروما"],"القضارف":["القضارف","القلابات","الفو"],"سنار":["سنار","الدالي والمزموم","ود النيل"],"النيل الأبيض":["ربك","كوستي","الدويم"],"النيل الأزرق":["الدمازين","الروصيرص","الكرمك"],"الشمالية":["دنقلا","عطبرة","كريمة"],"نهر النيل":["الدامر","شندي","عطبرة"],"شمال كردفان":["الأبيض","أم روابة","الرهد"],"جنوب كردفان":["كادقلي","أبو جبيهة","تلودي"],"غرب كردفان":["الفولة","النهود","المجلد"],"شمال دارفور":["الفاشر","كبكابية","مليط"],"جنوب دارفور":["نيالا","الضعين","برام"],"غرب دارفور":["الجنينة","كرينك","كلبس"],"وسط دارفور":["زالنجي","ودعة","أم دخن"],"شرق دارفور":["الضعين","عديلة","أبوكارنكا"]};
+
+let currentUser = null;
+let employerData = null;
+
+/* ==================== الهيدر ==================== */
+document.getElementById("mobile-menu-button").addEventListener("click", () => document.getElementById("mobile-menu").classList.add("open"));
+document.getElementById("close-menu").addEventListener("click", () => document.getElementById("mobile-menu").classList.remove("open"));
+
+/* ==================== الولاية/المدينة ==================== */
+const stateSel = document.getElementById("jobState");
+const citySel = document.getElementById("jobCity");
+sudanStates.forEach(s => { const o = document.createElement("option"); o.value = s; o.textContent = s; stateSel.appendChild(o); });
+stateSel.addEventListener("change", () => {
+  citySel.innerHTML = '<option value="">اختر مدينة</option>';
+  const cities = citiesByState[stateSel.value] || [];
+  citySel.disabled = cities.length === 0;
+  cities.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; citySel.appendChild(o); });
+});
+
+/* ==================== المهارات المطلوبة ==================== */
+let requiredSkills = [];
+function renderSkillsWrap() {
+  document.getElementById("skillsWrap").innerHTML = requiredSkills.map((s, i) =>
+    '<span class="skill-chip">' + s + ' <button type="button" onclick="removeSkill(' + i + ')"><i class="fas fa-times"></i></button></span>'
+  ).join("");
+}
+window.removeSkill = function(i) { requiredSkills.splice(i, 1); renderSkillsWrap(); };
+document.getElementById("addSkillBtn").addEventListener("click", addSkillFromInput);
+document.getElementById("skillInput").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addSkillFromInput(); } });
+function addSkillFromInput() {
+  const input = document.getElementById("skillInput");
+  const val = input.value.trim();
+  if (!val) return;
+  if (requiredSkills.length >= 8) { showFormMessage("لا يمكن إضافة أكثر من 8 مهارات.", "error"); return; }
+  if (!requiredSkills.includes(val)) requiredSkills.push(val);
+  input.value = "";
+  renderSkillsWrap();
+}
+
+function showFormMessage(msg, type) {
+  const el = document.getElementById("formMessage");
+  el.textContent = msg;
+  el.className = "message show " + type + "-message";
+  setTimeout(() => el.classList.remove("show"), 5000);
+}
+
+/* ==================== المصادقة والتحقق من الدور ==================== */
+onAuthStateChanged(auth, async (user) => {
+  const loader = document.getElementById("page-loader");
+  if (!user) {
+    loader.style.display = "none";
+    document.getElementById("not-employer-title").textContent = "يجب تسجيل الدخول أولاً";
+    document.getElementById("not-employer-text").textContent = "سجّل دخولك بحساب صاحب عمل لتتمكن من نشر وظيفة.";
+    document.getElementById("not-employer-state").classList.remove("hidden");
+    return;
+  }
+  currentUser = user;
+  try {
+    const snap = await getDoc(doc(db, "All_jops", user.uid));
+    if (!snap.exists()) {
+      loader.style.display = "none";
+      document.getElementById("not-employer-state").classList.remove("hidden");
+      return;
+    }
+    employerData = snap.data();
+    loader.style.display = "none";
+    document.getElementById("employer-content").classList.remove("hidden");
+    loadMyJobs();
+  } catch (err) {
+    console.error(err);
+    loader.innerHTML = '<p class="text-red-500">حدث خطأ أثناء التحقق من حسابك. أعد تحميل الصفحة.</p>';
+  }
+});
+
+/* ==================== نشر الوظيفة ==================== */
+document.getElementById("jobForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("publishBtn");
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span><span>جاري النشر...</span>';
+
+  try {
+    const jobData = {
+      title: document.getElementById("jobTitle").value.trim(),
+      description: document.getElementById("jobDescription").value.trim(),
+      jobType: document.getElementById("jobType").value,
+      salaryText: document.getElementById("jobSalary").value.trim() || null,
+      location: { state: stateSel.value || null, city: citySel.value || null },
+      skillsRequired: requiredSkills,
+      companyName: (employerData.companyInfo && employerData.companyInfo.name) || employerData.name || "جهة غير معروفة",
+      employerId: currentUser.uid,
+      employerLogoUrl: (employerData.companyInfo && employerData.companyInfo.logoUrl) || null,
+      status: "active",
+      postedAt: serverTimestamp()
+    };
+    await addDoc(collection(db, "jobs"), jobData);
+    showFormMessage("تم نشر الوظيفة بنجاح!", "success");
+    document.getElementById("jobForm").reset();
+    requiredSkills = []; renderSkillsWrap();
+    citySel.innerHTML = '<option value="">اختر مدينة</option>'; citySel.disabled = true;
+    loadMyJobs();
+  } catch (err) {
+    console.error(err);
+    showFormMessage("حدث خطأ أثناء نشر الوظيفة: " + err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+});
+
+/* ==================== وظائفي المنشورة ==================== */
+async function loadMyJobs() {
+  const listEl = document.getElementById("myJobsList");
+  const emptyEl = document.getElementById("myJobsEmpty");
+  try {
+    const q = query(collection(db, "jobs"), where("employerId", "==", currentUser.uid));
+    const snap = await getDocs(q);
+    const jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    jobs.sort((a, b) => (b.postedAt?.seconds || 0) - (a.postedAt?.seconds || 0));
+    emptyEl.classList.toggle("hidden", jobs.length > 0);
+    listEl.innerHTML = jobs.map(job => {
+      const isActive = (job.status || "active") === "active";
+      return '<div class="job-row">' +
+        '<div class="flex-1 min-w-0"><p class="font-bold text-gray-800 truncate">' + job.title + '</p>' +
+        '<p class="text-gray-400 text-xs">' + (job.location?.city || job.location?.state || "غير محدد") + '</p></div>' +
+        '<span class="' + (isActive ? "status-active" : "status-closed") + '">' + (isActive ? "نشطة" : "مغلقة") + '</span>' +
+        '<button onclick="toggleJobStatus(\'' + job.id + '\', ' + isActive + ')" class="text-sm font-bold ' + (isActive ? "text-red-600 hover:underline" : "text-blue-600 hover:underline") + '">' +
+        (isActive ? "إغلاق" : "إعادة تفعيل") + '</button></div>';
+    }).join("");
+  } catch (err) {
+    console.error("تعذر تحميل وظائفك:", err);
+  }
+}
+
+window.toggleJobStatus = async function(jobId, isCurrentlyActive) {
+  try {
+    await updateDoc(doc(db, "jobs", jobId), { status: isCurrentlyActive ? "closed" : "active" });
+    loadMyJobs();
+  } catch (err) {
+    console.error(err);
+    alert("تعذر تحديث حالة الوظيفة.");
+  }
+};
+</script>
+</body>
+</html>
