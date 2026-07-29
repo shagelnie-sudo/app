@@ -6,10 +6,13 @@
 <title>ملفي الشخصي - شغلني</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 .gradient-bg{background:linear-gradient(135deg,#2563eb 0%,#3b82f6 100%)}
+.gradient-bg-employer{background:linear-gradient(135deg,#065f46 0%,#16a34a 55%,#4ade80 100%)}
 #mobile-menu{transition:transform .3s ease-in-out;transform:translateX(100%)}
 #mobile-menu.open{transform:translateX(0)}
 .user-avatar-btn{width:2.5rem;height:2.5rem;border-radius:9999px;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:white;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 8px rgba(37,99,235,0.3);cursor:pointer;transition:all .2s ease;overflow:hidden;flex-shrink:0}
@@ -76,7 +79,23 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 .portfolio-item:hover img{transform:scale(1.08)}
 .portfolio-remove{position:absolute;top:6px;left:6px;width:26px;height:26px;border-radius:9999px;background:rgba(239,68,68,0.9);color:white;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;font-size:.7rem}
 .empty-state{text-align:center;padding:3rem 1rem;color:#9ca3af}
+.job-mini-card{display:flex;align-items:center;gap:1rem;background:white;border:1px solid #e5e7eb;border-radius:.9rem;padding:1rem;transition:all .2s}
+.job-mini-card:hover{border-color:#93c5fd;box-shadow:0 6px 14px rgba(37,99,235,0.08)}
+.job-mini-icon{width:44px;height:44px;border-radius:.7rem;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.status-pill{padding:3px 10px;border-radius:9999px;font-size:.7rem;font-weight:700;white-space:nowrap}
+.status-pill.pending{background:#fef3c7;color:#92400e}
+.status-pill.accepted{background:#d1fae5;color:#065f46}
+.status-pill.rejected{background:#fee2e2;color:#991b1b}
+.status-pill.reviewing{background:#dbeafe;color:#1d4ed8}
 .empty-state i{font-size:2.5rem;margin-bottom:1rem;color:#d1d5db}
+.stat-card{background:white;border:1px solid #e5e7eb;border-radius:1rem;padding:1.1rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.06)}
+.stat-icon{width:38px;height:38px;border-radius:.7rem;display:flex;align-items:center;justify-content:center;font-size:.95rem;margin-bottom:.6rem}
+.stat-value{font-size:1.6rem;font-weight:900;line-height:1;margin-bottom:.3rem}
+.stat-label{font-size:.75rem;color:#6b7280;font-weight:600}
+.star-row{display:flex;align-items:center;gap:3px}
+.star-row i{color:#f59e0b;font-size:.78rem}
+.star-row i.empty-star{color:#e5e7eb}
 .message-container{margin-top:.85rem}
 .message{text-align:center;padding:.75rem;border-radius:.6rem;display:none;font-size:.875rem;animation:slideDown .3s ease-out;margin-bottom:.5rem}
 .message.show{display:block}
@@ -225,7 +244,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')"><i class="fas fa-user"></i> نظرة عامة</button>
 <button class="tab-btn" data-tab="skills" id="tab-btn-skills" onclick="switchTab('skills')"><i class="fas fa-layer-group"></i> المهارات والخبرات</button>
 <button class="tab-btn" data-tab="portfolio" id="tab-btn-portfolio" onclick="switchTab('portfolio')"><i class="fas fa-briefcase"></i> معرض الأعمال</button>
-<button class="tab-btn" data-tab="jobs" id="tab-btn-jobs" onclick="switchTab('jobs')"><i class="fas fa-bookmark"></i> الوظائف <span class="text-[0.65rem] opacity-70">(قريباً)</span></button>
+<button class="tab-btn" data-tab="jobs" id="tab-btn-jobs" onclick="switchTab('jobs')"><i class="fas fa-bookmark"></i> الوظائف</button>
 <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-gear"></i> الإعدادات</button>
 </div>
 
@@ -247,10 +266,34 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 </div>
 <div class="dash-card">
 <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-chart-simple ml-1 text-blue-600"></i> إحصائياتي</h2>
-<div class="grid grid-cols-3 gap-3 text-center">
-<div class="bg-blue-50 rounded-xl p-4"><p class="text-2xl font-black text-blue-600" id="stat-views">0</p><p class="text-xs text-gray-500 mt-1">مشاهدة للملف</p></div>
-<div class="bg-emerald-50 rounded-xl p-4"><p class="text-2xl font-black text-emerald-600" id="stat-applications">0</p><p class="text-xs text-gray-500 mt-1">طلب توظيف</p></div>
-<div class="bg-amber-50 rounded-xl p-4"><p class="text-2xl font-black text-amber-600" id="stat-offers">0</p><p class="text-xs text-gray-500 mt-1">عرض عمل</p></div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="stat-card">
+<div class="stat-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-eye"></i></div>
+<p class="stat-value text-blue-600" id="stat-views">0</p>
+<p class="stat-label">مشاهدة للملف</p>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background:#f0fdf4;color:#16a34a"><i class="fas fa-paper-plane"></i></div>
+<p class="stat-value text-emerald-600" id="stat-applications">0</p>
+<p class="stat-label">طلب توظيف</p>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background:#fffbeb;color:#d97706"><i class="fas fa-handshake"></i></div>
+<p class="stat-value text-amber-600" id="stat-offers">0</p>
+<p class="stat-label">عرض عمل</p>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-bookmark"></i></div>
+<p class="stat-value" style="color:#7c3aed" id="stat-saved">0</p>
+<p class="stat-label">وظيفة محفوظة</p>
+</div>
+</div>
+<div class="dash-card" id="suggestions-card">
+<div class="section-head">
+<h2 class="text-lg font-bold text-gray-800" id="suggestions-title"><i class="fas fa-bolt ml-1 text-amber-500"></i> مقترح لك</h2>
+</div>
+<div id="suggestions-list" class="space-y-3"></div>
+<p class="text-gray-400 text-sm" id="suggestions-empty">لا توجد اقتراحات كافية بعد.</p>
 </div>
 </div>
 </div>
@@ -261,12 +304,21 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="flex items-center gap-3 text-gray-600"><i class="fas fa-envelope w-5 text-blue-500"></i><span id="view-email">—</span></div>
 <div class="flex items-center gap-3 text-gray-600"><i class="fas fa-phone w-5 text-blue-500"></i><span id="view-phone">غير مضاف</span></div>
 <div class="flex items-center gap-3 text-gray-600"><i class="fas fa-map-marker-alt w-5 text-blue-500"></i><span id="view-full-location">غير محدد</span></div>
+<div class="flex items-center gap-3 text-gray-600 hidden" id="view-precise-location-wrap"><i class="fas fa-location-crosshairs w-5 text-blue-500"></i><a href="#" id="view-precise-location-link" target="_blank" class="text-blue-600 hover:underline">عرض الموقع الدقيق على الخريطة</a></div>
 <div class="flex items-center gap-3 text-gray-600"><i class="fab fa-linkedin w-5 text-blue-500"></i><span id="view-linkedin">غير مضاف</span></div>
 </div>
 <div class="hidden space-y-3" id="contact-edit">
 <div><label class="field-label">رقم الهاتف للتواصل</label><input type="tel" class="field-input" id="input-phone" placeholder="اختياري"></div>
 <div><label class="field-label">الولاية</label><select class="field-select" id="input-state"><option value="">اختر ولاية</option></select></div>
 <div><label class="field-label">المدينة</label><select class="field-select" id="input-city"><option value="">اختر مدينة</option></select></div>
+<div>
+<div class="flex items-center justify-between mb-2">
+<label class="field-label !mb-0">الموقع الدقيق على الخريطة (اختياري)</label>
+<button type="button" class="text-xs text-blue-600 font-bold hover:underline" onclick="useCurrentLocation()"><i class="fas fa-location-crosshairs ml-1"></i>استخدام موقعي الحالي</button>
+</div>
+<div id="location-map" style="height:220px;border-radius:.7rem;border:1px solid #d1d5db;overflow:hidden"></div>
+<p class="text-xs text-gray-400 mt-1">اضغط على الخريطة لتحديد موقعك بدقة (يساعد أصحاب العمل على إيجادك بسهولة أكبر).</p>
+</div>
 <div><label class="field-label">رابط لينكد إن</label><input type="url" class="field-input" id="input-linkedin" placeholder="https://linkedin.com/in/..."></div>
 <div class="flex gap-2">
 <button class="save-btn" onclick="saveContact()"><i class="fas fa-check"></i> حفظ</button>
@@ -391,9 +443,22 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 
 <!-- الوظائف -->
 <div class="tab-panel" id="panel-jobs">
-<div class="empty-state">
-<i class="fas fa-hourglass-half"></i><br>
-ميزة الوظائف (المحفوظة، المتقدم لها، وسجل الطلبات) ستُفعَّل قريباً بمجرد إطلاق صفحة الوظائف.
+<div class="flex gap-2 mb-6 flex-wrap" id="jobs-subtabs">
+<button class="tab-btn active" data-subtab="saved" onclick="switchJobsSubTab('saved')">الوظائف المحفوظة</button>
+<button class="tab-btn" data-subtab="applied" onclick="switchJobsSubTab('applied')">الوظائف المتقدم لها</button>
+<button class="tab-btn" data-subtab="history" onclick="switchJobsSubTab('history')">سجل الطلبات</button>
+</div>
+<div id="subpanel-saved">
+<div id="saved-jobs-list" class="space-y-3"></div>
+<div class="empty-state hidden" id="saved-jobs-empty"><i class="far fa-bookmark"></i><br>لا توجد وظائف محفوظة حالياً.<br><a href="job_listing_page.html" class="text-blue-600 font-bold hover:underline">تصفح الوظائف المتاحة</a></div>
+</div>
+<div class="hidden" id="subpanel-applied">
+<div id="applied-jobs-list" class="space-y-3"></div>
+<div class="empty-state hidden" id="applied-jobs-empty"><i class="far fa-paper-plane"></i><br>لم تتقدم لأي وظيفة بعد.<br><a href="job_listing_page.html" class="text-blue-600 font-bold hover:underline">ابدأ التقديم الآن</a></div>
+</div>
+<div class="hidden" id="subpanel-history">
+<div id="history-jobs-list" class="space-y-3"></div>
+<div class="empty-state hidden" id="history-jobs-empty"><i class="fas fa-clock-rotate-left"></i><br>لا يوجد سجل طلبات مغلقة بعد.</div>
 </div>
 </div>
 
@@ -438,7 +503,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, updateDoc
+  getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged, signOut, updateProfile,
@@ -472,6 +537,11 @@ let userRole = "employee";
 let userCollection = "employees";
 let profileData = {};
 let authHandled = false; // يمنع تكرار المعالجة إذا أطلق Firebase الحدث أكثر من مرة
+let locationMap = null;
+let locationMarker = null;
+let pickedLat = null;
+let pickedLng = null;
+const DEFAULT_MAP_CENTER = [15.5007, 32.5599]; // الخرطوم كنقطة انطلاق افتراضية
 
 const sudanStates = ["الخرطوم","الجزيرة","البحر الأحمر","كسلا","القضارف","سنار","النيل الأبيض","النيل الأزرق","الشمالية","نهر النيل","شمال كردفان","جنوب كردفان","غرب كردفان","شمال دارفور","جنوب دارفور","غرب دارفور","وسط دارفور","شرق دارفور"];
 const citiesByState = {"الخرطوم":["الخرطوم","أم درمان","بحري"],"الجزيرة":["ود مدني","الحصاحيصا","المناقل"],"البحر الأحمر":["بورتسودان","سواكن","طوكر"],"كسلا":["كسلا","حلفا الجديدة","أروما"],"القضارف":["القضارف","القلابات","الفو"],"سنار":["سنار","الدالي والمزموم","ود النيل"],"النيل الأبيض":["ربك","كوستي","الدويم"],"النيل الأزرق":["الدمازين","الروصيرص","الكرمك"],"الشمالية":["دنقلا","عطبرة","كريمة"],"نهر النيل":["الدامر","شندي","عطبرة"],"شمال كردفان":["الأبيض","أم روابة","الرهد"],"جنوب كردفان":["كادقلي","أبو جبيهة","تلودي"],"غرب كردفان":["الفولة","النهود","المجلد"],"شمال دارفور":["الفاشر","كبكابية","مليط"],"جنوب دارفور":["نيالا","الضعين","برام"],"غرب دارفور":["الجنينة","كرينك","كلبس"],"وسط دارفور":["زالنجي","ودعة","أم دخن"],"شرق دارفور":["الضعين","عديلة","أبوكارنكا"]};
@@ -591,6 +661,63 @@ stateSel.addEventListener("change", () => {
   });
 });
 
+/* ==================== خريطة تحديد الموقع الدقيق ==================== */
+function initLocationMap() {
+  const mapEl = document.getElementById("location-map");
+  if (!mapEl || typeof L === "undefined") return;
+
+  const center = (pickedLat != null && pickedLng != null) ? [pickedLat, pickedLng] : DEFAULT_MAP_CENTER;
+
+  if (locationMap) {
+    // الخريطة مُهيأة مسبقاً، فقط نعيد ضبط الحجم والمركز
+    locationMap.invalidateSize();
+    locationMap.setView(center, locationMarker ? 14 : 6);
+    placeMarker(center[0], center[1], false);
+    return;
+  }
+
+  locationMap = L.map("location-map").setView(center, pickedLat != null ? 14 : 6);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap",
+    maxZoom: 18
+  }).addTo(locationMap);
+
+  if (pickedLat != null && pickedLng != null) placeMarker(pickedLat, pickedLng, false);
+
+  locationMap.on("click", (e) => {
+    placeMarker(e.latlng.lat, e.latlng.lng, true);
+  });
+}
+
+function placeMarker(lat, lng, storeAsPicked) {
+  if (!locationMap) return;
+  if (locationMarker) {
+    locationMarker.setLatLng([lat, lng]);
+  } else {
+    locationMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
+    locationMarker.on("dragend", () => {
+      const pos = locationMarker.getLatLng();
+      pickedLat = pos.lat; pickedLng = pos.lng;
+    });
+  }
+  if (storeAsPicked) { pickedLat = lat; pickedLng = lng; }
+}
+
+window.useCurrentLocation = function() {
+  if (!navigator.geolocation) { showMsg("contact-message", "المتصفح لا يدعم تحديد الموقع الجغرافي.", "error"); return; }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      pickedLat = pos.coords.latitude; pickedLng = pos.coords.longitude;
+      if (locationMap) {
+        locationMap.setView([pickedLat, pickedLng], 15);
+        placeMarker(pickedLat, pickedLng, true);
+      }
+    },
+    () => { showMsg("contact-message", "تعذر تحديد موقعك. تأكد من السماح للمتصفح بالوصول للموقع.", "error"); },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+};
+
 /* ==================== التبويبات ==================== */
 window.switchTab = function(tab) {
   document.querySelectorAll("#tabs-container .tab-btn").forEach(b => b.classList.remove("active"));
@@ -668,6 +795,7 @@ onAuthStateChanged(auth, async (user) => {
     authHandled = true;
     clearTimeout(forceTimeout);
     showAppState("content");
+    loadJobsRelatedData(); // لا ننتظرها حتى لا تؤخر ظهور الملف الشخصي نفسه
   } catch (err) {
     console.error("خطأ في تحميل الملف الشخصي:", err);
     authHandled = true;
@@ -711,6 +839,8 @@ function renderHeader() {
   const coverUrl = profileData.coverPhotoUrl;
   const coverImg = document.getElementById("cover-photo");
   const coverFallback = document.getElementById("cover-fallback");
+  coverFallback.classList.toggle("gradient-bg-employer", userRole === "employer");
+  coverFallback.classList.toggle("gradient-bg", userRole !== "employer");
   if (coverUrl) { coverImg.src = coverUrl; coverImg.classList.remove("hidden"); coverFallback.classList.add("hidden"); }
   else { coverImg.classList.add("hidden"); coverFallback.classList.remove("hidden"); }
 
@@ -727,7 +857,12 @@ function renderHeader() {
 
   const ratingWrap = document.getElementById("display-rating-wrap");
   if (profileData.averageRating) {
-    ratingWrap.innerHTML = '<span class="rating-simple"><i class="fas fa-star text-amber-500"></i> ' + parseFloat(profileData.averageRating).toFixed(1) + "</span>";
+    const rNum = parseFloat(profileData.averageRating);
+    let stars = "";
+    for (let i = 1; i <= 5; i++) {
+      stars += '<i class="fas fa-star' + (i > Math.round(rNum) ? " empty-star" : "") + '"></i>';
+    }
+    ratingWrap.innerHTML = '<span class="star-row">' + stars + '</span><span class="rtxt text-gray-400 text-xs">' + rNum.toFixed(1) + (profileData.totalReviews ? " (" + profileData.totalReviews + " تقييم)" : "") + "</span>";
   } else { ratingWrap.innerHTML = ""; }
 
   const pct = calcCompletion(profileData);
@@ -746,6 +881,7 @@ function renderHeader() {
   document.getElementById("stat-views").textContent = profileData.profileViews || 0;
   document.getElementById("stat-applications").textContent = profileData.applications || 0;
   document.getElementById("stat-offers").textContent = profileData.jobOffers || 0;
+  document.getElementById("stat-saved").textContent = (profileData.bookmarkedJobs && profileData.bookmarkedJobs.length) || 0;
 }
 
 function renderOverview() {
@@ -755,6 +891,15 @@ function renderOverview() {
   const loc = userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.location) : (profileData.contact && profileData.contact.location);
   document.getElementById("view-full-location").textContent = (loc && (loc.city || loc.state)) ? [loc.city, loc.state].filter(Boolean).join("، ") : "غير محدد";
   document.getElementById("view-linkedin").textContent = (profileData.links && profileData.links.linkedin) || "غير مضاف";
+
+  const preciseWrap = document.getElementById("view-precise-location-wrap");
+  const preciseLink = document.getElementById("view-precise-location-link");
+  if (loc && typeof loc.lat === "number" && typeof loc.lng === "number") {
+    preciseLink.href = "https://www.openstreetmap.org/?mlat=" + loc.lat + "&mlon=" + loc.lng + "#map=15/" + loc.lat + "/" + loc.lng;
+    preciseWrap.classList.remove("hidden");
+  } else {
+    preciseWrap.classList.add("hidden");
+  }
 
   const langWrap = document.getElementById("languages-view-mini");
   const langs = profileData.languages || [];
@@ -830,6 +975,9 @@ function populateEditForm(name) {
       citySel.appendChild(o);
     });
     citySel.value = loc.city || "";
+    pickedLat = typeof loc.lat === "number" ? loc.lat : null;
+    pickedLng = typeof loc.lng === "number" ? loc.lng : null;
+    setTimeout(initLocationMap, 80);
   }
   if (name === "skills") {
     const container = document.getElementById("skills-input-container");
@@ -1003,7 +1151,9 @@ window.saveContact = () => saveField({
     location: {
       state: stateSel.value,
       city: citySel.value,
-      area: (profileData.contact && profileData.contact.location && profileData.contact.location.area) || null
+      area: (profileData.contact && profileData.contact.location && profileData.contact.location.area) || null,
+      lat: pickedLat,
+      lng: pickedLng
     }
   },
   links: Object.assign({}, profileData.links || {}, { linkedin: document.getElementById("input-linkedin").value.trim() })
@@ -1167,6 +1317,151 @@ window.removeWork = async function(index) {
   urls.splice(index, 1);
   await saveField({ previousWorksUrls: urls }, "portfolio-message", null);
 };
+
+/* ==================== تبويب الوظائف (محفوظة / متقدم لها / سجل) ==================== */
+let allJobsCache = [];
+
+window.switchJobsSubTab = function(key) {
+  document.querySelectorAll("#jobs-subtabs [data-subtab]").forEach(b => b.classList.remove("active"));
+  const btn = document.querySelector('#jobs-subtabs [data-subtab="' + key + '"]');
+  if (btn) btn.classList.add("active");
+  ["saved", "applied", "history"].forEach(k => {
+    const el = document.getElementById("subpanel-" + k);
+    if (el) el.classList.toggle("hidden", k !== key);
+  });
+};
+
+function jobMiniCardHtml(title, company, extraHtml) {
+  return '<div class="job-mini-card"><div class="job-mini-icon"><i class="fas fa-briefcase"></i></div>' +
+    '<div class="flex-1 min-w-0"><p class="font-bold text-gray-800 truncate">' + esc(title) + '</p>' +
+    '<p class="text-gray-500 text-sm truncate">' + esc(company) + '</p></div>' +
+    (extraHtml || '') + '</div>';
+}
+
+async function loadJobsRelatedData() {
+  if (userRole !== "employee") {
+    loadSuggestedEmployeesForEmployer();
+    return;
+  }
+  try {
+    const jobsSnap = await getDocs(collection(db, "jobs"));
+    allJobsCache = jobsSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(j => (j.status || "active") === "active");
+  } catch (e) {
+    console.warn("تعذر تحميل الوظائف:", e);
+    allJobsCache = [];
+  }
+  renderSavedJobs();
+  await renderAppliedAndHistory();
+  renderSuggestedJobsForEmployee();
+}
+
+function renderSavedJobs() {
+  const listEl = document.getElementById("saved-jobs-list");
+  const emptyEl = document.getElementById("saved-jobs-empty");
+  const bookmarks = profileData.bookmarkedJobs || [];
+  const jobs = bookmarks.map(id => allJobsCache.find(j => j.id === id)).filter(Boolean);
+  emptyEl.classList.toggle("hidden", jobs.length > 0);
+  listEl.innerHTML = jobs.map(job => jobMiniCardHtml(
+    job.title, job.companyName,
+    '<a href="job_listing_page.html" class="save-btn !py-2 !px-4 text-sm">عرض في صفحة الوظائف</a>'
+  )).join("");
+}
+
+async function renderAppliedAndHistory() {
+  const appliedList = document.getElementById("applied-jobs-list");
+  const appliedEmpty = document.getElementById("applied-jobs-empty");
+  const historyList = document.getElementById("history-jobs-list");
+  const historyEmpty = document.getElementById("history-jobs-empty");
+  try {
+    const q = query(collection(db, "applications"), where("employeeId", "==", currentUser.uid));
+    const snap = await getDocs(q);
+    const applications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const pending = applications.filter(a => !a.status || a.status === "pending" || a.status === "reviewing");
+    const resolved = applications.filter(a => a.status === "accepted" || a.status === "rejected");
+
+    appliedEmpty.classList.toggle("hidden", pending.length > 0);
+    appliedList.innerHTML = pending.map(a => jobMiniCardHtml(
+      a.jobTitle, a.companyName,
+      '<span class="status-pill ' + (a.status === "reviewing" ? "reviewing" : "pending") + '">' + (a.status === "reviewing" ? "قيد المراجعة" : "بانتظار الرد") + "</span>"
+    )).join("");
+
+    historyEmpty.classList.toggle("hidden", resolved.length > 0);
+    historyList.innerHTML = resolved.map(a => jobMiniCardHtml(
+      a.jobTitle, a.companyName,
+      '<span class="status-pill ' + a.status + '">' + (a.status === "accepted" ? "تم القبول" : "تم الرفض") + "</span>"
+    )).join("");
+  } catch (e) {
+    console.warn("تعذر تحميل طلبات التوظيف:", e);
+    appliedEmpty.classList.remove("hidden");
+    historyEmpty.classList.remove("hidden");
+  }
+}
+
+/* ==================== الوظائف/الموظفون المقترحون بناءً على المهارات الحقيقية ==================== */
+function skillOverlapScore(listA, listB) {
+  if (!Array.isArray(listA) || !Array.isArray(listB) || !listA.length || !listB.length) return 0;
+  const a = listA.map(s => (s || "").toLowerCase().trim());
+  const b = listB.map(s => (s || "").toLowerCase().trim());
+  const overlap = a.filter(s => b.includes(s));
+  return overlap.length;
+}
+
+function renderSuggestedJobsForEmployee() {
+  const listEl = document.getElementById("suggestions-list");
+  const emptyEl = document.getElementById("suggestions-empty");
+  document.getElementById("suggestions-title").innerHTML = '<i class="fas fa-bolt ml-1 text-amber-500"></i> وظائف تناسب مهاراتك';
+  const skills = profileData.skills || [];
+  if (!skills.length || !allJobsCache.length) { listEl.innerHTML = ""; emptyEl.classList.remove("hidden"); return; }
+
+  const scored = allJobsCache
+    .map(job => ({ job, score: skillOverlapScore(skills, job.skillsRequired || []) }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
+
+  if (!scored.length) { listEl.innerHTML = ""; emptyEl.classList.remove("hidden"); return; }
+  emptyEl.classList.add("hidden");
+  listEl.innerHTML = scored.map(({ job, score }) => jobMiniCardHtml(
+    job.title, job.companyName,
+    '<span class="status-pill accepted">' + score + ' مهارة مشتركة</span>'
+  )).join("");
+}
+
+async function loadSuggestedEmployeesForEmployer() {
+  const listEl = document.getElementById("suggestions-list");
+  const emptyEl = document.getElementById("suggestions-empty");
+  document.getElementById("suggestions-title").innerHTML = '<i class="fas fa-users ml-1 text-blue-500"></i> موظفون مقترحون لنشاطك';
+
+  const businessType = (profileData.companyInfo && profileData.companyInfo.businessType) || "";
+  const description = (profileData.companyInfo && profileData.companyInfo.description) || "";
+  const keywords = (businessType + " " + description).toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  if (!keywords.length) { emptyEl.classList.remove("hidden"); return; }
+
+  try {
+    const snap = await getDocs(collection(db, "employees"));
+    const employees = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const scored = employees.map(emp => {
+      const empText = ((emp.skills || []).join(" ") + " " + (emp.headline || "")).toLowerCase();
+      const score = keywords.filter(k => empText.includes(k)).length;
+      return { emp, score };
+    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 4);
+
+    if (!scored.length) { emptyEl.classList.remove("hidden"); return; }
+    emptyEl.classList.add("hidden");
+    listEl.innerHTML = scored.map(({ emp, score }) =>
+      '<div class="job-mini-card"><img src="' + (emp.profileImageUrl || ("https://ui-avatars.com/api/?background=2563eb&color=fff&name=" + encodeURIComponent(emp.name || "م"))) + '" class="w-10 h-10 rounded-full object-cover flex-shrink-0">' +
+      '<div class="flex-1 min-w-0"><p class="font-bold text-gray-800 truncate">' + esc(emp.name || "موظف") + '</p>' +
+      '<p class="text-gray-500 text-sm truncate">' + esc(emp.headline || "") + '</p></div>' +
+      '<a href="employee_listing_page.html?search=' + encodeURIComponent(emp.name || "") + '" class="save-btn !py-2 !px-4 text-sm">عرض</a></div>'
+    ).join("");
+  } catch (e) {
+    console.warn("تعذر تحميل الموظفين المقترحين:", e);
+    emptyEl.classList.remove("hidden");
+  }
+}
 </script>
 </body>
 </html>
