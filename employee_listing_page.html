@@ -34,26 +34,19 @@ body{font-family:'Tajawal',sans-serif;background-color:#f5f7fa}
 .location-btn{background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.875rem;transition:all .3s;display:inline-flex;align-items:center;gap:.5rem;border:none;cursor:pointer}
 .location-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(16,185,129,0.4)}
 .location-btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
-
-/* بطاقة التقييم الجديدة - في مكان بارز أعلى يسار البطاقة */
-.rating-badge{
-  display:flex;align-items:center;gap:5px;background:#fffbeb;border:1px solid #fde68a;
-  padding:.3rem .7rem;border-radius:.6rem;flex-shrink:0
-}
+.location-btn.active-mode{background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)}
+.employee-name-link{cursor:pointer;transition:color .15s}
+.employee-name-link:hover{color:#2563eb;text-decoration:underline}
+.rating-badge{display:flex;align-items:center;gap:5px;background:#fffbeb;border:1px solid #fde68a;padding:.3rem .7rem;border-radius:.6rem;flex-shrink:0}
 .rating-badge .stars{display:flex;gap:1px}
 .rating-badge .stars i{font-size:.68rem;color:#f59e0b}
 .rating-badge .stars i.empty-star{color:#e5e7eb}
 .rating-badge .rnum{font-weight:800;font-size:.8rem;color:#92400e}
 .no-rating{font-size:.7rem;color:#9ca3af;background:#f9fafb;border:1px solid #f3f4f6;padding:.3rem .6rem;border-radius:.6rem}
-
-/* زر المفضلة */
-.fav-btn{
-  width:38px;height:38px;border-radius:9999px;background:white;border:1px solid #e5e7eb;
-  display:flex;align-items:center;justify-content:center;color:#9ca3af;cursor:pointer;
-  transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,0.06);flex-shrink:0
-}
+.fav-btn{width:38px;height:38px;border-radius:9999px;background:white;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,0.06);flex-shrink:0}
 .fav-btn:hover{border-color:#ef4444;color:#ef4444;transform:scale(1.08)}
 .fav-btn.saved{background:#fee2e2;border-color:#ef4444;color:#ef4444}
+.distance-badge{font-size:.7rem;color:#059669;background:#f0fdf4;border:1px solid #bbf7d0;padding:2px 8px;border-radius:6px;font-weight:700}
 </style>
 </head>
 <body>
@@ -134,7 +127,7 @@ body{font-family:'Tajawal',sans-serif;background-color:#f5f7fa}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -162,18 +155,11 @@ const locationBtn = document.getElementById('locationBtn');
 let allEmployees = [];
 let swiperInstance = null;
 let currentUser = null;
-let currentUserRole = null; // 'employee' | 'employer' | null
-let savedEmployeeIds = []; // قائمة الموظفين المحفوظين لدى صاحب العمل الحالي
+let currentUserRole = null;
+let savedEmployeeIds = [];
+let userLat = null, userLng = null;
+let nearestSortActive = false;
 
-const cityCoordinates = {
-  'الخرطوم':{lat:15.5007,lng:32.5599,state:'الخرطوم'},'أم درمان':{lat:15.6475,lng:32.4807,state:'الخرطوم'},'بحري':{lat:15.6340,lng:32.5326,state:'الخرطوم'},
-  'ود مدني':{lat:14.4000,lng:33.5200,state:'الجزيرة'},'بورتسودان':{lat:19.6167,lng:37.2167,state:'البحر الأحمر'},'كسلا':{lat:15.4500,lng:36.4000,state:'كسلا'},
-  'القضارف':{lat:14.9342,lng:33.5192,state:'القضارف'},'سنار':{lat:13.5500,lng:33.5833,state:'سنار'},'ربك':{lat:13.1833,lng:32.9000,state:'النيل الأبيض'},
-  'الدمازين':{lat:11.7700,lng:34.3500,state:'النيل الأزرق'},'دنقلا':{lat:18.2167,lng:30.7500,state:'الشمالية'},'الدامر':{lat:17.5833,lng:33.9500,state:'نهر النيل'},
-  'شندي':{lat:16.6833,lng:33.4333,state:'نهر النيل'},'عطبرة':{lat:17.7000,lng:33.9833,state:'نهر النيل'},'الأبيض':{lat:13.1833,lng:30.2167,state:'شمال كردفان'},
-  'كادقلي':{lat:11.0167,lng:29.7167,state:'جنوب كردفان'},'الفاشر':{lat:13.6333,lng:25.3500,state:'شمال دارفور'},'نيالا':{lat:12.0500,lng:24.8833,state:'جنوب دارفور'},
-  'الجنينة':{lat:13.4500,lng:22.4500,state:'غرب دارفور'},'زالنجي':{lat:12.9000,lng:23.4667,state:'وسط دارفور'},'الضعين':{lat:11.4500,lng:26.1333,state:'شرق دارفور'}
-};
 const citiesByState = {
   'الخرطوم':['الخرطوم','أم درمان','بحري'],'الجزيرة':['ود مدني','الحصاحيصا','المناقل'],'البحر الأحمر':['بورتسودان','سواكن','طوكر'],
   'كسلا':['كسلا','حلفا الجديدة','أروما'],'القضارف':['القضارف','القلابات','الفو'],'سنار':['سنار','الدالي والمزموم','ود النيل'],
@@ -188,28 +174,19 @@ function calculateDistance(lat1,lon1,lat2,lon2){
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
-function findNearestCity(userLat,userLng){
-  let nearest=null,minD=Infinity;
-  for(const [name,c] of Object.entries(cityCoordinates)){
-    const d=calculateDistance(userLat,userLng,c.lat,c.lng);
-    if(d<minD){minD=d;nearest={name,state:c.state,distance:d};}
-  }
-  return nearest;
-}
+
+/* ==================== "الأقرب لي" باستخدام إحداثيات كل موظف الحقيقية ==================== */
 window.detectLocation=function(){
   if(!navigator.geolocation){alert('المتصفح لا يدعم خدمة الموقع الجغرافي');return;}
   locationBtn.disabled=true;
   locationBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جاري التحديد...';
   navigator.geolocation.getCurrentPosition(pos=>{
-    const nearest=findNearestCity(pos.coords.latitude,pos.coords.longitude);
-    if(nearest){
-      stateFilter.value=nearest.state; updateCitiesList();
-      setTimeout(()=>{
-        cityFilter.value=nearest.name; filterAndRenderEmployees();
-        locationBtn.innerHTML=`<i class="fas fa-check"></i> ${nearest.name}`;
-        locationBtn.style.background='linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)';
-      },100);
-    }
+    userLat=pos.coords.latitude; userLng=pos.coords.longitude;
+    nearestSortActive=true;
+    locationBtn.disabled=false;
+    locationBtn.innerHTML='<i class="fas fa-check"></i> مرتّب بالأقرب';
+    locationBtn.classList.add('active-mode');
+    filterAndRenderEmployees();
   },err=>{
     console.error(err);
     alert('تعذر تحديد الموقع. يرجى اختيار الولاية والمدينة يدوياً.');
@@ -224,21 +201,12 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     loginLink.textContent = 'ملفي الشخصي';
-    // نتحقق إن كان صاحب عمل لديه قائمة موظفين محفوظين
     try {
-      const { getDoc, doc: docRef } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const empSnap = await getDoc(docRef(db, "All_jops", user.uid));
-      if (empSnap.exists()) {
-        currentUserRole = 'employer';
-        savedEmployeeIds = empSnap.data().savedEmployees || [];
-      } else {
-        currentUserRole = 'employee';
-      }
+      const empSnap = await getDoc(doc(db, "All_jops", user.uid));
+      if (empSnap.exists()) { currentUserRole = 'employer'; savedEmployeeIds = empSnap.data().savedEmployees || []; }
+      else currentUserRole = 'employee';
     } catch (e) { console.warn('تعذر تحميل بيانات المستخدم:', e); }
-  } else {
-    currentUser = null; currentUserRole = null; savedEmployeeIds = [];
-    loginLink.textContent = 'دخول';
-  }
+  } else { currentUser = null; currentUserRole = null; savedEmployeeIds = []; loginLink.textContent = 'دخول'; }
   renderEmployees(getFilteredEmployees());
 });
 
@@ -247,17 +215,13 @@ window.toggleFavorite = async function(employeeId) {
   if (currentUserRole !== 'employer') { alert('حفظ الموظفين متاح لحسابات أصحاب العمل فقط.'); return; }
   const isSaved = savedEmployeeIds.includes(employeeId);
   try {
-    await updateDoc(doc(db, "All_jops", currentUser.uid), {
-      savedEmployees: isSaved ? arrayRemove(employeeId) : arrayUnion(employeeId)
-    });
-    if (isSaved) savedEmployeeIds = savedEmployeeIds.filter(id => id !== employeeId);
-    else savedEmployeeIds.push(employeeId);
+    await updateDoc(doc(db, "All_jops", currentUser.uid), { savedEmployees: isSaved ? arrayRemove(employeeId) : arrayUnion(employeeId) });
+    savedEmployeeIds = isSaved ? savedEmployeeIds.filter(id => id !== employeeId) : [...savedEmployeeIds, employeeId];
     renderEmployees(getFilteredEmployees());
-  } catch (e) {
-    console.error(e);
-    alert('حدث خطأ أثناء الحفظ، حاول مرة أخرى.');
-  }
+  } catch (e) { console.error(e); alert('حدث خطأ أثناء الحفظ.'); }
 };
+
+window.goToProfile = function(uid) { window.location.href = 'profile.html?uid=' + uid; };
 
 /* ==================== جلب وعرض الموظفين ==================== */
 async function fetchEmployees() {
@@ -273,9 +237,7 @@ async function fetchEmployees() {
   } catch (error) {
     console.error("خطأ في جلب الموظفين:", error);
     employeesList.innerHTML = '<div class="text-center text-red-500 p-8">حدث خطأ أثناء تحميل بيانات الموظفين.</div>';
-  } finally {
-    loadingIndicator.classList.add('hidden');
-  }
+  } finally { loadingIndicator.classList.add('hidden'); }
 }
 
 function starsHtml(rating) {
@@ -294,9 +256,8 @@ function renderEmployees(employees) {
     const skillsHtml = Array.isArray(employee.skills) && employee.skills.length
       ? employee.skills.map(s => `<span class="skill-tag">${s}</span>`).join('') : '';
     const statusClass = employee.jobStatus === 'متاح للعمل' ? 'status-available' : 'status-not-looking';
-    const employeeCity = employee.contact?.location?.city || 'غير محدد';
-    const employeeState = employee.contact?.location?.state || 'غير محدد';
-    const locationText = `${employeeCity}، ${employeeState}`;
+    const loc = employee.contact?.location || {};
+    const locationText = [loc.state, loc.city, loc.area].filter(Boolean).join(' - ') || 'غير محدد';
     const profilePhotoURL = employee.profileImageUrl || 'https://ui-avatars.com/api/?background=2563eb&color=fff&name=' + encodeURIComponent(employee.name || 'م');
 
     const previousWorksHtml = Array.isArray(employee.previousWorksUrls) && employee.previousWorksUrls.length
@@ -304,7 +265,6 @@ function renderEmployees(employees) {
           ${employee.previousWorksUrls.map((url,i)=>`<img src="${url}" alt="صورة عمل سابق" onclick="openModal('${employee.id}', ${i}, 'works')" loading="lazy">`).join('')}
         </div></div>` : '';
 
-    // التقييم الحقيقي فقط - لا أرقام عشوائية
     const hasRating = employee.averageRating && employee.totalReviews > 0;
     const ratingHtml = hasRating
       ? `<div class="rating-badge" title="${employee.totalReviews} تقييم">${starsHtml(parseFloat(employee.averageRating))}<span class="rnum">${parseFloat(employee.averageRating).toFixed(1)}</span></div>`
@@ -313,20 +273,27 @@ function renderEmployees(employees) {
     const isSaved = savedEmployeeIds.includes(employee.id);
     const favBtnHtml = `<button class="fav-btn${isSaved ? ' saved' : ''}" onclick="toggleFavorite('${employee.id}')" title="${isSaved ? 'إزالة من المفضلة' : 'حفظ في المفضلة'}"><i class="${isSaved ? 'fas' : 'far'} fa-heart"></i></button>`;
 
+    let distanceHtml = '';
+    if (nearestSortActive && employee.contact?.location?.lat != null) {
+      const dist = calculateDistance(userLat, userLng, employee.contact.location.lat, employee.contact.location.lng);
+      distanceHtml = `<span class="distance-badge"><i class="fas fa-route ml-1"></i>${dist.toFixed(1)} كم</span>`;
+    }
+
     const card = document.createElement('div');
     card.className = 'bg-white rounded-xl shadow-sm employee-card overflow-hidden p-6';
     card.innerHTML = `
       <div class="flex items-start justify-between gap-3 mb-4">
         <div class="flex items-start space-x-4 rtl:space-x-reverse flex-1 min-w-0">
-          <img src="${profilePhotoURL}" alt="صورة الموظف" class="w-14 h-14 rounded-full object-cover cursor-pointer flex-shrink-0" onclick="openModal('${employee.id}', 0, 'profile')" loading="lazy">
+          <img src="${profilePhotoURL}" alt="صورة الموظف" class="w-14 h-14 rounded-full object-cover cursor-pointer flex-shrink-0" onclick="goToProfile('${employee.id}')" loading="lazy">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="font-bold text-lg truncate">${employee.name || 'موظف غير معروف'}</h3>
+              <h3 class="font-bold text-lg truncate employee-name-link" onclick="goToProfile('${employee.id}')">${employee.name || 'موظف غير معروف'}</h3>
               <span class="px-3 py-1 rounded-full ${statusClass} text-xs font-semibold">${employee.jobStatus || 'الحالة غير محددة'}</span>
             </div>
             <p class="text-gray-600 text-sm mt-1">${employee.headline || 'بدون عنوان وظيفي'}</p>
             <div class="flex items-center text-gray-500 text-sm mt-2 flex-wrap gap-2">
               <span><i class="fas fa-map-marker-alt ml-1"></i>${locationText}</span>
+              ${distanceHtml}
               <span class="hidden sm:inline">•</span>
               <span>الخبرة: ${employee.experience || 'غير محدد'}</span>
             </div>
@@ -362,16 +329,25 @@ function getFilteredEmployees() {
   const searchTerm = searchInput.value.toLowerCase();
   const selectedState = stateFilter.value;
   const selectedCity = cityFilter.value;
-  return allEmployees.filter(employee => {
+  let list = allEmployees.filter(employee => {
     const searchTerms = searchTerm.split(' ').filter(Boolean);
     const employeeState = employee.contact?.location?.state || '';
     const employeeCity = employee.contact?.location?.city || '';
-    const employeeText = `${employee.name||''} ${employee.headline||''} ${employeeState} ${employeeCity} ${employee.experience||''} ${(employee.skills||[]).join(' ')}`.toLowerCase();
+    const employeeText = `${employee.name||''} ${employee.headline||''} ${employeeState} ${employeeCity} ${employee.experience||''} ${(employee.skills||[]).join(' ')} ${(employee.keywords||[]).join(' ')}`.toLowerCase();
     const matchesSearch = searchTerms.length === 0 || searchTerms.every(t => employeeText.includes(t));
     const matchesState = selectedState === '' || employeeState === selectedState;
     const matchesCity = selectedCity === '' || employeeCity === selectedCity;
     return matchesSearch && matchesState && matchesCity;
   });
+
+  if (nearestSortActive && userLat != null) {
+    list = list.map(e => {
+      const lat = e.contact?.location?.lat, lng = e.contact?.location?.lng;
+      const dist = (lat != null && lng != null) ? calculateDistance(userLat, userLng, lat, lng) : Infinity;
+      return { e, dist };
+    }).sort((a, b) => a.dist - b.dist).map(x => x.e);
+  }
+  return list;
 }
 
 function filterAndRenderEmployees() { renderEmployees(getFilteredEmployees()); }
