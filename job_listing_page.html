@@ -362,6 +362,7 @@ window.applyToJob = async function(jobId) {
     await addDoc(collection(db, "applications"), {
       employeeId: currentUser.uid,
       employeeName: currentUser.displayName || "متقدم",
+      employeePhoto: currentUser.photoURL || null,
       jobId: jobId,
       jobTitle: job.title || '',
       companyName: job.companyName || '',
