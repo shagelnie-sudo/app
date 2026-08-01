@@ -121,6 +121,25 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 .status-pill.active{background:#dcfce7;color:#065f46}
 .status-pill.closed{background:#f3f4f6;color:#6b7280}
 .applicant-row{display:flex;align-items:center;gap:.8rem;padding:.8rem;border-top:1px solid #f3f4f6;flex-wrap:wrap}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:400;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-box{background:white;border-radius:1.1rem;max-width:640px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.25)}
+.modal-header{padding:1.1rem 1.4rem;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-weight:800;color:#1f2937;font-size:1.05rem}
+.modal-close-btn{width:32px;height:32px;border-radius:9999px;background:#f3f4f6;color:#6b7280;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-close-btn:hover{background:#e5e7eb}
+.modal-body{padding:1.2rem 1.4rem;overflow-y:auto}
+.applicant-card{display:flex;gap:.9rem;padding:1rem;border:1px solid #e5e7eb;border-radius:.9rem;margin-bottom:.8rem;transition:all .2s}
+.applicant-card:hover{border-color:#bfdbfe;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+.applicant-avatar{width:50px;height:50px;border-radius:9999px;object-fit:cover;cursor:pointer;flex-shrink:0}
+.lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:410;display:none;align-items:center;justify-content:center;padding:1rem}
+.lightbox-img{max-width:92vw;max-height:82vh;object-fit:contain;border-radius:.5rem}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:9999px;background:rgba(255,255,255,0.15);color:white;border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lightbox-nav:hover{background:rgba(255,255,255,0.3)}
+.lightbox-close{position:absolute;top:1.2rem;left:1.2rem;width:40px;height:40px;border-radius:9999px;background:rgba(255,255,255,0.15);color:white;border:none;font-size:1.1rem;cursor:pointer}
+.doc-row{display:flex;align-items:center;gap:.7rem;padding:.7rem;border:1px solid #e5e7eb;border-radius:.7rem;margin-bottom:.5rem}
+.doc-icon{width:36px;height:36px;border-radius:.6rem;background:#fef2f2;color:#dc2626;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.file-upload-btn{border:2px dashed #bfdbfe;border-radius:.7rem;padding:.7rem;text-align:center;color:#2563eb;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;display:block}
+.file-upload-btn:hover{background:#eff6ff}
 .owner-only.hidden{display:none!important}
 .public-badge{display:inline-flex;align-items:center;gap:.4rem;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;padding:.4rem .9rem;border-radius:.6rem;font-size:.8rem;font-weight:700;margin-bottom:1rem}
 @media(max-width:768px){.avatar-ring{width:96px;height:96px}.cover-wrapper{height:130px}}
@@ -330,7 +349,12 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <button type="button" class="text-xs text-blue-600 font-bold hover:underline" onclick="useCurrentLocation()"><i class="fas fa-location-crosshairs ml-1"></i>استخدام موقعي الحالي</button>
 </div>
 <div id="location-map" style="height:200px;border-radius:.7rem;border:1px solid #d1d5db;overflow:hidden"></div>
-<p class="text-xs text-gray-400 mt-1">تحديد الموقع بدقة يساعد في نتائج "الأقرب لي" فقط، ولا يُعرض لأحد.</p>
+<p class="text-xs mt-1" id="geocode-status" style="color:#059669;display:none"></p>
+<p class="text-xs text-gray-400 mt-1">تحديد الموقع على الخريطة يملأ الولاية/المدينة/الحي تلقائياً. تعديل القوائم يدوياً بعد ذلك يُعتمد كموقعك النهائي.</p>
+</div>
+<div>
+<label class="field-label">الكلمات المفتاحية <span class="text-gray-400 text-xs font-normal">(حتى 25، تساعد في الظهور بنتائج البحث والتوافق)</span></label>
+<input type="text" class="field-input" id="input-keywords" placeholder="افصل بينها بفاصلة، مثال: صيانة، كهرباء منازل، تركيب">
 </div>
 <div>
 <label class="field-label">رابط لينكد إن</label>
@@ -357,6 +381,12 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <h2 class="text-lg font-bold text-gray-800 mb-3"><i class="fas fa-language ml-1 text-blue-600"></i> اللغات</h2>
 <div id="languages-view-mini" class="flex flex-wrap gap-1"></div>
 <p class="text-gray-400 text-sm" id="languages-view-mini-empty">لم تتم إضافة لغات بعد.</p>
+</div>
+
+<div class="dash-card owner-only" id="keywords-mini-card">
+<h2 class="text-lg font-bold text-gray-800 mb-3"><i class="fas fa-tags ml-1 text-blue-600"></i> الكلمات المفتاحية</h2>
+<div id="keywords-view-mini" class="flex flex-wrap gap-1"></div>
+<p class="text-gray-400 text-sm" id="keywords-view-mini-empty">لم تتم إضافة كلمات مفتاحية بعد — أضفها من "معلومات التواصل" لزيادة ظهورك في نتائج البحث.</p>
 </div>
 
 <div class="dash-card" id="suggestions-card">
@@ -463,15 +493,31 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 </div>
 <div class="dash-card">
 <div class="section-head"><h2 class="text-lg font-bold text-gray-800"><i class="fas fa-file-lines ml-1 text-blue-600"></i> السيرة الذاتية والروابط</h2><button class="section-edit-btn owner-only" onclick="toggleEditSection('links')"><i class="fas fa-pen"></i></button></div>
-<div id="links-view" class="space-y-3 text-sm"><div class="flex items-center gap-3 text-gray-600"><i class="fas fa-file-pdf w-5 text-red-500"></i><span id="view-cv">لا يوجد رابط سيرة ذاتية</span></div></div>
+<div id="links-view" class="space-y-3 text-sm"><div class="flex items-center gap-3 text-gray-600"><i class="fas fa-file-pdf w-5 text-red-500"></i><span id="view-cv">لم يتم رفع سيرة ذاتية بعد.</span></div></div>
 <div class="hidden space-y-3" id="links-edit">
-<div><label class="field-label">رابط السيرة الذاتية (CV)</label><input type="url" class="field-input" id="input-cv" placeholder="https://docs.google.com/your-cv"></div>
+<div>
+<label class="field-label">رفع السيرة الذاتية (CV) — ملف PDF أو صورة</label>
+<label class="file-upload-btn"><i class="fas fa-upload ml-1"></i> اضغط لاختيار ملف
+<input type="file" id="cv-file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="hidden" onchange="handleCvUpload(this)">
+</label>
+<p class="text-xs text-gray-400 mt-1">أو الصق رابطاً جاهزاً (اختياري):</p>
+<input type="url" class="field-input mt-1" id="input-cv" placeholder="https://docs.google.com/your-cv">
+</div>
 <div class="flex gap-2">
-<button class="save-btn" onclick="saveLinks()"><i class="fas fa-check"></i> حفظ</button>
+<button class="save-btn" onclick="saveLinks()"><i class="fas fa-check"></i> حفظ الرابط</button>
 <button class="cancel-btn" onclick="toggleEditSection('links')">إلغاء</button>
 </div>
 <div class="message-container"><div id="links-message" class="message"></div></div>
 </div>
+</div>
+<div class="dash-card owner-only" id="documents-card">
+<div class="section-head">
+<h2 class="text-lg font-bold text-gray-800"><i class="fas fa-folder-open ml-1 text-blue-600"></i> ملفات مهنية أخرى</h2>
+<label class="section-edit-btn cursor-pointer" title="رفع ملف"><i class="fas fa-plus"></i><input type="file" id="document-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="hidden" onchange="handleDocumentUpload(this)"></label>
+</div>
+<div id="documents-view"></div>
+<p class="text-gray-400 text-sm" id="documents-empty">لا توجد ملفات إضافية. أضف شهادات، تراخيص، أو أي مستند مهني آخر.</p>
+<div class="message-container"><div id="documents-message" class="message"></div></div>
 </div>
 </div>
 
@@ -509,6 +555,25 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="empty-state hidden" id="my-jobs-empty"><i class="fas fa-briefcase"></i><br>لم تنشر أي وظيفة بعد.<br><a href="jop_posting_page.html" class="text-blue-600 font-bold hover:underline">انشر وظيفتك الأولى</a></div>
 </div>
 
+</div>
+
+<!-- نافذة المتقدمين المنبثقة -->
+<div class="modal-overlay" id="applicants-modal">
+<div class="modal-box">
+<div class="modal-header">
+<h3 id="applicants-modal-title">المتقدمون</h3>
+<button class="modal-close-btn" onclick="closeApplicantsModal()"><i class="fas fa-times"></i></button>
+</div>
+<div class="modal-body" id="applicants-modal-body"></div>
+</div>
+</div>
+
+<!-- عارض الصور (معرض الأعمال) -->
+<div class="lightbox-overlay" id="lightbox-overlay">
+<button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+<button class="lightbox-nav" style="right:1rem" onclick="lightboxNav(-1)"><i class="fas fa-chevron-right"></i></button>
+<img class="lightbox-img" id="lightbox-img" src="" alt="عرض الصورة">
+<button class="lightbox-nav" style="left:1rem" onclick="lightboxNav(1)"><i class="fas fa-chevron-left"></i></button>
 </div>
 
 <!-- الإعدادات (صاحب الملف فقط) -->
@@ -588,6 +653,7 @@ const firebaseConfig = {
   measurementId: "G-98GQGZS09W"
 };
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dbmjg23hl/image/upload";
+const CLOUDINARY_URL_AUTO = "https://api.cloudinary.com/v1_1/dbmjg23hl/auto/upload";
 const CLOUDINARY_UPLOAD_PRESET = "Companies_emploies";
 const MAX_PORTFOLIO_IMAGES = 7;
 const DEFAULT_MAP_CENTER = [15.5007, 32.5599];
@@ -716,20 +782,23 @@ document.addEventListener("click", (e) => {
 const stateSel = document.getElementById("input-state");
 const citySel = document.getElementById("input-city");
 const areaSel = document.getElementById("input-area");
+let suppressLocationClear = false;
 Object.keys(sudanLocations).forEach(s => { const o = document.createElement("option"); o.value = s; o.textContent = s; stateSel.appendChild(o); });
 stateSel.addEventListener("change", () => {
   citySel.innerHTML = '<option value="">اختر مدينة</option>';
   areaSel.innerHTML = '<option value="">اختر منطقة أو حي</option>';
   const cities = sudanLocations[stateSel.value] ? Object.keys(sudanLocations[stateSel.value]) : [];
   cities.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; citySel.appendChild(o); });
+  if (!suppressLocationClear) { pickedLat = null; pickedLng = null; document.getElementById("geocode-status").style.display = "none"; }
 });
 citySel.addEventListener("change", () => {
   areaSel.innerHTML = '<option value="">اختر منطقة أو حي</option>';
   const areas = (sudanLocations[stateSel.value] && sudanLocations[stateSel.value][citySel.value]) || [];
   areas.forEach(a => { const o = document.createElement("option"); o.value = a; o.textContent = a; areaSel.appendChild(o); });
+  if (!suppressLocationClear) { pickedLat = null; pickedLng = null; document.getElementById("geocode-status").style.display = "none"; }
 });
 
-/* ==================== خريطة الموقع الدقيق (لا تُعرض إحداثياتها، فقط تُستخدم للبحث بالأقرب) ==================== */
+/* ==================== خريطة الموقع الدقيق + الكشف العكسي عن العنوان (ولاية/مدينة/حي) ==================== */
 function initLocationMap() {
   const mapEl = document.getElementById("location-map");
   if (!mapEl || typeof L === "undefined") return;
@@ -738,21 +807,76 @@ function initLocationMap() {
   locationMap = L.map("location-map").setView(center, pickedLat != null ? 14 : 6);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 18 }).addTo(locationMap);
   if (pickedLat != null && pickedLng != null) placeMarker(pickedLat, pickedLng, false);
-  locationMap.on("click", (e) => placeMarker(e.latlng.lat, e.latlng.lng, true));
+  locationMap.on("click", (e) => { placeMarker(e.latlng.lat, e.latlng.lng, true); reverseGeocodeAndFill(e.latlng.lat, e.latlng.lng); });
 }
 function placeMarker(lat, lng, storeAsPicked) {
   if (!locationMap) return;
   if (locationMarker) locationMarker.setLatLng([lat, lng]);
   else {
     locationMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
-    locationMarker.on("dragend", () => { const p = locationMarker.getLatLng(); pickedLat = p.lat; pickedLng = p.lng; });
+    locationMarker.on("dragend", () => {
+      const p = locationMarker.getLatLng(); pickedLat = p.lat; pickedLng = p.lng;
+      reverseGeocodeAndFill(p.lat, p.lng);
+    });
   }
   if (storeAsPicked) { pickedLat = lat; pickedLng = lng; }
 }
+
+// الكشف العكسي: من الإحداثيات إلى نص العنوان (ولاية - مدينة - حي)، عبر Nominatim (OpenStreetMap) - مجاني وبدون مفتاح
+async function reverseGeocodeAndFill(lat, lng) {
+  const statusEl = document.getElementById("geocode-status");
+  statusEl.style.display = "block";
+  statusEl.style.color = "#2563eb";
+  statusEl.innerHTML = '<i class="fas fa-spinner fa-spin ml-1"></i> جاري تحديد العنوان من الموقع...';
+  try {
+    const res = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + lat + "&lon=" + lng + "&accept-language=ar&zoom=16");
+    if (!res.ok) throw new Error("geocode-failed");
+    const data = await res.json();
+    const addr = data.address || {};
+    const rawState = addr.state || "";
+    const rawCity = addr.city || addr.town || addr.county || "";
+    const rawArea = addr.suburb || addr.neighbourhood || addr.quarter || addr.village || "";
+
+    // مطابقة أفضل جهد مع قائمتنا المحلية للولايات
+    suppressLocationClear = true;
+    let matchedState = Object.keys(sudanLocations).find(s => rawState.includes(s) || s.includes(rawState));
+    if (matchedState) {
+      stateSel.value = matchedState;
+      citySel.innerHTML = '<option value="">اختر مدينة</option>';
+      const cities = Object.keys(sudanLocations[matchedState]);
+      cities.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; citySel.appendChild(o); });
+      let matchedCity = cities.find(c => rawCity.includes(c) || c.includes(rawCity)) || cities[0];
+      citySel.value = matchedCity;
+      areaSel.innerHTML = '<option value="">اختر منطقة أو حي</option>';
+      const areas = sudanLocations[matchedState][matchedCity] || [];
+      areas.forEach(a => { const o = document.createElement("option"); o.value = a; o.textContent = a; areaSel.appendChild(o); });
+      if (rawArea) {
+        let matchedArea = areas.find(a => rawArea.includes(a) || a.includes(rawArea));
+        if (!matchedArea) { const o = document.createElement("option"); o.value = rawArea; o.textContent = rawArea + " (مكتشف)"; areaSel.appendChild(o); matchedArea = rawArea; }
+        areaSel.value = matchedArea;
+      }
+      statusEl.style.color = "#059669";
+      statusEl.innerHTML = '<i class="fas fa-check-circle ml-1"></i> تم اكتشاف الموقع: ' + [stateSel.value, citySel.value, areaSel.value].filter(Boolean).join(" - ");
+    } else {
+      statusEl.style.color = "#d97706";
+      statusEl.innerHTML = '<i class="fas fa-triangle-exclamation ml-1"></i> تم تحديد الإحداثيات، لكن تعذر مطابقة العنوان النصي تلقائياً — يرجى اختيار الولاية/المدينة/الحي يدوياً.';
+    }
+    setTimeout(() => { suppressLocationClear = false; }, 300);
+  } catch (e) {
+    console.warn("تعذر الكشف العكسي عن العنوان:", e);
+    statusEl.style.color = "#d97706";
+    statusEl.innerHTML = '<i class="fas fa-triangle-exclamation ml-1"></i> تعذر تحديد العنوان النصي تلقائياً، لكن تم حفظ الموقع الدقيق. يمكنك اختيار الولاية/المدينة/الحي يدوياً.';
+  }
+}
+
 window.useCurrentLocation = function() {
   if (!navigator.geolocation) { showMsg("contact-message", "المتصفح لا يدعم تحديد الموقع.", "error"); return; }
   navigator.geolocation.getCurrentPosition(
-    (pos) => { pickedLat = pos.coords.latitude; pickedLng = pos.coords.longitude; if (locationMap) { locationMap.setView([pickedLat, pickedLng], 15); placeMarker(pickedLat, pickedLng, true); } },
+    (pos) => {
+      pickedLat = pos.coords.latitude; pickedLng = pos.coords.longitude;
+      if (locationMap) { locationMap.setView([pickedLat, pickedLng], 15); placeMarker(pickedLat, pickedLng, true); }
+      reverseGeocodeAndFill(pickedLat, pickedLng);
+    },
     () => showMsg("contact-message", "تعذر تحديد موقعك.", "error"),
     { enableHighAccuracy: true, timeout: 10000 }
   );
@@ -838,6 +962,7 @@ onAuthStateChanged(auth, async (user) => {
     } else {
       setupVisitorActions();
       incrementProfileView();
+      cleanEmptySectionsForPublicView();
     }
   } catch (err) {
     console.error("خطأ في تحميل الملف الشخصي:", err);
@@ -876,6 +1001,64 @@ function applyVisibilityForRoleAndOwnership() {
     const badgeWrap = document.getElementById("public-view-badge-wrap");
     badgeWrap.innerHTML = '<span class="public-badge"><i class="fas fa-eye"></i> أنت تشاهد ملفاً عاماً — بيانات التواصل المباشرة مخفية لحمايتها</span>';
   }
+}
+
+// إخفاء الأقسام الفارغة تماماً عند مشاهدة زائر لملف شخصي عام (بدل عرضها فارغة أو بعبارات "لم تتم الإضافة بعد")
+function cleanEmptySectionsForPublicView() {
+  const hideIfEmptyText = (cardId, viewId, placeholderStart) => {
+    const card = document.getElementById(cardId);
+    const view = document.getElementById(viewId);
+    if (!card || !view) return;
+    const text = view.textContent.trim();
+    if (!text || (placeholderStart && text.startsWith(placeholderStart))) card.style.display = "none";
+  };
+  const hideIfEmptyList = (cardId, listId) => {
+    const card = document.getElementById(cardId);
+    const list = document.getElementById(listId);
+    if (!card || !list) return;
+    if (!list.children.length) card.style.display = "none";
+  };
+
+  // نبذة: تُخفى بالكامل إن لم تُضف
+  const bioCard = document.getElementById("bio-view")?.closest(".dash-card");
+  if (bioCard && document.getElementById("bio-view").textContent.trim() === "لم تتم إضافة نبذة بعد.") bioCard.style.display = "none";
+
+  // معلومات التواصل: تُخفى إن لم يتبقَّ فيها شيء غير الهاتف/البريد (المخفيين أصلاً للزائر)
+  const locEmpty = document.getElementById("view-full-location").textContent.trim() === "غير محدد";
+  const linkedinEmpty = document.getElementById("view-linkedin").textContent.trim() === "غير مضاف";
+  if (locEmpty && linkedinEmpty) {
+    const contactCard = document.getElementById("view-full-location").closest(".dash-card");
+    if (contactCard) contactCard.style.display = "none";
+  }
+
+  hideIfEmptyText("languages-mini-card", "languages-view-mini-empty", null);
+  if (document.getElementById("languages-view-mini") && !document.getElementById("languages-view-mini").children.length) {
+    const c = document.getElementById("languages-mini-card"); if (c) c.style.display = "none";
+  }
+
+  if (userRole === "employee") {
+    hideIfEmptyList("workexp-view", "workexp-view"); // سيُعاد فحصها أدناه بمنطق أدق
+    const secs = [
+      ["languages-view", "languages-view"], ["workexp-view", "workexp-view"],
+      ["education-view", "education-view"], ["certs-view", "certs-view"]
+    ];
+    secs.forEach(([listId]) => {
+      const list = document.getElementById(listId);
+      if (list && !list.children.length) { const card = list.closest(".dash-card"); if (card) card.style.display = "none"; }
+    });
+    const skillsTags = document.getElementById("skills-view-tags");
+    if (skillsTags && (!skillsTags.children.length || skillsTags.textContent.includes("لم تتم إضافة"))) {
+      const card = skillsTags.closest(".dash-card"); if (card && !document.getElementById("experience-view").textContent.trim().match(/^(مبتدئ|متوسط|خبير)/)) card.style.display = "none";
+    }
+    const portfolioEmpty = !(profileData.previousWorksUrls || []).length;
+    if (portfolioEmpty) { const c = document.getElementById("portfolio-grid").closest(".dash-card"); if (c) c.style.display = "none"; }
+    const noCv = !(profileData.links && profileData.links.cv);
+    const noDocs = !(profileData.documents || []).length;
+    if (noCv) { const c = document.getElementById("view-cv").closest(".dash-card"); if (c) c.style.display = "none"; }
+  }
+
+  const suggestCard = document.getElementById("suggestions-list");
+  if (suggestCard && !suggestCard.children.length) { const c = suggestCard.closest(".dash-card"); if (c) c.style.display = "none"; }
 }
 
 function setupVisitorActions() {
@@ -966,19 +1149,20 @@ function renderHeader() {
   }
 }
 
+let liveStats = { applicantsCount: null, jobsPostedCount: null, hiredCount: null, applicationsCount: null, resolvedCount: null };
 function renderStatsGrid() {
   const grid = document.getElementById("stats-grid");
   if (userRole === "employer") {
     grid.innerHTML =
       statCardHtml("#eff6ff", "#2563eb", "fa-eye", profileData.profileViews || 0, "مشاهدة للملف") +
-      statCardHtml("#f0fdf4", "#16a34a", "fa-users", profileData.applicantsCount || 0, "متقدم لوظائفك") +
-      statCardHtml("#fffbeb", "#d97706", "fa-briefcase", profileData.jobsPostedCount || 0, "وظيفة منشورة") +
-      statCardHtml("#f5f3ff", "#7c3aed", "fa-check-circle", profileData.hiredCount || 0, "توظيف ناجح");
+      statCardHtml("#f0fdf4", "#16a34a", "fa-users", liveStats.applicantsCount != null ? liveStats.applicantsCount : "...", "متقدم لوظائفك") +
+      statCardHtml("#fffbeb", "#d97706", "fa-briefcase", liveStats.jobsPostedCount != null ? liveStats.jobsPostedCount : "...", "وظيفة منشورة") +
+      statCardHtml("#f5f3ff", "#7c3aed", "fa-check-circle", liveStats.hiredCount != null ? liveStats.hiredCount : "...", "توظيف ناجح");
   } else {
     grid.innerHTML =
       statCardHtml("#eff6ff", "#2563eb", "fa-eye", profileData.profileViews || 0, "مشاهدة للملف") +
-      statCardHtml("#f0fdf4", "#16a34a", "fa-paper-plane", profileData.applications || 0, "طلب توظيف") +
-      statCardHtml("#fffbeb", "#d97706", "fa-handshake", profileData.jobOffers || 0, "عرض عمل") +
+      statCardHtml("#f0fdf4", "#16a34a", "fa-paper-plane", liveStats.applicationsCount != null ? liveStats.applicationsCount : "...", "طلب توظيف") +
+      statCardHtml("#fffbeb", "#d97706", "fa-handshake", liveStats.resolvedCount != null ? liveStats.resolvedCount : "...", "رد على طلب") +
       statCardHtml("#f5f3ff", "#7c3aed", "fa-bookmark", (profileData.bookmarkedJobs && profileData.bookmarkedJobs.length) || 0, "وظيفة محفوظة");
   }
 }
@@ -1019,6 +1203,11 @@ function renderOverview() {
     langWrap.innerHTML = langs.map(l => '<span class="skill-tag">' + esc(l.name) + " · " + esc(l.level) + "</span>").join("");
     document.getElementById("languages-view-mini-empty").classList.toggle("hidden", langs.length > 0);
   }
+
+  const kwWrap = document.getElementById("keywords-view-mini");
+  const keywords = userRole === "employer" ? ((profileData.companyInfo && profileData.companyInfo.keywords) || []) : (profileData.keywords || []);
+  kwWrap.innerHTML = keywords.map(k => '<span class="skill-tag">' + esc(k) + "</span>").join("");
+  document.getElementById("keywords-view-mini-empty").classList.toggle("hidden", keywords.length > 0);
 }
 
 function renderRepeatable(viewId, emptyId, items, templateFn) {
@@ -1050,13 +1239,25 @@ function renderPortfolio() {
   const works = profileData.previousWorksUrls || [];
   document.getElementById("portfolio-empty").classList.toggle("hidden", works.length > 0);
   grid.innerHTML = works.map((url, i) =>
-    '<div class="portfolio-item"><img src="' + url + '" loading="lazy" alt="عمل سابق">' +
-    (isOwnProfile ? '<button class="portfolio-remove" onclick="removeWork(' + i + ')" title="حذف"><i class="fas fa-times"></i></button>' : '') + '</div>'
+    '<div class="portfolio-item"><img src="' + url + '" loading="lazy" alt="عمل سابق" onclick="openLightbox(' + i + ')" style="cursor:pointer">' +
+    (isOwnProfile ? '<button class="portfolio-remove" onclick="event.stopPropagation();removeWork(' + i + ')" title="حذف"><i class="fas fa-times"></i></button>' : '') + '</div>'
   ).join("");
+
   const cvView = document.getElementById("view-cv");
   cvView.innerHTML = (profileData.links && profileData.links.cv)
-    ? '<a href="' + esc(profileData.links.cv) + '" target="_blank" class="text-blue-600 hover:underline font-bold">عرض السيرة الذاتية</a>'
-    : "لا يوجد رابط سيرة ذاتية";
+    ? '<a href="' + esc(profileData.links.cv) + '" target="_blank" class="text-blue-600 hover:underline font-bold">عرض / تحميل السيرة الذاتية</a>'
+    : "لم يتم رفع سيرة ذاتية بعد.";
+
+  const docsWrap = document.getElementById("documents-view");
+  const docs = profileData.documents || [];
+  if (docsWrap) {
+    docsWrap.innerHTML = docs.map((d, i) =>
+      '<div class="doc-row"><div class="doc-icon"><i class="fas fa-file"></i></div>' +
+      '<a href="' + esc(d.url) + '" target="_blank" class="flex-1 min-w-0 truncate text-blue-600 hover:underline font-medium">' + esc(d.name || "ملف") + '</a>' +
+      (isOwnProfile ? '<button class="item-remove-btn" onclick="removeDocument(' + i + ')"><i class="fas fa-trash"></i></button>' : '') + '</div>'
+    ).join("");
+    document.getElementById("documents-empty").classList.toggle("hidden", docs.length > 0 || !isOwnProfile);
+  }
 }
 
 function renderSettingsDefaults() {
@@ -1075,10 +1276,13 @@ function populateEditForm(name) {
     document.getElementById("input-bio").value = (userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.description) : profileData.bio) || "";
   }
   if (name === "contact") {
+    suppressLocationClear = true;
     const loc = (userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.location) : (profileData.contact && profileData.contact.location)) || {};
     const phone = (userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.phone) : (profileData.contact && profileData.contact.phone)) || "";
     document.getElementById("input-phone").value = phone;
     document.getElementById("input-linkedin").value = (profileData.links && profileData.links.linkedin) || "";
+    const kw = userRole === "employer" ? (profileData.companyInfo && profileData.companyInfo.keywords) : profileData.keywords;
+    document.getElementById("input-keywords").value = Array.isArray(kw) ? kw.join("، ") : "";
     stateSel.value = loc.state || "";
     citySel.innerHTML = '<option value="">اختر مدينة</option>';
     const cities = sudanLocations[loc.state] ? Object.keys(sudanLocations[loc.state]) : [];
@@ -1087,10 +1291,13 @@ function populateEditForm(name) {
     areaSel.innerHTML = '<option value="">اختر منطقة أو حي</option>';
     const areas = (sudanLocations[loc.state] && sudanLocations[loc.state][loc.city]) || [];
     areas.forEach(a => { const o = document.createElement("option"); o.value = a; o.textContent = a; areaSel.appendChild(o); });
+    if (loc.area && !areas.includes(loc.area)) { const o = document.createElement("option"); o.value = loc.area; o.textContent = loc.area + " (مكتشف)"; areaSel.appendChild(o); }
     areaSel.value = loc.area || "";
     pickedLat = typeof loc.lat === "number" ? loc.lat : null;
     pickedLng = typeof loc.lng === "number" ? loc.lng : null;
+    document.getElementById("geocode-status").style.display = "none";
     setTimeout(initLocationMap, 80);
+    setTimeout(() => { suppressLocationClear = false; }, 300);
   }
   if (name === "skills") {
     const container = document.getElementById("skills-input-container"); container.innerHTML = "";
@@ -1230,15 +1437,18 @@ window.saveContact = () => {
   const phone = document.getElementById("input-phone").value.trim();
   const linkedin = document.getElementById("input-linkedin").value.trim();
   const locationObj = { state: stateSel.value, city: citySel.value, area: areaSel.value, lat: pickedLat, lng: pickedLng };
+  const keywords = document.getElementById("input-keywords").value.split(/[،,]/).map(k => k.trim()).filter(Boolean).slice(0, 25);
+  if (keywords.length >= 25) showMsg("contact-message", "تم الاحتفاظ بأول 25 كلمة مفتاحية فقط.", "error");
   if (userRole === "employer") {
     saveField({
-      companyInfo: Object.assign({}, profileData.companyInfo || {}, { phone, location: locationObj }),
+      companyInfo: Object.assign({}, profileData.companyInfo || {}, { phone, location: locationObj, keywords }),
       links: Object.assign({}, profileData.links || {}, { linkedin })
     }, "contact-message", "contact");
   } else {
     saveField({
       contact: { phone, location: locationObj },
-      links: Object.assign({}, profileData.links || {}, { linkedin })
+      links: Object.assign({}, profileData.links || {}, { linkedin }),
+      keywords
     }, "contact-message", "contact");
   }
 };
@@ -1335,6 +1545,40 @@ async function uploadImageToCloudinary(file) {
   if (!data.secure_url) throw new Error("لم يتم استلام رابط الصورة.");
   return data.secure_url;
 }
+// رفع ملفات عامة (PDF/DOC وغيرها) - يتطلب تفعيل "raw" في إعدادات الـ upload preset على Cloudinary
+async function uploadFileToCloudinary(file) {
+  const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  const response = await fetch(CLOUDINARY_URL_AUTO, { method: "POST", body: formData });
+  if (!response.ok) { const t = await response.text().catch(() => ""); console.error("Cloudinary error:", response.status, t); throw new Error("فشل رفع الملف — تأكد أن إعداد الرفع في Cloudinary يسمح بملفات غير الصور (raw)."); }
+  const data = await response.json();
+  if (!data.secure_url) throw new Error("لم يتم استلام رابط الملف.");
+  return data.secure_url;
+}
+window.handleCvUpload = async function(input) {
+  const file = input.files[0]; if (!file) return;
+  showMsg("links-message", "جاري رفع السيرة الذاتية...", "success");
+  try {
+    const url = await uploadFileToCloudinary(file);
+    await saveField({ links: Object.assign({}, profileData.links || {}, { cv: url }) }, "links-message", "links");
+  } catch (err) { showMsg("links-message", "تعذر رفع الملف: " + err.message, "error"); }
+  input.value = "";
+};
+window.handleDocumentUpload = async function(input) {
+  const file = input.files[0]; if (!file) return;
+  const existing = profileData.documents || [];
+  if (existing.length >= 10) { showMsg("documents-message", "الحد الأقصى 10 ملفات.", "error"); input.value = ""; return; }
+  showMsg("documents-message", "جاري رفع الملف...", "success");
+  try {
+    const url = await uploadFileToCloudinary(file);
+    const documents = existing.concat([{ name: file.name, url }]);
+    await saveField({ documents }, "documents-message", null);
+  } catch (err) { showMsg("documents-message", "تعذر رفع الملف: " + err.message, "error"); }
+  input.value = "";
+};
+window.removeDocument = async function(index) {
+  const documents = (profileData.documents || []).slice(); documents.splice(index, 1);
+  await saveField({ documents }, "documents-message", null);
+};
 document.getElementById("cover-input").addEventListener("change", async (e) => {
   const file = e.target.files[0]; if (!file) return;
   showMsg("header-message", "جاري رفع صورة الغلاف...", "success");
@@ -1390,15 +1634,22 @@ async function loadNotifications() {
     myNotifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     myNotifications.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
     renderNotifications();
-  } catch (e) { console.warn("تعذر تحميل الإشعارات:", e); }
+  } catch (e) {
+    console.warn("تعذر تحميل الإشعارات:", e);
+    const empty = document.getElementById("notif-empty");
+    empty.classList.remove("hidden");
+    empty.innerHTML = '<i class="fas fa-triangle-exclamation text-amber-500 mb-1" style="display:block"></i>تعذر تحميل الإشعارات.<br><span style="font-size:.7rem">تأكد من قواعد أمان Firestore لمجموعة notifications.</span>';
+  }
 }
+// تحديث الإشعارات كل 30 ثانية طالما الصفحة مفتوحة، حتى تظهر الإشعارات الجديدة دون الحاجة لإعادة تحميل الصفحة
+setInterval(() => { if (isOwnProfile && currentUser) loadNotifications(); }, 30000);
 function renderNotifications() {
   const list = document.getElementById("notif-list");
   const empty = document.getElementById("notif-empty");
   const badge = document.getElementById("notif-badge");
   const unreadCount = myNotifications.filter(n => !n.read).length;
   badge.classList.toggle("hidden", unreadCount === 0);
-  if (!myNotifications.length) { list.innerHTML = ""; empty.classList.remove("hidden"); return; }
+  if (!myNotifications.length) { list.innerHTML = ""; empty.classList.remove("hidden"); empty.innerHTML = "لا توجد إشعارات بعد."; return; }
   empty.classList.add("hidden");
   list.innerHTML = myNotifications.slice(0, 15).map(n => (
     '<div class="notif-item' + (n.read ? '' : ' unread') + '" onclick="handleNotificationClick(\'' + n.id + '\')">' +
@@ -1471,13 +1722,21 @@ async function renderAppliedAndHistory() {
     const pending = applications.filter(a => !a.status || a.status === "pending" || a.status === "reviewing");
     const resolved = applications.filter(a => a.status === "accepted" || a.status === "rejected");
     appliedEmpty.classList.toggle("hidden", pending.length > 0);
-    appliedList.innerHTML = pending.map(a => jobMiniCardHtml(a.jobTitle, a.companyName, '<span class="status-pill ' + (a.status === "reviewing" ? "reviewing" : "pending") + '">' + (a.status === "reviewing" ? "قيد المراجعة" : "بانتظار الرد") + "</span>")).join("");
+    appliedList.innerHTML = pending.map(a => jobMiniCardHtml(a.jobTitle, a.companyName, '<span class="status-pill ' + (a.status === "reviewing" ? "reviewing" : "pending") + '">' + (a.status === "reviewing" ? "قيد المراجعة" : "بانتظار الرد") + "</span>", a.employerId)).join("");
     historyEmpty.classList.toggle("hidden", resolved.length > 0);
-    historyList.innerHTML = resolved.map(a => jobMiniCardHtml(a.jobTitle, a.companyName, '<span class="status-pill ' + a.status + '">' + (a.status === "accepted" ? "تم القبول" : "تم الرفض") + "</span>")).join("");
-  } catch (e) { console.warn("تعذر تحميل طلبات التوظيف:", e); appliedEmpty.classList.remove("hidden"); historyEmpty.classList.remove("hidden"); }
+    historyList.innerHTML = resolved.map(a => jobMiniCardHtml(a.jobTitle, a.companyName, '<span class="status-pill ' + a.status + '">' + (a.status === "accepted" ? "تم القبول" : "تم الرفض") + "</span>", a.employerId)).join("");
+    liveStats.applicationsCount = applications.length;
+    liveStats.resolvedCount = resolved.length;
+    renderStatsGrid();
+  } catch (e) {
+    console.warn("تعذر تحميل طلبات التوظيف:", e);
+    appliedEmpty.classList.remove("hidden"); historyEmpty.classList.remove("hidden");
+    appliedEmpty.innerHTML = '<i class="fas fa-triangle-exclamation text-amber-500"></i><br>تعذر تحميل طلبات التوظيف (تحقق من قواعد أمان Firestore لمجموعة applications).';
+  }
 }
 
-/* ==================== تبويب الوظائف: صاحب عمل (إدارة الوظائف والمتقدمين) ==================== */
+/* ==================== تبويب الوظائف: صاحب عمل (إدارة الوظائف والمتقدمين عبر نافذة منبثقة) ==================== */
+let myPostedJobsCache = [];
 async function loadMyPostedJobs() {
   const listEl = document.getElementById("my-jobs-list");
   const emptyEl = document.getElementById("my-jobs-empty");
@@ -1486,53 +1745,113 @@ async function loadMyPostedJobs() {
     const snap = await getDocs(q);
     const jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     jobs.sort((a, b) => (b.postedAt?.seconds || 0) - (a.postedAt?.seconds || 0));
+    myPostedJobsCache = jobs;
     emptyEl.classList.toggle("hidden", jobs.length > 0);
     listEl.innerHTML = jobs.map(job => {
       const isActive = (job.status || "active") === "active";
-      return '<div class="dash-card mb-3" style="padding:1rem">' +
-        '<div class="flex items-center justify-between gap-3 cursor-pointer" onclick="toggleApplicantsPanel(\'' + job.id + '\')">' +
+      return '<div class="dash-card mb-3 cursor-pointer" style="padding:1rem" onclick="openApplicantsModal(\'' + job.id + '\')">' +
+        '<div class="flex items-center justify-between gap-3">' +
         '<div class="flex-1 min-w-0"><p class="font-bold text-gray-800">' + esc(job.title) + '</p>' +
         '<p class="text-gray-400 text-xs">' + formatLocation(job.location) + '</p></div>' +
         '<span class="status-pill ' + (isActive ? "active" : "closed") + '">' + (isActive ? "نشطة" : "مغلقة") + '</span>' +
-        '<i class="fas fa-chevron-down text-gray-400" id="chevron-' + job.id + '"></i></div>' +
-        '<div class="hidden" id="applicants-panel-' + job.id + '"><div class="text-center text-gray-400 text-sm py-4">جاري تحميل المتقدمين...</div></div></div>';
+        '<i class="fas fa-users text-gray-400"></i></div></div>';
     }).join("");
-  } catch (e) { console.warn("تعذر تحميل وظائفك:", e); }
+
+    // إحصائيات حقيقية محسوبة فعلياً من الطلبات (وليست حقلاً ثابتاً قد يصبح قديماً)
+    let applicantsCount = 0, hiredCount = 0;
+    const jobIds = jobs.map(j => j.id);
+    for (let i = 0; i < jobIds.length; i += 10) {
+      const chunk = jobIds.slice(i, i + 10);
+      if (!chunk.length) continue;
+      const appsSnap = await getDocs(query(collection(db, "applications"), where("jobId", "in", chunk)));
+      applicantsCount += appsSnap.size;
+      hiredCount += appsSnap.docs.filter(d => d.data().status === "accepted").length;
+    }
+    liveStats.jobsPostedCount = jobs.length;
+    liveStats.applicantsCount = applicantsCount;
+    liveStats.hiredCount = hiredCount;
+    renderStatsGrid();
+  } catch (e) {
+    console.warn("تعذر تحميل وظائفك:", e);
+    emptyEl.classList.remove("hidden");
+    emptyEl.innerHTML = '<i class="fas fa-triangle-exclamation text-amber-500"></i><br>تعذر تحميل الوظائف (تحقق من قواعد أمان Firestore).';
+  }
 }
-window.toggleApplicantsPanel = async function(jobId) {
-  const panel = document.getElementById("applicants-panel-" + jobId);
-  const chevron = document.getElementById("chevron-" + jobId);
-  const willOpen = panel.classList.contains("hidden");
-  panel.classList.toggle("hidden");
-  chevron.classList.toggle("fa-chevron-down", !willOpen);
-  chevron.classList.toggle("fa-chevron-up", willOpen);
-  if (!willOpen) return;
+
+window.openApplicantsModal = async function(jobId) {
+  const job = myPostedJobsCache.find(j => j.id === jobId);
+  const modal = document.getElementById("applicants-modal");
+  document.getElementById("applicants-modal-title").textContent = job ? ("المتقدمون على: " + job.title) : "المتقدمون";
+  document.getElementById("applicants-modal-body").innerHTML = '<div class="text-center text-gray-400 text-sm py-10"><i class="fas fa-spinner fa-spin text-xl mb-2" style="display:block"></i>جاري تحميل المتقدمين...</div>';
+  modal.style.display = "flex";
+  modal.dataset.jobId = jobId;
+  await refreshApplicantsModal(jobId);
+};
+window.closeApplicantsModal = function() {
+  document.getElementById("applicants-modal").style.display = "none";
+};
+document.getElementById("applicants-modal").addEventListener("click", (e) => {
+  if (e.target.id === "applicants-modal") closeApplicantsModal();
+});
+
+/* ==================== عارض الصور (Lightbox) لمعرض الأعمال ==================== */
+let lightboxImages = [];
+let lightboxIndex = 0;
+window.openLightbox = function(index) {
+  lightboxImages = profileData.previousWorksUrls || [];
+  if (!lightboxImages.length) return;
+  lightboxIndex = index;
+  document.getElementById("lightbox-img").src = lightboxImages[lightboxIndex];
+  document.getElementById("lightbox-overlay").style.display = "flex";
+};
+window.closeLightbox = function() { document.getElementById("lightbox-overlay").style.display = "none"; };
+window.lightboxNav = function(dir) {
+  lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
+  document.getElementById("lightbox-img").src = lightboxImages[lightboxIndex];
+};
+document.getElementById("lightbox-overlay").addEventListener("click", (e) => { if (e.target.id === "lightbox-overlay") closeLightbox(); });
+document.addEventListener("keydown", (e) => {
+  if (document.getElementById("lightbox-overlay").style.display === "flex") {
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") lightboxNav(1);
+    if (e.key === "ArrowRight") lightboxNav(-1);
+  }
+});
+async function refreshApplicantsModal(jobId) {
+  const body = document.getElementById("applicants-modal-body");
   try {
     const q = query(collection(db, "applications"), where("jobId", "==", jobId));
     const snap = await getDocs(q);
     const applicants = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (!applicants.length) { panel.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">لا يوجد متقدمون بعد لهذه الوظيفة.</p>'; return; }
-    panel.innerHTML = applicants.map(app => {
+    if (!applicants.length) { body.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><br>لا يوجد متقدمون بعد لهذه الوظيفة.</div>'; return; }
+    applicants.sort((a, b) => (b.appliedAt?.seconds || 0) - (a.appliedAt?.seconds || 0));
+    body.innerHTML = applicants.map(app => {
       const statusLabel = { pending: "بانتظار الرد", accepted: "مقبول", rejected: "مرفوض" }[app.status || "pending"];
       const statusClass = { pending: "pending", accepted: "accepted", rejected: "rejected" }[app.status || "pending"];
-      return '<div class="applicant-row">' +
-        '<div class="flex-1 min-w-0 cursor-pointer" onclick="window.location.href=\'profile.html?uid=' + app.employeeId + '\'"><p class="font-bold text-gray-800 text-sm">' + esc(app.employeeName || "متقدم") + '</p><p class="text-gray-400 text-xs">اضغط لعرض الملف الشخصي</p></div>' +
+      return '<div class="applicant-card">' +
+        '<img src="' + (app.employeePhoto || ("https://ui-avatars.com/api/?background=2563eb&color=fff&name=" + encodeURIComponent(app.employeeName || "م"))) + '" class="applicant-avatar" onclick="window.location.href=\'profile.html?uid=' + app.employeeId + '\'">' +
+        '<div class="flex-1 min-w-0">' +
+        '<p class="font-bold text-gray-800 cursor-pointer hover:text-blue-600" onclick="window.location.href=\'profile.html?uid=' + app.employeeId + '\'">' + esc(app.employeeName || "متقدم") + '</p>' +
+        '<p class="text-gray-400 text-xs">تقدّم ' + timeAgoShort(app.appliedAt) + '</p>' +
+        '<div class="flex items-center gap-2 mt-2 flex-wrap">' +
         '<span class="status-pill ' + statusClass + '">' + statusLabel + '</span>' +
         (app.status === "pending" || !app.status ? '<button class="accept-btn" onclick="respondToApplication(\'' + app.id + '\',\'accepted\',\'' + app.employeeId + '\',\'' + esc(app.jobTitle || "") + '\')">قبول</button><button class="reject-btn" onclick="respondToApplication(\'' + app.id + '\',\'rejected\',\'' + app.employeeId + '\',\'' + esc(app.jobTitle || "") + '\')">رفض</button>' : '') +
-        '<a href="chat.html?employeeId=' + app.employeeId + '&employeeName=' + encodeURIComponent(app.employeeName || "") + '" class="save-btn !py-1.5 !px-3 text-xs"><i class="fas fa-comment-dots"></i></a></div>';
+        '<a href="chat.html?employeeId=' + app.employeeId + '&employeeName=' + encodeURIComponent(app.employeeName || "") + '" class="save-btn !py-1.5 !px-3 text-xs"><i class="fas fa-comment-dots"></i> مراسلة</a>' +
+        '</div></div></div>';
     }).join("");
-  } catch (e) { console.error(e); panel.innerHTML = '<p class="text-center text-red-400 text-sm py-4">تعذر تحميل المتقدمين.</p>'; }
-};
+  } catch (e) { console.error(e); body.innerHTML = '<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><br>تعذر تحميل المتقدمين (تحقق من قواعد أمان Firestore).</div>'; }
+}
 window.respondToApplication = async function(applicationId, newStatus, employeeId, jobTitle) {
   try {
     await updateDoc(doc(db, "applications", applicationId), { status: newStatus });
     await addDoc(collection(db, "notifications"), {
       userId: employeeId, type: "status",
       message: newStatus === "accepted" ? ('تهانينا! تم قبولك لوظيفة "' + jobTitle + '". تواصل مع الشركة لإتمام التوظيف.') : ('نأسف، تم رفض طلبك لوظيفة "' + jobTitle + '".'),
-      read: false, timestamp: serverTimestamp()
+      link: "profile.html", read: false, timestamp: serverTimestamp()
     });
-    const activeJobRow = document.querySelector('[id^="applicants-panel-"]:not(.hidden)');
-    if (activeJobRow) { const jobId = activeJobRow.id.replace("applicants-panel-", ""); toggleApplicantsPanel(jobId); toggleApplicantsPanel(jobId); }
+    const modal = document.getElementById("applicants-modal");
+    if (modal.style.display === "flex" && modal.dataset.jobId) { await refreshApplicantsModal(modal.dataset.jobId); }
+    loadMyPostedJobs();
   } catch (e) { console.error(e); alert("تعذر تحديث حالة الطلب."); }
 };
 
@@ -1548,7 +1867,7 @@ function renderSuggestedJobsForEmployee() {
   const emptyEl = document.getElementById("suggestions-empty");
   document.getElementById("suggestions-title").innerHTML = '<i class="fas fa-bolt ml-1 text-amber-500"></i> وظائف تناسب مهاراتك';
   document.getElementById("suggestions-view-all").href = "job_listing_page.html";
-  const skills = profileData.skills || [];
+  const skills = (profileData.skills || []).concat(profileData.keywords || []);
   if (!skills.length || !allJobsCache.length) { listEl.innerHTML = ""; emptyEl.classList.remove("hidden"); return; }
   const scored = allJobsCache.map(job => ({ job, score: skillOverlapScore(skills, job.skillsRequired || []) })).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 4);
   if (!scored.length) { listEl.innerHTML = ""; emptyEl.classList.remove("hidden"); return; }
@@ -1562,13 +1881,14 @@ async function loadSuggestedEmployeesForEmployer() {
   document.getElementById("suggestions-view-all").href = "employee_listing_page.html";
   const businessType = (profileData.companyInfo && profileData.companyInfo.businessType) || "";
   const description = (profileData.companyInfo && profileData.companyInfo.description) || "";
-  const keywords = (businessType + " " + description).toLowerCase().split(/\s+/).filter(w => w.length > 1);
+  const companyKeywords = (profileData.companyInfo && profileData.companyInfo.keywords) || [];
+  const keywords = (businessType + " " + description + " " + companyKeywords.join(" ")).toLowerCase().split(/\s+/).filter(w => w.length > 1);
   if (!keywords.length) { emptyEl.classList.remove("hidden"); return; }
   try {
     const snap = await getDocs(collection(db, "employees"));
     const employees = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     const scored = employees.map(emp => {
-      const empText = ((emp.skills || []).join(" ") + " " + (emp.headline || "")).toLowerCase();
+      const empText = ((emp.skills || []).join(" ") + " " + (emp.keywords || []).join(" ") + " " + (emp.headline || "")).toLowerCase();
       const score = keywords.filter(k => empText.includes(k)).length;
       return { emp, score };
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 4);
