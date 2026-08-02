@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>رسائلي - شغلني</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+*{box-sizing:border-box}
+html,body{height:100%;font-family:'Tajawal',sans-serif;background:#f5f7fa}
+body{overflow:hidden;-webkit-tap-highlight-color:transparent}
+
+#mobile-menu{transition:transform .3s ease-in-out;transform:translateX(100%)}
+#mobile-menu.open{transform:translateX(0)}
+
+.chat-wrap{
+  height:calc(100dvh - 80px);
+  display:flex;
+  background:white;
+  border-radius:1rem;
+  overflow:hidden;
+  box-shadow:0 4px 6px rgba(0,0,0,0.04);
+  border:1px solid #e5e7eb
+}
+
+.conv-list{
+  width:340px;
+  border-left:1px solid #e5e7eb;
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+  background:white
+}
+.conv-search{padding:.9rem;border-bottom:1px solid #f3f4f6}
+.conv-search input{
+  width:100%;
+  padding:.55rem .9rem;
+  border:1px solid #d1d5db;
+  border-radius:.6rem;
+  font-size:.85rem;
+  text-align:right;
+  font-family:'Tajawal',sans-serif
+}
+.conv-search input:focus{outline:none;border-color:#2563eb}
+.conv-items{flex:1;overflow-y:auto;min-height:0}
+.conv-item{
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  padding:.85rem 1rem;
+  cursor:pointer;
+  border-bottom:1px solid #f8fafc;
+  transition:background .15s;
+  position:relative
+}
+.conv-item:hover{background:#f8fafc}
+.conv-item.active{background:#eff6ff}
+.conv-avatar{
+  width:46px;
+  height:46px;
+  border-radius:9999px;
+  object-fit:cover;
+  flex-shrink:0;
+  background:#eff6ff
+}
+.conv-info{flex:1;min-width:0}
+.conv-name{
+  font-weight:700;
+  font-size:.88rem;
+  color:#1f2937;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.conv-preview{
+  font-size:.78rem;
+  color:#9ca3af;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-top:2px
+}
+.conv-meta{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:4px;
+  flex-shrink:0
+}
+.conv-time{font-size:.68rem;color:#9ca3af}
+.unread-badge{
+  background:#2563eb;
+  color:white;
+  font-size:.65rem;
+  font-weight:800;
+  width:19px;
+  height:19px;
+  border-radius:9999px;
+  display:flex;
+  align-items:center;
+  justify-content:center
+}
+
+.chat-main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  min-height:0;
+  position:relative
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-chat-state{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#9ca3af;
+  gap:.8rem;
+  padding:2rem
+}
+.empty-chat-state i{font-size:3rem;color:#d1d5db}
+
+/* ========== ACTIVE CHAT ========== */
+#active-chat{
+  display:none;
+  flex-direction:column;
+  flex:1;
+  min-height:0
+}
+
+.chat-header{
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+  padding:.9rem 1.1rem;
+  border-bottom:1px solid #e5e7eb;
+  background:white;
+  flex-shrink:0
+}
+.chat-header-avatar{
+  width:42px;
+  height:42px;
+  border-radius:9999px;
+  object-fit:cover;
+  cursor:pointer;
+  background:#eff6ff
+}
+.chat-header-name{
+  font-weight:800;
+  color:#1f2937;
+  font-size:.95rem;
+  cursor:pointer
+}
+.chat-header-name:hover{color:#2563eb}
+.back-btn{
+  display:none;
+  background:none;
+  border:none;
+  color:#6b7280;
+  font-size:1.2rem;
+  cursor:pointer;
+  padding:.3rem
+}
+
+.messages-area{
+  flex:1;
+  overflow-y:auto;
+  padding:1.2rem;
+  background:#f9fafb;
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+  min-height:0
+}
+.msg-row{
+  display:flex;
+  max-width:75%;
+  align-self:flex-start
+}
+.msg-row.mine{
+  align-self:flex-end;
+  flex-direction:row-reverse
+}
+.msg-bubble{
+  padding:.6rem .9rem;
+  border-radius:1rem;
+  font-size:.87rem;
+  line-height:1.6;
+  word-break:break-word
+}
+.msg-row.mine .msg-bubble{
+  background:#2563eb;
+  color:white;
+  border-bottom-left-radius:.3rem
+}
+.msg-row:not(.mine) .msg-bubble{
+  background:white;
+  color:#1f2937;
+  border:1px solid #e5e7eb;
+  border-bottom-right-radius:.3rem
+}
+.msg-time{
+  font-size:.65rem;
+  color:#9ca3af;
+  margin-top:3px;
+  text-align:left
+}
+.msg-row.mine .msg-time{text-align:right}
+
+.chat-input-wrap{
+  padding:.8rem 1.1rem;
+  border-top:1px solid #e5e7eb;
+  background:white;
+  flex-shrink:0
+}
+.chat-input-row{
+  display:flex;
+  gap:.6rem;
+  align-items:flex-end
+}
+.chat-input{
+  flex:1;
+  border:1px solid #d1d5db;
+  border-radius:1.2rem;
+  padding:.7rem 1.1rem;
+  font-size:.87rem;
+  text-align:right;
+  resize:none;
+  max-height:110px;
+  font-family:'Tajawal',sans-serif;
+  min-height:42px
+}
+.chat-input:focus{outline:none;border-color:#2563eb}
+.send-btn{
+  width:42px;
+  height:42px;
+  border-radius:9999px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  transition:all .15s
+}
+.send-btn:hover{background:#1d4ed8}
+.send-btn:disabled{background:#d1d5db;cursor:not-allowed}
+.filter-warning{
+  background:#fef3c7;
+  color:#92400e;
+  border:1px solid #fde68a;
+  padding:.55rem .9rem;
+  border-radius:.6rem;
+  font-size:.78rem;
+  margin-bottom:.5rem;
+  display:none
+}
+.filter-warning.show{display:block}
+
+.day-sep{
+  text-align:center;
+  color:#9ca3af;
+  font-size:.72rem;
+  margin:.6rem 0;
+  flex-shrink:0
+}
+
+/* ========== MOBILE ========== */
+@media(max-width:768px){
+  .chat-wrap{height:calc(100dvh - 72px);position:relative}
+  .conv-list{
+    width:100%;
+    position:absolute;
+    inset:0;
+    z-index:10;
+    background:white
+  }
+  .conv-list.hide-mobile{display:none}
+  .chat-main{width:100%;position:absolute;inset:0;z-index:5}
+  .chat-main.hide-mobile{display:none}
+  .back-btn{display:block}
+  #active-chat{height:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+<nav class="container mx-auto px-4 h-20 flex items-center justify-between">
+<div class="flex items-center">
+<a href="index.html"><img src="shagelnie.png.png" alt="شغلني" class="h-14 w-auto object-contain"></a>
+<div class="hidden md:flex space-x-1 space-x-reverse mr-6">
+<a href="index.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
+<a href="job_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الوظائف</a>
+<a href="employee_listing_page.html" class="px-4 py-2 text-gray-600 hover:text-blue-600">الموظفون</a>
+<a href="chats.html" class="px-4 py-2 text-blue-600 font-bold">رسائلي</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<a href="profile.html" class="hidden md:block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">ملفي الشخصي</a>
+<button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-blue-600 transition"><i class="fas fa-bars text-2xl"></i></button>
+</div>
+</nav>
+
+<div id="mobile-menu" class="fixed top-0 right-0 h-full w-72 bg-white z-[70] shadow-2xl p-6 flex flex-col md:hidden">
+<div class="flex justify-between items-center mb-8">
+<img src="shagelnie.png.png" alt="شغلني" class="h-12">
+<button id="close-menu" class="text-gray-500 hover:text-gray-700 transition"><i class="fas fa-times text-2xl"></i></button>
+</div>
+<nav class="flex flex-col space-y-4">
+<a href="index.html" class="text-gray-600 py-2 border-b border-gray-100">الرئيسية</a>
+<a href="job_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100">الوظائف</a>
+<a href="employee_listing_page.html" class="text-gray-600 py-2 border-b border-gray-100">الموظفون</a>
+<a href="chats.html" class="text-blue-600 font-bold py-2 border-b border-gray-100">رسائلي</a>
+<a href="profile.html" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold mt-4">ملفي الشخصي</a>
+</nav>
+</div>
+</header>
+
+<!-- ===== CHAT WRAPPER ===== -->
+<div class="container mx-auto px-4 py-4">
+<div class="chat-wrap" id="chat-wrap">
+
+<!-- Conversation List -->
+<div class="conv-list" id="conv-list">
+<div class="conv-search">
+<input type="text" id="convSearch" placeholder="ابحث في المحادثات..." autocomplete="off">
+</div>
+<div class="conv-items" id="conv-items">
+<div class="text-center text-gray-400 text-sm py-10" id="conv-loading">جاري تحميل المحادثات...</div>
+<div class="empty-chat-state hidden" id="conv-empty">
+<i class="far fa-comments text-4xl text-gray-300 mb-2"></i>
+<p class="text-sm text-center">لا توجد محادثات بعد.<br>ابدأ محادثة من صفحة الموظفين أو الوظائف.</p>
+</div>
+</div>
+</div>
+
+<!-- Chat Main -->
+<div class="chat-main" id="chat-main">
+
+<!-- Empty State -->
+<div class="empty-chat-state" id="empty-chat-placeholder">
+<i class="far fa-comment-dots"></i>
+<p>اختر محادثة لبدء المراسلة</p>
+</div>
+
+<!-- Active Chat -->
+<div id="active-chat">
+<div class="chat-header">
+<button class="back-btn" onclick="backToList()"><i class="fas fa-arrow-right"></i></button>
+<img class="chat-header-avatar" id="chat-header-avatar" src="" alt="" onclick="goToPartnerProfile()">
+<div class="flex-1 min-w-0">
+<p class="chat-header-name" id="chat-header-name" onclick="goToPartnerProfile()">—</p>
+<p class="text-xs text-gray-400" id="chat-header-sub">اضغط للانتقال إلى الملف الشخصي</p>
+</div>
+</div>
+
+<div class="messages-area" id="messages-area"></div>
+
+<div class="chat-input-wrap">
+<p class="filter-warning" id="filter-warning">
+<i class="fas fa-shield-halved ml-1"></i>
+لا يمكن إرسال أرقام هواتف أو روابط عبر المحادثة حفاظاً على أمانك. تواصل عبر المنصة فقط.
+</p>
+<div class="chat-input-row">
+<textarea id="messageInput" class="chat-input" rows="1" placeholder="اكتب رسالتك..."></textarea>
+<button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where,
+  orderBy, onSnapshot, serverTimestamp, increment
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
+  authDomain: "shaglni-c64c0.firebaseapp.com",
+  projectId: "shaglni-c64c0",
+  storageBucket: "shaglni-c64c0.firebasestorage.app",
+  messagingSenderId: "768887356636",
+  appId: "1:768887356636:web:11ec1d6991add3309c8819",
+  measurementId: "G-98GQGZS09W"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let activeConversationId = null;
+let activePartnerId = null;
+let allConversations = [];
+let unsubscribeMessages = null;
+
+/* ==================== HEADER ==================== */
+document.getElementById("mobile-menu-button").addEventListener("click", () => document.getElementById("mobile-menu").classList.add("open"));
+document.getElementById("close-menu").addEventListener("click", () => document.getElementById("mobile-menu").classList.remove("open"));
+
+function esc(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+}
+
+/* ==================== CONTACT FILTER ==================== */
+const PHONE_PATTERN = /(\+?\d[\d\s\-()]{6,}\d)/;
+const URL_PATTERN = /((https?:\/\/|www\.)\S+)|([a-zA-Z0-9][a-zA-Z0-9.-]*\.(com|net|org|sd|io|co|me|ly|app)\b)/i;
+function containsContactInfo(text) {
+  return PHONE_PATTERN.test(text) || URL_PATTERN.test(text);
+}
+
+/* ==================== AUTH ==================== */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "login.html"; return; }
+  currentUser = user;
+  listenToConversations();
+  await maybeOpenConversationFromUrl();
+});
+
+/* ==================== OPEN CONVERSATION FROM URL ==================== */
+async function maybeOpenConversationFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const partnerId = params.get("employeeId");
+  if (!partnerId || partnerId === currentUser.uid) return;
+  const partnerName = params.get("employeeName") || "مستخدم";
+  const partnerPhoto = params.get("employeePhoto") || "";
+  const conversationId = [currentUser.uid, partnerId].sort().join("_");
+
+  try {
+    const convRef = doc(db, "conversations", conversationId);
+    const convSnap = await getDoc(convRef);
+    if (!convSnap.exists()) {
+      let myName = currentUser.displayName || "مستخدم";
+      let myPhoto = currentUser.photoURL || "";
+      await setDoc(convRef, {
+        participants: [currentUser.uid, partnerId],
+        participantNames: { [currentUser.uid]: myName, [partnerId]: partnerName },
+        participantPhotos: { [currentUser.uid]: myPhoto, [partnerId]: partnerPhoto },
+        lastMessage: "", lastMessageAt: serverTimestamp(),
+        unreadCount: { [currentUser.uid]: 0, [partnerId]: 0 }
+      });
+    }
+    openConversation(conversationId, partnerId, partnerName, partnerPhoto);
+  } catch (e) { console.error("تعذر فتح المحادثة:", e); }
+}
+
+/* ==================== CONVERSATIONS LIST (LIVE) ==================== */
+function listenToConversations() {
+  const q = query(collection(db, "conversations"), where("participants", "array-contains", currentUser.uid));
+  onSnapshot(q, (snap) => {
+    allConversations = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allConversations.sort((a, b) => (b.lastMessageAt?.seconds || 0) - (a.lastMessageAt?.seconds || 0));
+    renderConversationList();
+  }, (err) => {
+    console.error("تعذر تحميل المحادثات:", err);
+    document.getElementById("conv-loading").textContent = "تعذر تحميل المحادثات (تحقق من قواعد أمان Firestore).";
+  });
+}
+
+function timeAgoShort(ts) {
+  if (!ts) return "";
+  const d = new Date((ts.seconds || 0) * 1000);
+  const diffMin = Math.floor((Date.now() - d) / 60000);
+  if (diffMin < 1) return "الآن";
+  if (diffMin < 60) return diffMin + "د";
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return diffH + "س";
+  const diffD = Math.floor(diffH / 24);
+  if (diffD < 7) return diffD + "ي";
+  return d.toLocaleDateString("ar");
+}
+
+function renderConversationList() {
+  const container = document.getElementById("conv-items");
+  const loading = document.getElementById("conv-loading");
+  const empty = document.getElementById("conv-empty");
+  loading.style.display = "none";
+  const searchTerm = (document.getElementById("convSearch").value || "").toLowerCase();
+
+  const filtered = allConversations.filter(c => {
+    const partnerId = (c.participants || []).find(p => p !== currentUser.uid);
+    const partnerName = (c.participantNames && c.participantNames[partnerId]) || "";
+    return !searchTerm || partnerName.toLowerCase().includes(searchTerm);
+  });
+
+  empty.classList.toggle("hidden", filtered.length > 0 || allConversations.length > 0);
+  if (!allConversations.length) { empty.classList.remove("hidden"); }
+
+  const itemsHtml = filtered.map(c => {
+    const partnerId = (c.participants || []).find(p => p !== currentUser.uid);
+    const partnerName = (c.participantNames && c.participantNames[partnerId]) || "مستخدم";
+    const partnerPhoto = (c.participantPhotos && c.participantPhotos[partnerId]) || ("https://ui-avatars.com/api/?background=2563eb&color=fff&name=" + encodeURIComponent(partnerName));
+    const unread = (c.unreadCount && c.unreadCount[currentUser.uid]) || 0;
+    const isActive = c.id === activeConversationId;
+
+    // FIX: safely encode photo URL for onclick attribute
+    const safePhoto = encodeURIComponent(partnerPhoto);
+    const safeName = esc(partnerName).replace(/'/g, "\'");
+
+    return \`<div class="conv-item\${isActive ? ' active' : ''}" data-cid="\${c.id}" data-pid="\${partnerId}" data-name="\${safeName}" data-photo="\${safePhoto}">
+      <img class="conv-avatar" src="\${partnerPhoto}" alt="" loading="lazy">
+      <div class="conv-info">
+        <p class="conv-name">\${esc(partnerName)}</p>
+        <p class="conv-preview">\${esc(c.lastMessage || "ابدأ المحادثة")}</p>
+      </div>
+      <div class="conv-meta">
+        <span class="conv-time">\${timeAgoShort(c.lastMessageAt)}</span>
+        \${unread > 0 ? '<span class="unread-badge">' + unread + '</span>' : ''}
+      </div>
+    </div>\`;
+  }).join("");
+
+  container.querySelectorAll(".conv-item").forEach(el => el.remove());
+  container.insertAdjacentHTML("beforeend", itemsHtml);
+
+  // FIX: attach click events safely instead of inline onclick
+  container.querySelectorAll(".conv-item").forEach(el => {
+    el.addEventListener("click", () => {
+      const cid = el.dataset.cid;
+      const pid = el.dataset.pid;
+      const name = el.dataset.name;
+      const photo = decodeURIComponent(el.dataset.photo);
+      openConversation(cid, pid, name, photo);
+    });
+  });
+}
+document.getElementById("convSearch").addEventListener("input", renderConversationList);
+
+/* ==================== OPEN CONVERSATION ==================== */
+window.openConversation = function(conversationId, partnerId, partnerName, partnerPhoto) {
+  activeConversationId = conversationId;
+  activePartnerId = partnerId;
+
+  document.getElementById("empty-chat-placeholder").style.display = "none";
+  document.getElementById("active-chat").style.display = "flex";
+  document.getElementById("chat-header-avatar").src = partnerPhoto || ("https://ui-avatars.com/api/?background=2563eb&color=fff&name=" + encodeURIComponent(partnerName));
+  document.getElementById("chat-header-name").textContent = partnerName;
+
+  document.getElementById("conv-list").classList.add("hide-mobile");
+  document.getElementById("chat-main").classList.remove("hide-mobile");
+
+  renderConversationList();
+  resetUnreadCount(conversationId);
+  listenToMessages(conversationId);
+};
+
+window.backToList = function() {
+  document.getElementById("conv-list").classList.remove("hide-mobile");
+  document.getElementById("chat-main").classList.add("hide-mobile");
+};
+
+window.goToPartnerProfile = function() {
+  if (activePartnerId) window.location.href = "profile.html?uid=" + activePartnerId;
+};
+
+async function resetUnreadCount(conversationId) {
+  try { await updateDoc(doc(db, "conversations", conversationId), { ["unreadCount." + currentUser.uid]: 0 }); }
+  catch (e) { console.warn("تعذر تصفير عداد غير المقروء:", e); }
+}
+
+/* ==================== MESSAGES (LIVE) ==================== */
+function listenToMessages(conversationId) {
+  if (unsubscribeMessages) unsubscribeMessages();
+  const q = query(collection(db, "conversations", conversationId, "messages"), orderBy("sentAt", "asc"));
+  unsubscribeMessages = onSnapshot(q, (snap) => {
+    const messages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderMessages(messages);
+    resetUnreadCount(conversationId);
+  }, (err) => {
+    console.error("تعذر تحميل الرسائل:", err);
+    document.getElementById("messages-area").innerHTML = '<p class="text-center text-red-400 text-sm">تعذر تحميل الرسائل (تحقق من قواعد أمان Firestore).</p>';
+  });
+}
+
+function renderMessages(messages) {
+  const area = document.getElementById("messages-area");
+  let lastDay = null;
+  let html = "";
+  messages.forEach(m => {
+    const d = m.sentAt ? new Date((m.sentAt.seconds || 0) * 1000) : new Date();
+    const dayStr = d.toLocaleDateString("ar");
+    if (dayStr !== lastDay) { html += '<div class="day-sep">' + dayStr + '</div>'; lastDay = dayStr; }
+    const isMine = m.senderId === currentUser.uid;
+    const timeStr = d.toLocaleTimeString("ar", { hour: "2-digit", minute: "2-digit" });
+    html += '<div class="msg-row' + (isMine ? " mine" : "") + '"><div><div class="msg-bubble">' + esc(m.text) + '</div><div class="msg-time">' + timeStr + '</div></div></div>';
+  });
+  area.innerHTML = html || '<p class="text-center text-gray-400 text-sm mt-6">لا توجد رسائل بعد. ابدأ المحادثة!</p>';
+  area.scrollTop = area.scrollHeight;
+}
+
+/* ==================== SEND MESSAGE ==================== */
+const messageInput = document.getElementById("messageInput");
+messageInput.addEventListener("input", () => {
+  messageInput.style.height = "auto";
+  messageInput.style.height = Math.min(messageInput.scrollHeight, 110) + "px";
+  document.getElementById("filter-warning").classList.toggle("show", containsContactInfo(messageInput.value));
+});
+messageInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+window.sendMessage = async function() {
+  const text = messageInput.value.trim();
+  if (!text || !activeConversationId) return;
+
+  if (containsContactInfo(text)) {
+    document.getElementById("filter-warning").classList.add("show");
+    return;
+  }
+
+  const sendBtn = document.getElementById("sendBtn");
+  sendBtn.disabled = true;
+  try {
+    await addDoc(collection(db, "conversations", activeConversationId, "messages"), {
+      senderId: currentUser.uid,
+      text: text,
+      sentAt: serverTimestamp()
+    });
+    await updateDoc(doc(db, "conversations", activeConversationId), {
+      lastMessage: text,
+      lastMessageAt: serverTimestamp(),
+      ["unreadCount." + activePartnerId]: increment(1)
+    });
+    await addDoc(collection(db, "notifications"), {
+      userId: activePartnerId, type: "message",
+      message: (currentUser.displayName || "مستخدم") + " أرسل لك رسالة جديدة",
+      link: "chat.html?employeeId=" + currentUser.uid + "&employeeName=" + encodeURIComponent(currentUser.displayName || ""),
+      read: false, timestamp: serverTimestamp()
+    });
+    messageInput.value = "";
+    messageInput.style.height = "auto";
+    document.getElementById("filter-warning").classList.remove("show");
+  } catch (e) {
+    console.error("تعذر إرسال الرسالة:", e);
+    alert("تعذر إرسال الرسالة، حاول مرة أخرى.");
+  } finally {
+    sendBtn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>
