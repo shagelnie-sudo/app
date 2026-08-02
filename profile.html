@@ -40,20 +40,20 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 .cover-wrapper img,.cover-wrapper .cover-fallback{width:100%;height:100%;object-fit:cover}
 .cover-edit-btn{position:absolute;top:1rem;left:1rem;background:rgba(255,255,255,0.9);color:#2563eb;padding:.5rem 1rem;border-radius:2rem;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:.4rem;cursor:pointer;border:none;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:all .2s}
 .cover-edit-btn:hover{background:white;transform:translateY(-2px)}
-.avatar-ring{width:128px;height:128px;border-radius:9999px;border:5px solid white;box-shadow:0 8px 20px rgba(0,0,0,0.12);object-fit:cover;background:#eff6ff}
+.avatar-ring{width:128px;height:128px;min-width:128px;max-width:128px;aspect-ratio:1/1;border-radius:9999px;border:5px solid white;box-shadow:0 8px 20px rgba(0,0,0,0.12);object-fit:cover;background:#eff6ff;display:block;flex-shrink:0}
 .avatar-edit-btn{position:absolute;bottom:4px;left:4px;width:34px;height:34px;border-radius:9999px;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;border:3px solid white;cursor:pointer;font-size:.8rem;transition:all .2s}
 .avatar-edit-btn:hover{background:#1d4ed8;transform:scale(1.08)}
 .progress-track{width:100%;height:10px;background:#eef2f7;border-radius:9999px;overflow:hidden}
 .progress-fill{height:100%;border-radius:9999px;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);transition:width .6s ease}
 .progress-fill.complete{background:linear-gradient(135deg,#10b981 0%,#059669 100%)}
-#tabs-container{display:flex;overflow-x:auto;gap:.5rem;scrollbar-width:none;scroll-snap-type:x proximity}
+#tabs-container{display:flex;overflow-x:auto;gap:.5rem;scrollbar-width:none;scroll-snap-type:x proximity;position:sticky;top:0;z-index:40;background:#f5f7fa;padding:.6rem 0;margin-top:-.6rem}
 #tabs-container::-webkit-scrollbar{display:none}
 .tab-btn{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap;padding:.65rem 1.1rem;border-radius:.75rem;font-weight:700;font-size:.875rem;color:#6b7280;background:white;border:1px solid #e5e7eb;transition:all .2s;cursor:pointer;display:flex;align-items:center;gap:.5rem}
 .tab-btn i{font-size:.85rem}
 .tab-btn:hover{color:#2563eb;border-color:#bfdbfe}
 .tab-btn.active{background:#2563eb;color:white;border-color:#2563eb;box-shadow:0 6px 12px rgba(37,99,235,0.25)}
-.tab-panel{display:none}
-.tab-panel.active{display:block;animation:fadeInPanel .3s ease}
+/* الأقسام كلها ظاهرة ومكدّسة رأسياً للتمرير المستمر؛ أزرار التبويب أعلاه تعمل كاختصار "انتقال" فقط */
+.tab-panel{display:block;scroll-margin-top:76px;margin-bottom:1.5rem;animation:fadeInPanel .3s ease}
 @keyframes fadeInPanel{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:.5rem;flex-wrap:wrap}
 .section-edit-btn{width:34px;height:34px;border-radius:.6rem;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:all .2s;flex-shrink:0}
@@ -83,8 +83,9 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 .toggle-slider::before{position:absolute;content:"";height:20px;width:20px;right:3px;bottom:3px;background:white;transition:.3s;border-radius:9999px;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
 .toggle-switch input:checked+.toggle-slider{background:#2563eb}
 .toggle-switch input:checked+.toggle-slider::before{transform:translateX(-20px)}
-.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
-.portfolio-item{position:relative;border-radius:.85rem;overflow:hidden;aspect-ratio:1/1;background:#f3f4f6}
+.portfolio-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.portfolio-grid::-webkit-scrollbar{height:6px}
+.portfolio-item{flex:0 0 150px;scroll-snap-align:start;position:relative;border-radius:.85rem;overflow:hidden;aspect-ratio:1/1;background:#f3f4f6}
 .portfolio-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
 .portfolio-item:hover img{transform:scale(1.08)}
 .portfolio-remove{position:absolute;top:6px;left:6px;width:26px;height:26px;border-radius:9999px;background:rgba(239,68,68,0.9);color:white;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;font-size:.7rem}
@@ -142,7 +143,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 .file-upload-btn:hover{background:#eff6ff}
 .owner-only.hidden{display:none!important}
 .public-badge{display:inline-flex;align-items:center;gap:.4rem;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;padding:.4rem .9rem;border-radius:.6rem;font-size:.8rem;font-weight:700;margin-bottom:1rem}
-@media(max-width:768px){.avatar-ring{width:96px;height:96px}.cover-wrapper{height:130px}}
+@media(max-width:768px){.avatar-ring{width:96px;height:96px;min-width:96px;max-width:96px}.cover-wrapper{height:130px}}
 </style>
 </head>
 <body class="bg-gray-50">
@@ -234,7 +235,6 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 
 <div id="page-content" class="container mx-auto px-4 py-8 hidden">
 
-<div id="public-view-badge-wrap"></div>
 
 <div class="dash-card !p-0 overflow-visible mb-6">
 <div class="cover-wrapper">
@@ -246,9 +246,9 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="px-6 md:px-8 pb-6">
 <div class="flex flex-col md:flex-row md:items-end md:justify-between -mt-14 md:-mt-16 gap-4">
 <div class="flex items-end gap-4">
-<div class="relative">
-<img id="profile-avatar" class="avatar-ring" src="" alt="الصورة الشخصية">
-<button class="avatar-edit-btn owner-only" id="edit-avatar-btn" onclick="document.getElementById('avatar-input').click()" title="تغيير الصورة"><i class="fas fa-camera"></i></button>
+<div class="relative flex-shrink-0">
+<img id="profile-avatar" class="avatar-ring" src="" alt="الصورة الشخصية" onclick="openAvatarLightbox()" style="cursor:pointer">
+<button class="avatar-edit-btn owner-only" id="edit-avatar-btn" onclick="event.stopPropagation();document.getElementById('avatar-input').click()" title="تغيير الصورة"><i class="fas fa-camera"></i></button>
 <input type="file" id="avatar-input" accept="image/*" class="hidden">
 </div>
 <div class="pb-2">
@@ -256,6 +256,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <h1 class="text-xl md:text-2xl font-black text-gray-900" id="display-name">—</h1>
 <span id="job-status-badge"></span>
 <span id="employee-type-badge"></span>
+<span id="age-badge"></span>
 <span id="verified-badge-wrap"></span>
 </div>
 <p class="text-blue-600 font-bold text-sm md:text-base mt-1" id="display-headline">—</p>
@@ -263,9 +264,11 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <span id="display-location"><i class="fas fa-map-marker-alt ml-1"></i>—</span>
 <span id="display-rating-wrap"></span>
 </div>
+<p class="text-gray-400 text-xs mt-1" id="member-since"></p>
 </div>
 </div>
 <div class="flex gap-2 flex-wrap owner-only" id="owner-actions-wrap">
+
 <button class="save-btn !bg-blue-50 !text-blue-600 hover:!bg-blue-600 hover:!text-white" onclick="scrollToSettings()"><i class="fas fa-pen"></i> تعديل البيانات</button>
 </div>
 <div class="flex gap-2 flex-wrap hidden" id="visitor-actions-wrap">
@@ -289,7 +292,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')"><i class="fas fa-user"></i> نظرة عامة</button>
 <button class="tab-btn" data-tab="skills" id="tab-btn-skills" onclick="switchTab('skills')"><i class="fas fa-layer-group"></i> المهارات والخبرات</button>
 <button class="tab-btn" data-tab="portfolio" id="tab-btn-portfolio" onclick="switchTab('portfolio')"><i class="fas fa-briefcase"></i> معرض الأعمال</button>
-<button class="tab-btn" data-tab="jobs" id="tab-btn-jobs" onclick="switchTab('jobs')"><i class="fas fa-bookmark"></i> <span id="tab-jobs-label">الوظائف</span></button>
+<button class="tab-btn owner-only" data-tab="jobs" id="tab-btn-jobs" onclick="switchTab('jobs')"><i class="fas fa-bookmark"></i> <span id="tab-jobs-label">الوظائف</span></button>
 <button class="tab-btn owner-only" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-gear"></i> الإعدادات</button>
 </div>
 
@@ -484,7 +487,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 <div class="tab-panel" id="panel-portfolio">
 <div class="dash-card mb-6">
 <div class="section-head">
-<h2 class="text-lg font-bold text-gray-800"><i class="fas fa-images ml-1 text-blue-600"></i> صور من أعمالك السابقة <span class="text-gray-400 text-xs font-normal">(حتى 7 صور)</span></h2>
+<h2 class="text-lg font-bold text-gray-800"><i class="fas fa-images ml-1 text-blue-600"></i> صور أعمالي السابقة <span class="text-gray-400 text-xs font-normal">(حتى 7 صور)</span></h2>
 <label class="section-edit-btn cursor-pointer owner-only" title="إضافة صور"><i class="fas fa-plus"></i><input type="file" id="portfolio-input" accept="image/*" multiple class="hidden" onchange="handlePortfolioUpload(this)"></label>
 </div>
 <div class="portfolio-grid" id="portfolio-grid"></div>
@@ -522,7 +525,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa;overflow-x:hidden}
 </div>
 
 <!-- الوظائف (محتوى مختلف حسب الدور) -->
-<div class="tab-panel" id="panel-jobs">
+<div class="tab-panel owner-only" id="panel-jobs">
 
 <!-- محتوى الموظف -->
 <div id="jobs-employee-view">
@@ -884,16 +887,30 @@ window.useCurrentLocation = function() {
 
 /* ==================== التبويبات ==================== */
 window.switchTab = function(tab) {
-  document.querySelectorAll("#tabs-container .tab-btn").forEach(b => b.classList.remove("active"));
-  const btn = document.querySelector('[data-tab="' + tab + '"]'); if (btn) btn.classList.add("active");
-  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-  const panel = document.getElementById("panel-" + tab); if (panel) panel.classList.add("active");
+  const panel = document.getElementById("panel-" + tab);
+  if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 window.scrollToSettings = function() {
   switchTab("settings");
-  const el = document.getElementById("basic-edit-anchor");
-  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    const el = document.getElementById("basic-edit-anchor");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 350);
 };
+// تمييز زر التبويب النشط تلقائياً أثناء التمرير (scroll-spy) بدل الاعتماد على الضغط فقط
+function initScrollSpy() {
+  const panels = Array.from(document.querySelectorAll(".tab-panel")).filter(p => !p.classList.contains("hidden") && p.style.display !== "none");
+  if (!("IntersectionObserver" in window) || !panels.length) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const tabName = entry.target.id.replace("panel-", "");
+        document.querySelectorAll("#tabs-container .tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabName));
+      }
+    });
+  }, { rootMargin: "-90px 0px -60% 0px", threshold: 0 });
+  panels.forEach(p => observer.observe(p));
+}
 window.toggleEditSection = function(name) {
   const editEl = document.getElementById(name + "-edit");
   const viewEl = document.getElementById(name + "-view");
@@ -954,6 +971,7 @@ onAuthStateChanged(auth, async (user) => {
     applyVisibilityForRoleAndOwnership();
     renderAll();
     authHandled = true; clearTimeout(forceTimeout); showAppState("content");
+    setTimeout(initScrollSpy, 200);
 
     if (isOwnProfile) {
       maybeShowWelcomeBanner();
@@ -979,6 +997,8 @@ function applyVisibilityForRoleAndOwnership() {
   if (userRole === "employer") {
     const skillsTab = document.getElementById("tab-btn-skills"); if (skillsTab) skillsTab.style.display = "none";
     const portfolioTab = document.getElementById("tab-btn-portfolio"); if (portfolioTab) portfolioTab.style.display = "none";
+    document.getElementById("panel-skills").style.display = "none";
+    document.getElementById("panel-portfolio").style.display = "none";
     document.getElementById("job-status-card").style.display = "none";
     document.getElementById("languages-mini-card").style.display = "none";
     document.getElementById("tab-jobs-label").textContent = "وظائفي المنشورة";
@@ -989,6 +1009,8 @@ function applyVisibilityForRoleAndOwnership() {
     document.getElementById("headline-field-wrap").querySelector("label").textContent = "نوع النشاط";
     document.getElementById("birthdate-field-wrap").classList.add("hidden");
   } else {
+    document.getElementById("panel-skills").style.display = "";
+    document.getElementById("panel-portfolio").style.display = "";
     document.getElementById("notif-applicants-row").style.display = "none";
     document.getElementById("tab-jobs-label").textContent = "الوظائف";
     document.getElementById("jobs-employer-view").classList.add("hidden");
@@ -998,8 +1020,6 @@ function applyVisibilityForRoleAndOwnership() {
 
   if (!isOwnProfile) {
     document.getElementById("visitor-actions-wrap").classList.remove("hidden");
-    const badgeWrap = document.getElementById("public-view-badge-wrap");
-    badgeWrap.innerHTML = '<span class="public-badge"><i class="fas fa-eye"></i> أنت تشاهد ملفاً عاماً — بيانات التواصل المباشرة مخفية لحمايتها</span>';
   }
 }
 
@@ -1088,7 +1108,7 @@ function renderAll() {
 }
 
 function renderHeader() {
-  const name = profileData.name || (currentUser && currentUser.displayName) || "مستخدم";
+  const name = profileData.name || (isOwnProfile && currentUser && currentUser.displayName) || "مستخدم";
   document.getElementById("display-name").textContent = name;
   document.getElementById("user-initial").textContent = name.charAt(0).toUpperCase();
 
@@ -1120,6 +1140,17 @@ function renderHeader() {
     const typeLabel = profileData.employeeType === "craftsman" ? "عامل / حرفي" : "موظف / مهندس / إداري";
     empTypeBadge.innerHTML = '<span class="skill-tag" style="background:#eef2ff;color:#4338ca"><i class="fas fa-tag ml-1"></i>' + typeLabel + '</span>';
   } else empTypeBadge.innerHTML = "";
+
+  // شارة العمر: تُحسب من تاريخ الميلاد وتُعرض للجميع (بطاقة تعريف مهنية) للموظف فقط - دون كشف التاريخ الدقيق لغير المالك
+  const ageBadgeEl = document.getElementById("age-badge");
+  if (userRole === "employee" && profileData.birthDate) {
+    const age = calcAge(profileData.birthDate);
+    ageBadgeEl.innerHTML = age != null ? '<span class="skill-tag" style="background:#fef3c7;color:#92400e"><i class="fas fa-cake-candles ml-1"></i>' + age + ' سنة</span>' : "";
+  } else ageBadgeEl.innerHTML = "";
+
+  // عضو منذ: تاريخ إنشاء الحساب
+  const memberSinceEl = document.getElementById("member-since");
+  memberSinceEl.textContent = profileData.createdAt ? ("عضو منذ " + formatArabicDate(profileData.createdAt)) : "";
 
   const verifiedWrap = document.getElementById("verified-badge-wrap");
   verifiedWrap.innerHTML = (userRole === "employer" && profileData.verification && profileData.verification.isVerified)
@@ -1180,6 +1211,16 @@ function calcAge(birthDateStr) {
   const m = now.getMonth() - b.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
   return age;
+}
+
+// تنسيق تاريخ Firestore (Timestamp) إلى نص عربي مقروء، مثال: "5 سبتمبر 2026"
+function formatArabicDate(ts) {
+  if (!ts) return "";
+  try {
+    const d = ts.toDate ? ts.toDate() : new Date((ts.seconds || 0) * 1000);
+    const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+    return d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
+  } catch (e) { return ""; }
 }
 
 function renderOverview() {
@@ -1802,6 +1843,7 @@ window.openLightbox = function(index) {
   if (!lightboxImages.length) return;
   lightboxIndex = index;
   document.getElementById("lightbox-img").src = lightboxImages[lightboxIndex];
+  document.querySelectorAll(".lightbox-nav").forEach(btn => btn.style.display = lightboxImages.length > 1 ? "flex" : "none");
   document.getElementById("lightbox-overlay").style.display = "flex";
 };
 window.closeLightbox = function() { document.getElementById("lightbox-overlay").style.display = "none"; };
@@ -1817,6 +1859,28 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") lightboxNav(-1);
   }
 });
+// دعم السحب باللمس يميناً/يساراً على الموبايل للتنقل بين الصور
+(function setupLightboxSwipe() {
+  const overlay = document.getElementById("lightbox-overlay");
+  let touchStartX = null;
+  overlay.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  overlay.addEventListener("touchend", (e) => {
+    if (touchStartX == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) lightboxNav(dx > 0 ? 1 : -1);
+    touchStartX = null;
+  }, { passive: true });
+})();
+// فتح الصورة الشخصية بالحجم الكامل عند الضغط عليها
+window.openAvatarLightbox = function() {
+  const avatarUrl = document.getElementById("profile-avatar").src;
+  if (!avatarUrl) return;
+  lightboxImages = [avatarUrl];
+  lightboxIndex = 0;
+  document.getElementById("lightbox-img").src = avatarUrl;
+  document.querySelectorAll(".lightbox-nav").forEach(btn => btn.style.display = "none");
+  document.getElementById("lightbox-overlay").style.display = "flex";
+};
 async function refreshApplicantsModal(jobId) {
   const body = document.getElementById("applicants-modal-body");
   try {
