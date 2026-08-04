@@ -76,6 +76,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
   .chat-wrap{position:relative;height:calc(100vh - 80px)}
 }
 </style>
+<base target="_blank">
 </head>
 <body>
 <header class="bg-white shadow-sm sticky top-0 z-50">
@@ -390,7 +391,7 @@ function appendMessage(m, docId) {
   const area = document.getElementById("messages-area");
   const d = m.sentAt ? new Date((m.sentAt.seconds || 0) * 1000) : new Date();
   const dayStr = d.toLocaleDateString("ar");
-  
+
   let lastDaySep = area.querySelector(".day-sep:last-child");
   let currentDay = lastDaySep ? lastDaySep.textContent : null;
   if (dayStr !== currentDay) {
