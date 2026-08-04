@@ -60,6 +60,13 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
 .empty-chat-state i{font-size:3rem;color:#d1d5db}
 .day-sep{text-align:center;color:#9ca3af;font-size:.72rem;margin:.6rem 0}
 
+/* ====== الجديد: ضمان ظهور المحادثة النشطة ====== */
+#active-chat {
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
 @media(max-width:768px){
   .conv-list{width:100%;position:absolute;inset:0;z-index:5;background:white}
   .conv-list.hide-mobile{display:none}
@@ -69,7 +76,6 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
   .chat-wrap{position:relative;height:calc(100vh - 80px)}
 }
 </style>
-<base target="_blank">
 </head>
 <body>
 <header class="bg-white shadow-sm sticky top-0 z-50">
@@ -125,7 +131,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
 <p>اختر محادثة لبدء المراسلة</p>
 </div>
 
-<div id="active-chat" style="display:none;flex-direction:column;height:100%">
+<div id="active-chat" style="display:none">
 <div class="chat-header">
 <button class="back-btn" id="backBtn"><i class="fas fa-arrow-right"></i></button>
 <img class="chat-header-avatar" id="chat-header-avatar" src="" alt="">
@@ -277,7 +283,6 @@ function renderConversationList() {
   empty.classList.toggle("hidden", filtered.length > 0 || allConversations.length > 0);
   if (!allConversations.length) { empty.classList.remove("hidden"); }
 
-  // إزالة العناصر القديمة
   container.querySelectorAll(".conv-item").forEach(el => el.remove());
 
   const fragment = document.createDocumentFragment();
@@ -293,10 +298,6 @@ function renderConversationList() {
 
     const div = document.createElement("div");
     div.className = "conv-item" + (isActive ? " active" : "");
-    div.dataset.convId = c.id;
-    div.dataset.partnerId = partnerId;
-    div.dataset.partnerName = partnerName;
-    div.dataset.partnerPhoto = partnerPhoto;
     div.innerHTML =
       '<img class="conv-avatar" src="' + esc(partnerPhoto) + '" alt="" loading="lazy">' +
       '<div class="conv-info"><p class="conv-name">' + esc(partnerName) + '</p><p class="conv-preview">' + esc(c.lastMessage || "ابدأ المحادثة") + '</p></div>' +
@@ -336,6 +337,7 @@ document.getElementById("backBtn").addEventListener("click", () => {
   document.getElementById("chat-main").classList.add("hide-mobile");
   const activeChat = document.getElementById("active-chat");
   activeChat.style.display = "none";
+  document.getElementById("empty-chat-placeholder").style.display = "flex";
   if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
   activeConversationId = null;
   activePartnerId = null;
@@ -388,8 +390,7 @@ function appendMessage(m, docId) {
   const area = document.getElementById("messages-area");
   const d = m.sentAt ? new Date((m.sentAt.seconds || 0) * 1000) : new Date();
   const dayStr = d.toLocaleDateString("ar");
-
-  // التحقق من فاصل اليوم
+  
   let lastDaySep = area.querySelector(".day-sep:last-child");
   let currentDay = lastDaySep ? lastDaySep.textContent : null;
   if (dayStr !== currentDay) {
@@ -433,7 +434,6 @@ async function sendMessage() {
   const text = messageInput.value.trim();
   if (!text || !activeConversationId) return;
 
-  // Rate limiting: منع الإرسال المتكرر بشكل مفرط
   const now = Date.now();
   if (now - lastSendTime < 800) return;
   lastSendTime = now;
