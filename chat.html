@@ -9,12 +9,13 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 *{box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
+:root{--vh:1vh}
+html,body{height:calc(var(--vh) * 100);overflow:hidden}
 body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
 #mobile-menu{transition:transform .3s ease-in-out;transform:translateX(100%)}
 #mobile-menu.open{transform:translateX(0)}
 
-.chat-wrap{height:calc(100vh - 80px);display:flex;background:white;border-radius:1rem;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.04);border:1px solid #e5e7eb}
+.chat-wrap{height:calc(var(--vh) * 100 - 112px);display:flex;background:white;border-radius:1rem;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.04);border:1px solid #e5e7eb}
 .conv-list{width:340px;border-left:1px solid #e5e7eb;display:flex;flex-direction:column;flex-shrink:0}
 .conv-search{padding:.9rem;border-bottom:1px solid #f3f4f6}
 .conv-search input{width:100%;padding:.55rem .9rem;border:1px solid #d1d5db;border-radius:.6rem;font-size:.85rem;text-align:right}
@@ -70,7 +71,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
   .chat-main{width:100%}
   .chat-main.hide-mobile{display:none}
   .back-btn{display:block}
-  .chat-wrap{position:relative;height:calc(100vh - 80px)}
+  .chat-wrap{position:relative;height:calc(var(--vh) * 100 - 112px)}
 }
 </style>
 </head>
@@ -148,6 +149,17 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
 </div>
 </div>
 
+<script>
+/* إصلاح مشكلة 100vh على المتصفحات المحمولة: شريط العنوان يجعل 100vh أطول من
+   الجزء المرئي فعلياً، فيختفي حقل الكتابة تحت الحافة بدون إمكانية تمرير.
+   نحسب الارتفاع الحقيقي عبر window.innerHeight ونحدّثه عند أي تغيير. */
+function setRealVH() {
+  document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+}
+setRealVH();
+window.addEventListener('resize', setRealVH);
+window.addEventListener('orientationchange', setRealVH);
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
