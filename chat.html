@@ -60,6 +60,10 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
 .empty-chat-state i{font-size:3rem;color:#d1d5db}
 .day-sep{text-align:center;color:#9ca3af;font-size:.72rem;margin:.6rem 0}
 
+/* تأكيد صريح لحالة الإخفاء/الإظهار حتى لا تتعارض مع أي كلاس آخر */
+#active-chat.hidden{display:none !important}
+#active-chat{flex:1;min-height:0}
+
 @media(max-width:768px){
   .conv-list{width:100%;position:absolute;inset:0;z-index:5;background:white}
   .conv-list.hide-mobile{display:none}
@@ -124,12 +128,12 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
 <p>اختر محادثة لبدء المراسلة</p>
 </div>
 
-<div class="hidden" style="display:none;flex-direction:column;height:100%" id="active-chat">
+<div class="hidden" id="active-chat" style="flex-direction:column;height:100%">
 <div class="chat-header">
-<button class="back-btn" onclick="backToList()"><i class="fas fa-arrow-right"></i></button>
-<img class="chat-header-avatar" id="chat-header-avatar" src="" alt="" onclick="goToPartnerProfile()">
+<button class="back-btn" id="backBtn"><i class="fas fa-arrow-right"></i></button>
+<img class="chat-header-avatar" id="chat-header-avatar" src="" alt="">
 <div class="flex-1 min-w-0">
-<p class="chat-header-name" id="chat-header-name" onclick="goToPartnerProfile()">—</p>
+<p class="chat-header-name" id="chat-header-name">—</p>
 <p class="text-xs text-gray-400" id="chat-header-sub">اضغط للانتقال إلى الملف الشخصي</p>
 </div>
 </div>
@@ -138,7 +142,7 @@ body{font-family:'Tajawal',sans-serif;background:#f5f7fa}
 <p class="filter-warning" id="filter-warning"><i class="fas fa-shield-halved ml-1"></i>لا يمكن إرسال أرقام هواتف أو روابط عبر المحادثة حفاظاً على أمانك. تواصل عبر المنصة فقط.</p>
 <div class="chat-input-row">
 <textarea id="messageInput" class="chat-input" rows="1" placeholder="اكتب رسالتك..."></textarea>
-<button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+<button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
 </div>
 </div>
 </div>
@@ -183,8 +187,7 @@ function esc(s) {
   return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 }
 
-/* ==================== حماية من مشاركة بيانات تواصل خارج المنصة ====================
-   يمنع إرسال أي رسالة تحتوي رقم هاتف أو رابط/موقع، لإبقاء التواصل داخل المنصة. */
+/* ==================== حماية من مشاركة بيانات تواصل خارج المنصة ==================== */
 const PHONE_PATTERN = /(\+?\d[\d\s\-()]{6,}\d)/;
 const URL_PATTERN = /((https?:\/\/|www\.)\S+)|([a-zA-Z0-9][a-zA-Z0-9.-]*\.(com|net|org|sd|io|co|me|ly|app)\b)/i;
 function containsContactInfo(text) {
@@ -199,7 +202,7 @@ onAuthStateChanged(auth, async (user) => {
   await maybeOpenConversationFromUrl();
 });
 
-/* ==================== فتح محادثة من رابط قادم من صفحة أخرى (employeeId/employeeName/employeePhoto) ==================== */
+/* ==================== فتح محادثة من رابط قادم من صفحة أخرى ==================== */
 async function maybeOpenConversationFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const partnerId = params.get("employeeId");
@@ -252,6 +255,7 @@ function timeAgoShort(ts) {
   return d.toLocaleDateString("ar");
 }
 
+/* ---------- إصلاح رئيسي: بناء العناصر عبر data-* بدل onclick نصّي، وربط الأحداث عبر تفويض واحد ---------- */
 function renderConversationList() {
   const container = document.getElementById("conv-items");
   const loading = document.getElementById("conv-loading");
@@ -265,8 +269,11 @@ function renderConversationList() {
     return !searchTerm || partnerName.toLowerCase().includes(searchTerm);
   });
 
-  empty.classList.toggle("hidden", filtered.length > 0 || allConversations.length > 0);
-  if (!allConversations.length) { empty.classList.remove("hidden"); }
+  if (!allConversations.length) {
+    empty.classList.remove("hidden");
+  } else {
+    empty.classList.toggle("hidden", filtered.length > 0);
+  }
 
   const itemsHtml = filtered.map(c => {
     const partnerId = (c.participants || []).find(p => p !== currentUser.uid);
@@ -274,26 +281,45 @@ function renderConversationList() {
     const partnerPhoto = (c.participantPhotos && c.participantPhotos[partnerId]) || ("https://ui-avatars.com/api/?background=2563eb&color=fff&name=" + encodeURIComponent(partnerName));
     const unread = (c.unreadCount && c.unreadCount[currentUser.uid]) || 0;
     const isActive = c.id === activeConversationId;
-    return '<div class="conv-item' + (isActive ? ' active' : '') + '" onclick="openConversation(\'' + c.id + '\',\'' + partnerId + '\',\'' + esc(partnerName).replace(/'/g, "\\'") + '\',\'' + partnerPhoto + '\')">' +
-      '<img class="conv-avatar" src="' + partnerPhoto + '" alt="">' +
+    // كل القيم تمر عبر esc() وتوضع في data-* بدل داخل onclick نصي، فلا ينكسر الرابط مهما كانت محارفه
+    return '<div class="conv-item' + (isActive ? ' active' : '') + '"' +
+      ' data-conv-id="' + esc(c.id) + '"' +
+      ' data-partner-id="' + esc(partnerId) + '"' +
+      ' data-partner-name="' + esc(partnerName) + '"' +
+      ' data-partner-photo="' + esc(partnerPhoto) + '">' +
+      '<img class="conv-avatar" src="' + esc(partnerPhoto) + '" alt="">' +
       '<div class="conv-info"><p class="conv-name">' + esc(partnerName) + '</p><p class="conv-preview">' + esc(c.lastMessage || "ابدأ المحادثة") + '</p></div>' +
       '<div class="conv-meta"><span class="conv-time">' + timeAgoShort(c.lastMessageAt) + '</span>' +
       (unread > 0 ? '<span class="unread-badge">' + unread + '</span>' : '') + '</div></div>';
   }).join("");
 
-  // إبقاء عناصر التحميل/الفراغ ثم إضافة القائمة
   container.querySelectorAll(".conv-item").forEach(el => el.remove());
   container.insertAdjacentHTML("beforeend", itemsHtml);
 }
 document.getElementById("convSearch").addEventListener("input", renderConversationList);
 
+// تفويض حدث واحد بدل onclick داخل كل عنصر — أكثر أماناً وموثوقية
+document.getElementById("conv-items").addEventListener("click", (e) => {
+  const item = e.target.closest(".conv-item");
+  if (!item) return;
+  openConversation(
+    item.dataset.convId,
+    item.dataset.partnerId,
+    item.dataset.partnerName,
+    item.dataset.partnerPhoto
+  );
+});
+
 /* ==================== فتح محادثة ==================== */
-window.openConversation = function(conversationId, partnerId, partnerName, partnerPhoto) {
+function openConversation(conversationId, partnerId, partnerName, partnerPhoto) {
   activeConversationId = conversationId;
   activePartnerId = partnerId;
 
   document.getElementById("empty-chat-placeholder").style.display = "none";
-  document.getElementById("active-chat").style.display = "flex";
+  const activeChat = document.getElementById("active-chat");
+  activeChat.classList.remove("hidden");   // <-- الإصلاح: إزالة كلاس الإخفاء بدل الاعتماد فقط على style inline
+  activeChat.style.display = "flex";
+
   document.getElementById("chat-header-avatar").src = partnerPhoto;
   document.getElementById("chat-header-name").textContent = partnerName;
 
@@ -303,16 +329,18 @@ window.openConversation = function(conversationId, partnerId, partnerName, partn
   renderConversationList();
   resetUnreadCount(conversationId);
   listenToMessages(conversationId);
-};
+}
 
-window.backToList = function() {
+document.getElementById("backBtn").addEventListener("click", () => {
   document.getElementById("conv-list").classList.remove("hide-mobile");
   document.getElementById("chat-main").classList.add("hide-mobile");
-};
+});
 
-window.goToPartnerProfile = function() {
+document.getElementById("chat-header-avatar").addEventListener("click", goToPartnerProfile);
+document.getElementById("chat-header-name").addEventListener("click", goToPartnerProfile);
+function goToPartnerProfile() {
   if (activePartnerId) window.location.href = "profile.html?uid=" + activePartnerId;
-};
+}
 
 async function resetUnreadCount(conversationId) {
   try { await updateDoc(doc(db, "conversations", conversationId), { ["unreadCount." + currentUser.uid]: 0 }); }
@@ -351,6 +379,8 @@ function renderMessages(messages) {
 
 /* ==================== إرسال رسالة ==================== */
 const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
 messageInput.addEventListener("input", () => {
   messageInput.style.height = "auto";
   messageInput.style.height = Math.min(messageInput.scrollHeight, 110) + "px";
@@ -359,8 +389,9 @@ messageInput.addEventListener("input", () => {
 messageInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
+sendBtn.addEventListener("click", sendMessage);
 
-window.sendMessage = async function() {
+async function sendMessage() {
   const text = messageInput.value.trim();
   if (!text || !activeConversationId) return;
 
@@ -369,7 +400,6 @@ window.sendMessage = async function() {
     return;
   }
 
-  const sendBtn = document.getElementById("sendBtn");
   sendBtn.disabled = true;
   try {
     await addDoc(collection(db, "conversations", activeConversationId, "messages"), {
@@ -397,7 +427,7 @@ window.sendMessage = async function() {
   } finally {
     sendBtn.disabled = false;
   }
-};
+}
 </script>
 </body>
 </html>
