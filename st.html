@@ -117,11 +117,9 @@
   <!-- LOGIN VIEW -->
   <div class="card" id="loginView">
     <h1>تسجيل دخول الموظف</h1>
-    <div class="sub">أدخل رقم الهاتف وكلمة المرور اللي استلمتها</div>
+    <div class="sub">أدخل رقم هاتفك المسجل من الأدمن</div>
     <label>رقم الهاتف</label>
     <input type="tel" id="loginPhone" placeholder="مثال: 0912345678" inputmode="numeric">
-    <label>كلمة المرور</label>
-    <input type="password" id="loginPassword" placeholder="كلمة المرور">
     <button id="loginBtn">دخول</button>
     <div class="msg" id="loginMsg"></div>
   </div>
@@ -209,11 +207,14 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// نبني إيميل وهمي من رقم الهاتف عشان نستخدم Firebase Auth بالإيميل/كلمة المرور
-// (نفس رقم الهاتف اللي عمله الأدمن وقت إنشاء الحساب)
+// نبني إيميل وهمي من رقم الهاتف عشان نستخدم Firebase Auth
+// كلمة المرور الفعلية هي رقم الهاتف نفسه (بدون رموز) — الأدمن هو اللي بيسجل الرقم أصلاً من صفحة الأدمن
 function phoneToEmail(phone) {
   const clean = phone.trim().replace(/\D/g, "");
   return clean + "@shaghalni-data.local";
+}
+function phoneToPassword(phone) {
+  return phone.trim().replace(/\D/g, "");
 }
 
 let currentUser = null;
@@ -234,9 +235,8 @@ function showMsg(el, text, type) {
 // ---------- LOGIN ----------
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const phone = document.getElementById("loginPhone").value;
-  const password = document.getElementById("loginPassword").value;
-  if (!phone || !password) {
-    showMsg(loginMsg, "أدخل رقم الهاتف وكلمة المرور", "error");
+  if (!phone) {
+    showMsg(loginMsg, "أدخل رقم الهاتف", "error");
     return;
   }
   const btn = document.getElementById("loginBtn");
@@ -244,10 +244,11 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   btn.textContent = "جاري الدخول...";
   try {
     const email = phoneToEmail(phone);
+    const password = phoneToPassword(phone);
     await auth.signInWithEmailAndPassword(email, password);
     // onAuthStateChanged هيتولى الباقي
   } catch (err) {
-    showMsg(loginMsg, "رقم الهاتف أو كلمة المرور غير صحيحة", "error");
+    showMsg(loginMsg, "رقم الهاتف ده مش مسجل. تواصل مع الأدمن عشان يضيفك", "error");
     btn.disabled = false;
     btn.textContent = "دخول";
   }
