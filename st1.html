@@ -125,10 +125,10 @@
 
 <div class="login-wrap panel" id="loginView">
   <h2>دخول الأدمن</h2>
-  <label>رقم الهاتف</label>
-  <input type="tel" id="loginPhone" placeholder="رقم هاتف حساب الأدمن">
+  <label>البريد الإلكتروني</label>
+  <input type="text" id="loginEmail" placeholder="البريد الإلكتروني" autocomplete="off" value="nohesapnooo@gmail.com">
   <label>كلمة المرور</label>
-  <input type="password" id="loginPassword">
+  <input type="password" id="loginCode" placeholder="كلمة المرور" autocomplete="off">
   <button id="loginBtn" style="width:100%;background:#1b5e20;color:#fff;padding:11px;border:none;border-radius:8px;font-weight:700;margin-top:14px;cursor:pointer;">دخول</button>
   <div class="msg" id="loginMsg"></div>
 </div>
@@ -145,6 +145,30 @@
       <div class="stat-card"><div class="num" id="statToday">0</div><div class="label">تسجيلات اليوم</div></div>
       <div class="stat-card"><div class="num" id="statEmployees">0</div><div class="label">عدد الموظفين النشطين</div></div>
       <div class="stat-card"><div class="num" id="statInterested">0</div><div class="label">متحمس / مهتم</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>إضافة موظف جديد</h2>
+      <div class="filters" style="margin-bottom:10px;">
+        <input type="text" id="newEmpName" placeholder="اسم الموظف">
+        <input type="tel" id="newEmpPhone" placeholder="رقم هاتف الموظف" inputmode="numeric">
+        <input type="number" id="newEmpQuota" placeholder="عدد التسجيلات المسموحة" value="50" style="width:180px;">
+        <button id="addEmpBtn" style="background:#1b5e20;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;">إضافة</button>
+      </div>
+      <div class="msg" id="addEmpMsg"></div>
+    </div>
+
+    <div class="panel">
+      <h2>الموظفون المسجّلون</h2>
+      <div class="sub" style="font-size:12px;color:#888;margin-bottom:6px;">الرمز بيظهر مرة واحدة بس وقت الإنشاء — لو ضاع، احذف الموظف من Firebase Authentication وأضفه تاني</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>الاسم</th><th>الهاتف</th><th>الرمز</th><th>الحصة</th><th>المسجّل</th></tr>
+          </thead>
+          <tbody id="employeesTableBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="panel">
@@ -171,6 +195,9 @@
 
     <div class="panel">
       <h2>سجل البيانات</h2>
+      <div style="margin-bottom:10px;">
+        <button id="exportBtn" style="background:#1b5e20;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;">⬇ تحميل كملف إكسل</button>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -191,6 +218,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // ============================================================
@@ -209,36 +237,35 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-function phoneToEmail(phone) {
-  return phone.trim().replace(/\D/g, "") + "@shaghalni-data.local";
-}
+// حساب الأدمن — البريد المسموح له بدخول لوحة التحكم
+const ADMIN_ALLOWED_EMAIL = "nohesapnooo@gmail.com";
 
 let allRecords = [];
 let map, markersLayer;
 
 // ---------- LOGIN ----------
 document.getElementById("loginBtn").addEventListener("click", async () => {
-  const phone = document.getElementById("loginPhone").value;
-  const password = document.getElementById("loginPassword").value;
+  const email = document.getElementById("loginEmail").value.trim();
+  const code = document.getElementById("loginCode").value;
   const msg = document.getElementById("loginMsg");
-  if (!phone || !password) {
-    msg.textContent = "أدخل رقم الهاتف وكلمة المرور";
+  if (!email || !code) {
+    msg.textContent = "أدخل البريد الإلكتروني وكلمة المرور";
     msg.className = "msg error";
     return;
   }
   try {
-    await auth.signInWithEmailAndPassword(phoneToEmail(phone), password);
+    await auth.signInWithEmailAndPassword(email, code);
   } catch (err) {
-    msg.textContent = "بيانات الدخول غير صحيحة";
+    msg.textContent = "البيانات غير صحيحة";
     msg.className = "msg error";
   }
 });
 
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    const doc = await db.collection("users").doc(user.uid).get();
-    if (!doc.exists || doc.data().role !== "admin") {
-      document.getElementById("loginMsg").textContent = "هذا الحساب ليس حساب أدمن";
+    // تحقق مبسّط: البريد الإلكتروني لازم يطابق بريد الأدمن المسموح بيه بالظبط
+    if (user.email !== ADMIN_ALLOWED_EMAIL) {
+      document.getElementById("loginMsg").textContent = "هذا الحساب غير مصرح له بالدخول";
       document.getElementById("loginMsg").className = "msg error";
       await auth.signOut();
       return;
@@ -247,6 +274,7 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById("dashboard").classList.remove("hidden");
     initMap();
     loadData();
+    loadEmployees();
   } else {
     document.getElementById("loginView").classList.remove("hidden");
     document.getElementById("dashboard").classList.add("hidden");
@@ -398,6 +426,115 @@ function escapeHtml(str) {
 ["fltEmployee", "fltActivity", "fltInterest", "fltSearch"].forEach(id => {
   document.getElementById(id).addEventListener("input", renderAll);
   document.getElementById(id).addEventListener("change", renderAll);
+});
+
+// ---------- إضافة موظف جديد من صفحة الأدمن ----------
+function phoneToEmail(phone) {
+  return phone.trim().replace(/\D/g, "") + "@shaghalni-data.local";
+}
+
+// رمز عشوائي بسيط يتكوّن من 6 أرقام — ده هو "الرمز" اللي هيستخدمه الموظف بدل كلمة مرور معقدة
+function generateSimpleCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+document.getElementById("addEmpBtn").addEventListener("click", async () => {
+  const name = document.getElementById("newEmpName").value.trim();
+  const phone = document.getElementById("newEmpPhone").value.trim();
+  const quota = parseInt(document.getElementById("newEmpQuota").value, 10) || 50;
+  const msg = document.getElementById("addEmpMsg");
+
+  if (!name || !phone) {
+    msg.textContent = "أدخل الاسم ورقم الهاتف";
+    msg.className = "msg error";
+    return;
+  }
+
+  const code = generateSimpleCode();
+  const email = phoneToEmail(phone);
+  const btn = document.getElementById("addEmpBtn");
+  btn.disabled = true;
+  btn.textContent = "جاري الإضافة...";
+
+  // نستخدم تطبيق Firebase ثانوي مؤقت عشان إنشاء المستخدم الجديد
+  // ميأثرش على جلسة دخولك الحالية كأدمن
+  let secondaryApp;
+  try {
+    secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary-" + Date.now());
+    const secondaryAuth = secondaryApp.auth();
+    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, code);
+    const uid = cred.user.uid;
+    await secondaryAuth.signOut();
+
+    await db.collection("users").doc(uid).set({
+      name, phone, role: "employee", quota, submittedCount: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    msg.innerHTML = `تم إنشاء الموظف بنجاح ✓ — الرمز الخاص به: <b>${code}</b> (ابعته له عشان يدخل بيه)`;
+    msg.className = "msg success";
+    document.getElementById("newEmpName").value = "";
+    document.getElementById("newEmpPhone").value = "";
+    document.getElementById("newEmpQuota").value = "50";
+    loadEmployees();
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      msg.textContent = "رقم الهاتف ده مسجل بالفعل لموظف آخر";
+    } else {
+      msg.textContent = "حدث خطأ: " + err.message;
+    }
+    msg.className = "msg error";
+  } finally {
+    if (secondaryApp) await secondaryApp.delete();
+    btn.disabled = false;
+    btn.textContent = "إضافة";
+  }
+});
+
+function loadEmployees() {
+  db.collection("users").where("role", "==", "employee")
+    .onSnapshot((snapshot) => {
+      const tbody = document.getElementById("employeesTableBody");
+      const rows = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        rows.push(`<tr>
+          <td>${escapeHtml(d.name || "")}</td>
+          <td>${escapeHtml(d.phone || "")}</td>
+          <td>—</td>
+          <td>${d.submittedCount || 0} / ${d.quota || 0}</td>
+          <td>${d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString("ar-EG") : "-"}</td>
+        </tr>`);
+      });
+      tbody.innerHTML = rows.join("") || `<tr><td colspan="5" style="text-align:center;color:#888;">لا يوجد موظفون بعد</td></tr>`;
+    });
+}
+
+// ---------- تصدير إلى إكسل ----------
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const filtered = getFiltered();
+  if (filtered.length === 0) {
+    alert("لا توجد بيانات لتصديرها");
+    return;
+  }
+  const rows = filtered.map(r => ({
+    "الاسم": r.name || "",
+    "النوع": r.type || "",
+    "رقم الهاتف": r.phone || "",
+    "نوع النشاط": r.activity || "",
+    "مستوى الاهتمام": r.interestLevel || "",
+    "ملاحظة": r.note || "",
+    "الموظف": r.employeeName || "",
+    "التاريخ": r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString("ar-EG") : "",
+    "خط العرض": r.lat || "",
+    "خط الطول": r.lng || ""
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws["!cols"] = [{wch:20},{wch:12},{wch:15},{wch:15},{wch:20},{wch:30},{wch:15},{wch:20},{wch:12},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "بيانات أصحاب العمل");
+  const dateStr = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `بيانات_اصحاب_العمل_${dateStr}.xlsx`);
 });
 </script>
 </body>
