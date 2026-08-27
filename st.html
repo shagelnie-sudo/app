@@ -3,198 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تسجيل بيانات صاحب عمل</title>
+<title>لوحة تحكم الأدمن — بيانات أصحاب العمل</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   * { box-sizing: border-box; }
   body {
     font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
     background: #f2f4f3;
     margin: 0;
-    padding: 0;
     color: #1f2b21;
   }
-  .wrap {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  .card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 22px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    margin-bottom: 16px;
-  }
-  h1 {
-    font-size: 20px;
-    margin: 0 0 4px;
-    color: #1b5e20;
-  }
-  .sub {
-    color: #666;
-    font-size: 13px;
-    margin-bottom: 18px;
-  }
-  label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    margin: 14px 0 6px;
-  }
-  input, select, textarea {
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid #d6dbd7;
-    border-radius: 8px;
-    font-size: 15px;
-    font-family: inherit;
-    background: #fafbfa;
-  }
-  textarea { resize: vertical; min-height: 70px; }
-  button {
-    width: 100%;
-    padding: 13px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 18px;
-  }
-  #loginBtn, #submitBtn {
-    background: #2e7d32;
+  header {
+    background: #1b5e20;
     color: #fff;
-  }
-  #loginBtn:disabled, #submitBtn:disabled {
-    background: #a5b7a6;
-    cursor: not-allowed;
-  }
-  #logoutBtn {
-    background: transparent;
-    color: #b3261e;
-    border: 1px solid #b3261e;
-    margin-top: 8px;
-  }
-  .quota {
-    background: #e8f5e9;
-    border-radius: 10px;
-    padding: 12px 14px;
+    padding: 16px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header button {
+    background: #fff;
+    color: #b3261e;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
     font-weight: 700;
-    color: #1b5e20;
+    cursor: pointer;
+  }
+  .container { padding: 18px; max-width: 1300px; margin: 0 auto; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .stat-card .num { font-size: 24px; font-weight: 800; color: #1b5e20; }
+  .stat-card .label { font-size: 12px; color: #666; margin-top: 4px; }
+
+  .panel {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .panel h2 { font-size: 15px; margin: 0 0 12px; color: #1b5e20; }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 4px;
   }
-  .quota span.num { font-size: 20px; }
-  .msg {
-    text-align: center;
-    padding: 10px;
+  .filters select, .filters input {
+    padding: 8px 10px;
     border-radius: 8px;
-    font-size: 14px;
-    margin-top: 12px;
-    display: none;
+    border: 1px solid #d6dbd7;
+    font-size: 13px;
+    background: #fafbfa;
   }
+
+  #map { height: 420px; border-radius: 12px; margin-top: 10px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  th, td {
+    padding: 9px 10px;
+    text-align: right;
+    border-bottom: 1px solid #eef1ee;
+    white-space: nowrap;
+  }
+  th {
+    background: #f5f8f5;
+    color: #33513a;
+    position: sticky;
+    top: 0;
+  }
+  tr:hover { background: #fbfdfb; }
+  .table-wrap { overflow-x: auto; max-height: 480px; overflow-y: auto; }
+
+  .badge {
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-block;
+  }
+  .badge.متحمس { background: #c8e6c9; color: #1b5e20; }
+  .badge.مهتم { background: #dcedc8; color: #33691e; }
+  .badge.مهتم-لكن-لم-يفهم { background: #fff9c4; color: #7d6300; }
+  .badge.غير-مهتم { background: #ffe0b2; color: #8a4b00; }
+  .badge.غير-مهتم-ومضجر { background: #ffcdd2; color: #b3261e; }
+
+  .empty-state { text-align: center; color: #888; padding: 30px; }
+  .login-wrap { max-width: 380px; margin: 80px auto; }
+  .msg { padding: 10px; border-radius: 8px; font-size: 14px; margin-top: 10px; display:none; }
   .msg.error { background: #fdecea; color: #b3261e; display: block; }
-  .msg.success { background: #e8f5e9; color: #1b5e20; display: block; }
-  .msg.info { background: #e3f2fd; color: #0d47a1; display: block; }
+  label { display:block; font-size:13px; font-weight:600; margin:10px 0 5px; }
+  input[type=tel], input[type=password] {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d6dbd7;
+  }
   .hidden { display: none !important; }
-  .loc-status {
-    font-size: 12px;
-    color: #777;
-    margin-top: 6px;
-  }
-  .field-hint {
-    font-size: 12px;
-    color: #888;
-    margin-top: 4px;
-  }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <!-- LOGIN VIEW -->
-  <div class="card" id="loginView">
-    <h1>تسجيل دخول الموظف</h1>
-    <div class="sub">أدخل رقم الهاتف وكلمة المرور اللي استلمتها</div>
-    <label>رقم الهاتف</label>
-    <input type="tel" id="loginPhone" placeholder="مثال: 0912345678" inputmode="numeric">
-    <label>كلمة المرور</label>
-    <input type="password" id="loginPassword" placeholder="كلمة المرور">
-    <button id="loginBtn">دخول</button>
-    <div class="msg" id="loginMsg"></div>
-  </div>
-
-  <!-- FORM VIEW -->
-  <div class="card hidden" id="formView">
-    <div class="quota">
-      <span>متبقي لك</span>
-      <span class="num" id="quotaLeft">-</span>
-    </div>
-    <div class="sub" id="employeeName" style="margin-top:6px;"></div>
-  </div>
-
-  <div class="card hidden" id="formCard">
-    <h1>بيانات صاحب العمل</h1>
-    <div class="sub">املأ البيانات ثم اضغط تأكيد — سيتم تسجيل موقعك تلقائياً مع البيانات</div>
-
-    <label>الاسم</label>
-    <input type="text" id="fName" placeholder="اسم صاحب العمل أو المحل">
-
-    <label>النوع</label>
-    <select id="fType">
-      <option value="">اختر</option>
-      <option value="صاحب عمل">صاحب عمل</option>
-      <option value="شركة">شركة</option>
-    </select>
-
-    <label>رقم الهاتف</label>
-    <input type="tel" id="fPhone" placeholder="رقم هاتف صاحب العمل" inputmode="numeric">
-
-    <label>نوع النشاط</label>
-    <select id="fActivity">
-      <option value="">اختر</option>
-      <option value="بناء">بناء</option>
-      <option value="نجارة">نجارة</option>
-      <option value="سباكة">سباكة</option>
-      <option value="كهرباء">كهرباء</option>
-      <option value="دهان">دهان</option>
-      <option value="تنظيف">تنظيف</option>
-      <option value="أخرى">أخرى (اكتب أدناه)</option>
-    </select>
-    <input type="text" id="fActivityOther" placeholder="اكتب نوع النشاط" class="hidden" style="margin-top:8px;">
-
-    <label>مستوى الاهتمام</label>
-    <select id="fInterest">
-      <option value="">اختر</option>
-      <option value="متحمس">متحمس</option>
-      <option value="مهتم">مهتم</option>
-      <option value="مهتم لكن لم يفهم">مهتم لكن لم يفهم</option>
-      <option value="غير مهتم">غير مهتم</option>
-      <option value="غير مهتم ومضجر">غير مهتم ومضجر</option>
-    </select>
-
-    <label>ملاحظة (اختياري)</label>
-    <textarea id="fNote" placeholder="أي تفاصيل إضافية..."></textarea>
-
-    <div class="loc-status" id="locStatus">سيتم طلب إذن الموقع عند الضغط على تأكيد</div>
-
-    <button id="submitBtn">تأكيد</button>
-    <div class="msg" id="formMsg"></div>
-  </div>
-
-  <button id="logoutBtn" class="hidden">تسجيل خروج</button>
+<div class="login-wrap panel" id="loginView">
+  <h2>دخول الأدمن</h2>
+  <label>البريد الإلكتروني</label>
+  <input type="text" id="loginEmail" placeholder="البريد الإلكتروني" autocomplete="off" value="nohesapnooo@gmail.com">
+  <label>كلمة المرور</label>
+  <input type="password" id="loginCode" placeholder="كلمة المرور" autocomplete="off">
+  <button id="loginBtn" style="width:100%;background:#1b5e20;color:#fff;padding:11px;border:none;border-radius:8px;font-weight:700;margin-top:14px;cursor:pointer;">دخول</button>
+  <div class="msg" id="loginMsg"></div>
 </div>
 
-<!-- Firebase SDKs (compat, simpler syntax) -->
+<div id="dashboard" class="hidden">
+  <header>
+    <h1>لوحة تحكم — بيانات أصحاب العمل</h1>
+    <button id="logoutBtn">تسجيل خروج</button>
+  </header>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">إجمالي التسجيلات</div></div>
+      <div class="stat-card"><div class="num" id="statToday">0</div><div class="label">تسجيلات اليوم</div></div>
+      <div class="stat-card"><div class="num" id="statEmployees">0</div><div class="label">عدد الموظفين النشطين</div></div>
+      <div class="stat-card"><div class="num" id="statInterested">0</div><div class="label">متحمس / مهتم</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>إضافة موظف جديد</h2>
+      <div class="filters" style="margin-bottom:10px;">
+        <input type="text" id="newEmpName" placeholder="اسم الموظف">
+        <input type="tel" id="newEmpPhone" placeholder="رقم هاتف الموظف" inputmode="numeric">
+        <input type="number" id="newEmpQuota" placeholder="عدد التسجيلات المسموحة" value="50" style="width:180px;">
+        <button id="addEmpBtn" style="background:#1b5e20;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;">إضافة</button>
+      </div>
+      <div class="msg" id="addEmpMsg"></div>
+    </div>
+
+    <div class="panel">
+      <h2>الموظفون المسجّلون</h2>
+      <div class="sub" style="font-size:12px;color:#888;margin-bottom:6px;">الرمز بيظهر مرة واحدة بس وقت الإنشاء — لو ضاع، احذف الموظف من Firebase Authentication وأضفه تاني</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>الاسم</th><th>الهاتف</th><th>الرمز</th><th>الحصة</th><th>المسجّل</th></tr>
+          </thead>
+          <tbody id="employeesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>الفلاتر</h2>
+      <div class="filters">
+        <select id="fltEmployee"><option value="">كل الموظفين</option></select>
+        <select id="fltActivity"><option value="">كل الأنشطة</option></select>
+        <select id="fltInterest">
+          <option value="">كل مستويات الاهتمام</option>
+          <option value="متحمس">متحمس</option>
+          <option value="مهتم">مهتم</option>
+          <option value="مهتم لكن لم يفهم">مهتم لكن لم يفهم</option>
+          <option value="غير مهتم">غير مهتم</option>
+          <option value="غير مهتم ومضجر">غير مهتم ومضجر</option>
+        </select>
+        <input type="text" id="fltSearch" placeholder="بحث بالاسم أو رقم الهاتف">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>خريطة التسجيلات</h2>
+      <div id="map"></div>
+    </div>
+
+    <div class="panel">
+      <h2>سجل البيانات</h2>
+      <div style="margin-bottom:10px;">
+        <button id="exportBtn" style="background:#1b5e20;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;">⬇ تحميل كملف إكسل</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>الاسم</th><th>النوع</th><th>الهاتف</th><th>النشاط</th>
+              <th>الاهتمام</th><th>ملاحظة</th><th>الموظف</th><th>التاريخ</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div class="empty-state hidden" id="emptyState">لا توجد بيانات مطابقة</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // ============================================================
-// FIREBASE CONFIG — استبدل القيم دي بإعدادات مشروعك من Firebase Console
+// FIREBASE CONFIG — نفس إعدادات employee.html بالظبط
 // ============================================================
 const firebaseConfig = {
   apiKey: "AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",
@@ -209,191 +237,304 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// نبني إيميل وهمي من رقم الهاتف عشان نستخدم Firebase Auth بالإيميل/كلمة المرور
-// (نفس رقم الهاتف اللي عمله الأدمن وقت إنشاء الحساب)
-function phoneToEmail(phone) {
-  const clean = phone.trim().replace(/\D/g, "");
-  return clean + "@shaghalni-data.local";
-}
+// حساب الأدمن — البريد المسموح له بدخول لوحة التحكم
+const ADMIN_ALLOWED_EMAIL = "nohesapnooo@gmail.com";
 
-let currentUser = null;
-let currentUserDoc = null;
-
-const loginView = document.getElementById("loginView");
-const formView = document.getElementById("formView");
-const formCard = document.getElementById("formCard");
-const logoutBtn = document.getElementById("logoutBtn");
-const loginMsg = document.getElementById("loginMsg");
-const formMsg = document.getElementById("formMsg");
-
-function showMsg(el, text, type) {
-  el.textContent = text;
-  el.className = "msg " + type;
-}
+let allRecords = [];
+let map, markersLayer;
 
 // ---------- LOGIN ----------
 document.getElementById("loginBtn").addEventListener("click", async () => {
-  const phone = document.getElementById("loginPhone").value;
-  const password = document.getElementById("loginPassword").value;
-  if (!phone || !password) {
-    showMsg(loginMsg, "أدخل رقم الهاتف وكلمة المرور", "error");
+  const email = document.getElementById("loginEmail").value.trim();
+  const code = document.getElementById("loginCode").value;
+  const msg = document.getElementById("loginMsg");
+  if (!email || !code) {
+    msg.textContent = "أدخل البريد الإلكتروني وكلمة المرور";
+    msg.className = "msg error";
     return;
   }
-  const btn = document.getElementById("loginBtn");
-  btn.disabled = true;
-  btn.textContent = "جاري الدخول...";
   try {
-    const email = phoneToEmail(phone);
-    await auth.signInWithEmailAndPassword(email, password);
-    // onAuthStateChanged هيتولى الباقي
+    await auth.signInWithEmailAndPassword(email, code);
   } catch (err) {
-    showMsg(loginMsg, "رقم الهاتف أو كلمة المرور غير صحيحة", "error");
-    btn.disabled = false;
-    btn.textContent = "دخول";
+    msg.textContent = "البيانات غير صحيحة";
+    msg.className = "msg error";
   }
 });
 
-// ---------- AUTH STATE ----------
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    currentUser = user;
-    const doc = await db.collection("users").doc(user.uid).get();
-    if (!doc.exists) {
-      showMsg(loginMsg, "الحساب غير مهيأ بشكل صحيح. تواصل مع الأدمن", "error");
+    // تحقق مبسّط: البريد الإلكتروني لازم يطابق بريد الأدمن المسموح بيه بالظبط
+    if (user.email !== ADMIN_ALLOWED_EMAIL) {
+      document.getElementById("loginMsg").textContent = "هذا الحساب غير مصرح له بالدخول";
+      document.getElementById("loginMsg").className = "msg error";
       await auth.signOut();
       return;
     }
-    currentUserDoc = doc.data();
-    if (currentUserDoc.role !== "employee") {
-      showMsg(loginMsg, "هذا الحساب ليس حساب موظف ميداني", "error");
-      await auth.signOut();
-      return;
-    }
-    loginView.classList.add("hidden");
-    formView.classList.remove("hidden");
-    formCard.classList.remove("hidden");
-    logoutBtn.classList.remove("hidden");
-    document.getElementById("employeeName").textContent = "مرحباً، " + (currentUserDoc.name || "");
-    await refreshQuota();
+    document.getElementById("loginView").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+    initMap();
+    loadData();
+    loadEmployees();
   } else {
-    currentUser = null;
-    currentUserDoc = null;
-    loginView.classList.remove("hidden");
-    formView.classList.add("hidden");
-    formCard.classList.add("hidden");
-    logoutBtn.classList.add("hidden");
-    document.getElementById("loginBtn").disabled = false;
-    document.getElementById("loginBtn").textContent = "دخول";
+    document.getElementById("loginView").classList.remove("hidden");
+    document.getElementById("dashboard").classList.add("hidden");
   }
 });
 
-async function refreshQuota() {
-  const doc = await db.collection("users").doc(currentUser.uid).get();
-  const data = doc.data();
-  const quota = data.quota != null ? data.quota : 0;
-  const count = data.submittedCount || 0;
-  const remaining = Math.max(quota - count, 0);
-  document.getElementById("quotaLeft").textContent = remaining;
-  currentUserDoc = data;
+document.getElementById("logoutBtn").addEventListener("click", () => auth.signOut());
+
+// ---------- MAP ----------
+function initMap() {
+  if (map) return;
+  map = L.map('map').setView([15.5007, 32.5599], 12); // مركز افتراضي: الخرطوم
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  markersLayer = L.layerGroup().addTo(map);
 }
 
-// ---------- LOGOUT ----------
-logoutBtn.addEventListener("click", () => auth.signOut());
+// ---------- LOAD DATA ----------
+function loadData() {
+  db.collection("employers").orderBy("createdAt", "desc")
+    .onSnapshot((snapshot) => {
+      allRecords = [];
+      snapshot.forEach((doc) => {
+        allRecords.push({ id: doc.id, ...doc.data() });
+      });
+      populateFilterOptions();
+      renderAll();
+    });
+}
 
-// ---------- ACTIVITY OTHER FIELD ----------
-document.getElementById("fActivity").addEventListener("change", (e) => {
-  const other = document.getElementById("fActivityOther");
-  if (e.target.value === "أخرى") {
-    other.classList.remove("hidden");
-  } else {
-    other.classList.add("hidden");
-    other.value = "";
+function populateFilterOptions() {
+  const employees = [...new Set(allRecords.map(r => r.employeeName).filter(Boolean))];
+  const activities = [...new Set(allRecords.map(r => r.activity).filter(Boolean))];
+
+  const empSel = document.getElementById("fltEmployee");
+  const curEmp = empSel.value;
+  empSel.innerHTML = '<option value="">كل الموظفين</option>' +
+    employees.map(e => `<option value="${e}">${e}</option>`).join("");
+  empSel.value = curEmp;
+
+  const actSel = document.getElementById("fltActivity");
+  const curAct = actSel.value;
+  actSel.innerHTML = '<option value="">كل الأنشطة</option>' +
+    activities.map(a => `<option value="${a}">${a}</option>`).join("");
+  actSel.value = curAct;
+}
+
+function getFiltered() {
+  const emp = document.getElementById("fltEmployee").value;
+  const act = document.getElementById("fltActivity").value;
+  const interest = document.getElementById("fltInterest").value;
+  const search = document.getElementById("fltSearch").value.trim().toLowerCase();
+
+  return allRecords.filter(r => {
+    if (emp && r.employeeName !== emp) return false;
+    if (act && r.activity !== act) return false;
+    if (interest && r.interestLevel !== interest) return false;
+    if (search && !(
+      (r.name || "").toLowerCase().includes(search) ||
+      (r.phone || "").toLowerCase().includes(search)
+    )) return false;
+    return true;
+  });
+}
+
+function renderAll() {
+  const filtered = getFiltered();
+  renderStats(filtered);
+  renderTable(filtered);
+  renderMap(filtered);
+}
+
+function renderStats(filtered) {
+  document.getElementById("statTotal").textContent = filtered.length;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const todayCount = filtered.filter(r => {
+    if (!r.createdAt || !r.createdAt.toDate) return false;
+    return r.createdAt.toDate() >= today;
+  }).length;
+  document.getElementById("statToday").textContent = todayCount;
+
+  const employees = new Set(filtered.map(r => r.employeeName).filter(Boolean));
+  document.getElementById("statEmployees").textContent = employees.size;
+
+  const interested = filtered.filter(r => r.interestLevel === "متحمس" || r.interestLevel === "مهتم").length;
+  document.getElementById("statInterested").textContent = interested;
+}
+
+function badgeClass(level) {
+  return "badge " + (level || "").replace(/\s/g, "-");
+}
+
+function renderTable(filtered) {
+  const tbody = document.getElementById("tableBody");
+  const empty = document.getElementById("emptyState");
+  if (filtered.length === 0) {
+    tbody.innerHTML = "";
+    empty.classList.remove("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+  tbody.innerHTML = filtered.map(r => {
+    const date = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString("ar-EG") : "-";
+    return `<tr>
+      <td>${escapeHtml(r.name || "")}</td>
+      <td>${escapeHtml(r.type || "")}</td>
+      <td>${escapeHtml(r.phone || "")}</td>
+      <td>${escapeHtml(r.activity || "")}</td>
+      <td><span class="${badgeClass(r.interestLevel)}">${escapeHtml(r.interestLevel || "")}</span></td>
+      <td>${escapeHtml(r.note || "")}</td>
+      <td>${escapeHtml(r.employeeName || "")}</td>
+      <td>${date}</td>
+    </tr>`;
+  }).join("");
+}
+
+function renderMap(filtered) {
+  if (!markersLayer) return;
+  markersLayer.clearLayers();
+  const pts = [];
+  filtered.forEach(r => {
+    if (typeof r.lat === "number" && typeof r.lng === "number") {
+      const marker = L.marker([r.lat, r.lng]);
+      marker.bindPopup(`
+        <b>${escapeHtml(r.name || "")}</b><br>
+        ${escapeHtml(r.type || "")} — ${escapeHtml(r.activity || "")}<br>
+        الهاتف: ${escapeHtml(r.phone || "")}<br>
+        الاهتمام: ${escapeHtml(r.interestLevel || "")}<br>
+        الموظف: ${escapeHtml(r.employeeName || "")}
+      `);
+      marker.addTo(markersLayer);
+      pts.push([r.lat, r.lng]);
+    }
+  });
+  if (pts.length > 0) {
+    map.fitBounds(pts, { padding: [30, 30], maxZoom: 15 });
+  }
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+}
+
+["fltEmployee", "fltActivity", "fltInterest", "fltSearch"].forEach(id => {
+  document.getElementById(id).addEventListener("input", renderAll);
+  document.getElementById(id).addEventListener("change", renderAll);
+});
+
+// ---------- إضافة موظف جديد من صفحة الأدمن ----------
+function phoneToEmail(phone) {
+  return phone.trim().replace(/\D/g, "") + "@shaghalni-data.local";
+}
+
+// رمز عشوائي بسيط يتكوّن من 6 أرقام — ده هو "الرمز" اللي هيستخدمه الموظف بدل كلمة مرور معقدة
+function generateSimpleCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+document.getElementById("addEmpBtn").addEventListener("click", async () => {
+  const name = document.getElementById("newEmpName").value.trim();
+  const phone = document.getElementById("newEmpPhone").value.trim();
+  const quota = parseInt(document.getElementById("newEmpQuota").value, 10) || 50;
+  const msg = document.getElementById("addEmpMsg");
+
+  if (!name || !phone) {
+    msg.textContent = "أدخل الاسم ورقم الهاتف";
+    msg.className = "msg error";
+    return;
+  }
+
+  const code = generateSimpleCode();
+  const email = phoneToEmail(phone);
+  const btn = document.getElementById("addEmpBtn");
+  btn.disabled = true;
+  btn.textContent = "جاري الإضافة...";
+
+  // نستخدم تطبيق Firebase ثانوي مؤقت عشان إنشاء المستخدم الجديد
+  // ميأثرش على جلسة دخولك الحالية كأدمن
+  let secondaryApp;
+  try {
+    secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary-" + Date.now());
+    const secondaryAuth = secondaryApp.auth();
+    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, code);
+    const uid = cred.user.uid;
+    await secondaryAuth.signOut();
+
+    await db.collection("users").doc(uid).set({
+      name, phone, role: "employee", quota, submittedCount: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    msg.innerHTML = `تم إنشاء الموظف بنجاح ✓ — الرمز الخاص به: <b>${code}</b> (ابعته له عشان يدخل بيه)`;
+    msg.className = "msg success";
+    document.getElementById("newEmpName").value = "";
+    document.getElementById("newEmpPhone").value = "";
+    document.getElementById("newEmpQuota").value = "50";
+    loadEmployees();
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      msg.textContent = "رقم الهاتف ده مسجل بالفعل لموظف آخر";
+    } else {
+      msg.textContent = "حدث خطأ: " + err.message;
+    }
+    msg.className = "msg error";
+  } finally {
+    if (secondaryApp) await secondaryApp.delete();
+    btn.disabled = false;
+    btn.textContent = "إضافة";
   }
 });
 
-// ---------- SUBMIT ----------
-document.getElementById("submitBtn").addEventListener("click", async () => {
-  const name = document.getElementById("fName").value.trim();
-  const type = document.getElementById("fType").value;
-  const phone = document.getElementById("fPhone").value.trim();
-  let activity = document.getElementById("fActivity").value;
-  const activityOther = document.getElementById("fActivityOther").value.trim();
-  const interest = document.getElementById("fInterest").value;
-  const note = document.getElementById("fNote").value.trim();
+function loadEmployees() {
+  db.collection("users").where("role", "==", "employee")
+    .onSnapshot((snapshot) => {
+      const tbody = document.getElementById("employeesTableBody");
+      const rows = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        rows.push(`<tr>
+          <td>${escapeHtml(d.name || "")}</td>
+          <td>${escapeHtml(d.phone || "")}</td>
+          <td>—</td>
+          <td>${d.submittedCount || 0} / ${d.quota || 0}</td>
+          <td>${d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString("ar-EG") : "-"}</td>
+        </tr>`);
+      });
+      tbody.innerHTML = rows.join("") || `<tr><td colspan="5" style="text-align:center;color:#888;">لا يوجد موظفون بعد</td></tr>`;
+    });
+}
 
-  if (activity === "أخرى") activity = activityOther || "أخرى";
-
-  if (!name || !type || !phone || !activity || !interest) {
-    showMsg(formMsg, "من فضلك أكمل كل الحقول المطلوبة", "error");
+// ---------- تصدير إلى إكسل ----------
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const filtered = getFiltered();
+  if (filtered.length === 0) {
+    alert("لا توجد بيانات لتصديرها");
     return;
   }
-
-  // تحقق من الحصة المتبقية
-  const remaining = (currentUserDoc.quota || 0) - (currentUserDoc.submittedCount || 0);
-  if (remaining <= 0) {
-    showMsg(formMsg, "وصلت للحد الأقصى من التسجيلات المسموحة لك. تواصل مع الأدمن", "error");
-    return;
-  }
-
-  const submitBtn = document.getElementById("submitBtn");
-  submitBtn.disabled = true;
-  submitBtn.textContent = "جاري تحديد الموقع...";
-  document.getElementById("locStatus").textContent = "جاري طلب إذن الموقع...";
-
-  if (!navigator.geolocation) {
-    showMsg(formMsg, "المتصفح لا يدعم تحديد الموقع. لا يمكن التسجيل بدونه", "error");
-    submitBtn.disabled = false;
-    submitBtn.textContent = "تأكيد";
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      document.getElementById("locStatus").textContent = "تم تحديد الموقع ✓";
-      submitBtn.textContent = "جاري الحفظ...";
-
-      try {
-        await db.collection("employers").add({
-          name, type, phone, activity, interestLevel: interest, note,
-          lat, lng,
-          employeeId: currentUser.uid,
-          employeeName: currentUserDoc.name || "",
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        await db.collection("users").doc(currentUser.uid).update({
-          submittedCount: firebase.firestore.FieldValue.increment(1)
-        });
-
-        showMsg(formMsg, "تم التسجيل بنجاح ✓", "success");
-        // إعادة تعيين الفورم
-        document.getElementById("fName").value = "";
-        document.getElementById("fType").value = "";
-        document.getElementById("fPhone").value = "";
-        document.getElementById("fActivity").value = "";
-        document.getElementById("fActivityOther").value = "";
-        document.getElementById("fActivityOther").classList.add("hidden");
-        document.getElementById("fInterest").value = "";
-        document.getElementById("fNote").value = "";
-        document.getElementById("locStatus").textContent = "سيتم طلب إذن الموقع عند الضغط على تأكيد";
-
-        await refreshQuota();
-      } catch (err) {
-        showMsg(formMsg, "حدث خطأ أثناء الحفظ. حاول مرة أخرى", "error");
-      }
-      submitBtn.disabled = false;
-      submitBtn.textContent = "تأكيد";
-    },
-    (error) => {
-      showMsg(formMsg, "لازم تسمح بالوصول للموقع عشان يتم التسجيل", "error");
-      document.getElementById("locStatus").textContent = "تم رفض إذن الموقع";
-      submitBtn.disabled = false;
-      submitBtn.textContent = "تأكيد";
-    },
-    { enableHighAccuracy: true, timeout: 15000 }
-  );
+  const rows = filtered.map(r => ({
+    "الاسم": r.name || "",
+    "النوع": r.type || "",
+    "رقم الهاتف": r.phone || "",
+    "نوع النشاط": r.activity || "",
+    "مستوى الاهتمام": r.interestLevel || "",
+    "ملاحظة": r.note || "",
+    "الموظف": r.employeeName || "",
+    "التاريخ": r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString("ar-EG") : "",
+    "خط العرض": r.lat || "",
+    "خط الطول": r.lng || ""
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws["!cols"] = [{wch:20},{wch:12},{wch:15},{wch:15},{wch:20},{wch:30},{wch:15},{wch:20},{wch:12},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "بيانات أصحاب العمل");
+  const dateStr = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `بيانات_اصحاب_العمل_${dateStr}.xlsx`);
 });
 </script>
 </body>
