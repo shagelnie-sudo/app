@@ -432,10 +432,9 @@ function escapeHtml(str) {
 function phoneToEmail(phone) {
   return phone.trim().replace(/\D/g, "") + "@shaghalni-data.local";
 }
-
-// رمز عشوائي بسيط يتكوّن من 6 أرقام — ده هو "الرمز" اللي هيستخدمه الموظف بدل كلمة مرور معقدة
-function generateSimpleCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+// كلمة المرور الفعلية = رقم الهاتف نفسه، عشان الموظف يدخل برقمه بس من غير ما يحفظ رمز منفصل
+function phoneToPassword(phone) {
+  return phone.trim().replace(/\D/g, "");
 }
 
 document.getElementById("addEmpBtn").addEventListener("click", async () => {
@@ -450,7 +449,12 @@ document.getElementById("addEmpBtn").addEventListener("click", async () => {
     return;
   }
 
-  const code = generateSimpleCode();
+  const password = phoneToPassword(phone);
+  if (password.length < 6) {
+    msg.textContent = "رقم الهاتف قصير — Firebase محتاج كلمة مرور 6 أحرف على الأقل، فرقم الهاتف نفسه (بعد حذف الرموز) لازم يكون 6 أرقام فأكتر";
+    msg.className = "msg error";
+    return;
+  }
   const email = phoneToEmail(phone);
   const btn = document.getElementById("addEmpBtn");
   btn.disabled = true;
@@ -462,7 +466,7 @@ document.getElementById("addEmpBtn").addEventListener("click", async () => {
   try {
     secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary-" + Date.now());
     const secondaryAuth = secondaryApp.auth();
-    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, code);
+    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, password);
     const uid = cred.user.uid;
     await secondaryAuth.signOut();
 
@@ -471,7 +475,7 @@ document.getElementById("addEmpBtn").addEventListener("click", async () => {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    msg.innerHTML = `تم إنشاء الموظف بنجاح ✓ — الرمز الخاص به: <b>${code}</b> (ابعته له عشان يدخل بيه)`;
+    msg.innerHTML = `تم إنشاء الموظف بنجاح ✓ — يقدر يدخل برقم هاتفه بس (${escapeHtml(phone)}) من غير كلمة مرور`;
     msg.className = "msg success";
     document.getElementById("newEmpName").value = "";
     document.getElementById("newEmpPhone").value = "";
