@@ -111,7 +111,7 @@ body,button,input{font-family:'Tajawal',sans-serif}body{background:#f9fafb;color
 .ab{background:#2563eb;color:#fff;border:0;border-radius:10px;padding:9px 18px;font-weight:700;font-size:14px;text-decoration:none;display:inline-flex;gap:6px;align-items:center;cursor:pointer;flex:none}.ab:disabled{background:#9ca3af}
 .jm{font-size:13px;color:#6b7280}.jm b{display:block;color:#2563eb;font-size:15px}.jco{color:#6b7280;font-size:13px;cursor:pointer}.jb{display:flex;gap:6px;flex-wrap:wrap}.bg1{padding:2px 10px;border-radius:8px;font-size:12px;font-weight:700;background:#eff6ff;color:#1d4ed8}
 .dbadge{font-size:12px;color:#059669;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 8px;border-radius:6px;font-weight:700}
-#inp:focus,#inp:focus-visible,button:focus-visible{outline:2px solid #93c5fd;outline-offset:1px}</style></head><body><div id="app"><div class="hd"><a href="index.html"><img class="lg" src="shagelnie.png.png" alt="شغلني"></a><div class="hr"><a id="ub" class="uab" href="profile.html" aria-label="حسابي"><span>ش</span></a><button id="mn" type="button" aria-label="القائمة"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button></div></div>
+#inp:focus,#inp:focus-visible,button:focus-visible{outline:2px solid #93c5fd;outline-offset:1px}.why{margin-top:8px;font-size:12px;font-weight:700;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:5px 10px}</style></head><body><div id="app"><div class="hd"><a href="index.html"><img class="lg" src="shagelnie.png.png" alt="شغلني"></a><div class="hr"><a id="ub" class="uab" href="profile.html" aria-label="حسابي"><span>ش</span></a><button id="mn" type="button" aria-label="القائمة"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button></div></div>
 <div id="ov"></div>
 <div id="pm"><div class="pmh"><img src="shagelnie.png.png" alt="شغلني"><button id="cm" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><a href="index.html">الرئيسية</a><a href="job_listing_page.html">الوظائف</a><a href="employee_listing_page.html">الموظفون</a><a href="chats.html">رسائلي</a><a href="jop_posting_page.html">أضف وظيفة</a><a class="mb" href="profile.html">دخول / ملفي</a></div><div id="chat"></div><div id="comp"><div id="chips"></div><div class="cr"><input id="inp" placeholder="اكتب رسالتك…" autocomplete="off" enterkeyhint="send"><button id="go" type="button" aria-label="إرسال"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="transform:scaleX(-1)"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button></div></div></div><script type="module">
 const cfg={apiKey:"AIzaSyBsIaCjE7QOQ6QkhqhCIMA3sLdMvxBxPHk",authDomain:"shaglni-c64c0.firebaseapp.com",projectId:"shaglni-c64c0",storageBucket:"shaglni-c64c0.firebasestorage.app",messagingSenderId:"768887356636",appId:"1:768887356636:web:11ec1d6991add3309c8819"};
@@ -148,7 +148,7 @@ const stars=r=>{const n=Math.round(r);return'<span class="stars">'+[1,2,3,4,5].m
 const favB=(id,k)=>`<button class="fv${SV.has(id)?' on':''}" data-fav="${esc(id)}" data-k="${k}" type="button" aria-label="حفظ">${I.heart}</button>`;
 const skl=a=>(a&&a.length)?`<h4>المهارات:</h4><div class="sks">${a.map(k=>`<span class="sk">${esc(k)}</span>`).join('')}</div>`:'';
 const seekC=s=>{const ok=/متاح/.test(s.status||'');return`<div class="ec"><div class="eh"><div class="eav">${s.photo?`<img src="${esc(s.photo)}" alt="">`:esc((s.name||'؟')[0])}</div><div class="ei"><div class="en" data-go="profile.html?uid=${esc(s.id)}">${esc(s.name)}</div>${s.status?`<span class="stt ${ok?'ok':'no'}">${esc(s.status)}</span>`:''}<div class="eg">${esc(s.profession||'')}</div><div class="el">${I.pin}<span>${esc(loc(s)||'—')}</span></div>${s.experience?`<div class="ex">الخبرة: ${esc(s.experience)}</div>`:''}${dist(s)}</div><div class="ea">${P.role=='employer'?favB(s.id,'emp'):''}${s.rating>0?`<div class="rt">${stars(s.rating)}<b>${(+s.rating).toFixed(1)}</b></div>`:`<div class="nr">${I.star}<span>لا تقييمات بعد</span></div>`}</div></div><p class="eb">${cut(s.about,150,'لا توجد نبذة شخصية')}</p>${skl(s.skills)}${s.works&&s.works.length?`<h4>أعمال سابقة:</h4><div class="wk">${s.works.map(u=>`<img src="${esc(u)}" loading="lazy" alt="">`).join('')}</div>`:''}<div class="ef"><span class="tmr">${I.clock}<span>${esc(agoT(s.ts))}</span></span><a class="ab" href="chat.html?employeeId=${esc(s.id)}&employeeName=${encodeURIComponent(s.name||'')}&employeePhoto=${encodeURIComponent(s.photo||'')}">${I.mail}<span>تواصل</span></a></div></div>`};
-const jobC=j=>`<div class="ec"><div class="eh"><div class="eav" style="border-radius:14px;width:54px;height:54px;font-size:20px">${j.logo?`<img src="${esc(j.logo)}" alt="">`:esc((j.company||j.title||'؟')[0])}</div><div class="ei"><div class="en">${esc(j.title||'وظيفة')}</div><div class="jco" ${j.employerId?`data-go="profile.html?uid=${esc(j.employerId)}"`:''}>${esc(j.company||'جهة غير محددة')}</div><div class="jb">${j.jobType?`<span class="bg1">${esc(j.jobType)}</span>`:''}${dist(j)}</div></div>${P.role=='seeker'?`<div class="ea">${favB(j.id,'job')}</div>`:''}</div>${(j.skills&&j.skills.length)?`<div class="sks" style="margin-top:12px">${j.skills.slice(0,4).map(k=>`<span class="sk">${esc(k)}</span>`).join('')}</div>`:''}<p class="eb">${cut(j.desc,130,'لا يوجد وصف')}</p><div class="ef"><div class="jm">${j.salary?`<b>${esc(j.salary)}</b>`:''}<span class="el">${I.pin}<span>${esc(loc(j)||'—')}${j.posted?' · '+agoT(j.posted):''}</span></span></div>${P.role=='seeker'?`<button class="ab" data-ap="${esc(j.id)}" type="button">تقدّم الآن</button>`:''}</div></div>`;
+const jobC=j=>`<div class="ec"><div class="eh"><div class="eav" style="border-radius:14px;width:54px;height:54px;font-size:20px">${j.logo?`<img src="${esc(j.logo)}" alt="">`:esc((j.company||j.title||'؟')[0])}</div><div class="ei"><div class="en">${esc(j.title||'وظيفة')}</div><div class="jco" ${j.employerId?`data-go="profile.html?uid=${esc(j.employerId)}"`:''}>${esc(j.company||'جهة غير محددة')}</div><div class="jb">${j.jobType?`<span class="bg1">${esc(j.jobType)}</span>`:''}${dist(j)}</div></div>${P.role=='seeker'?`<div class="ea">${favB(j.id,'job')}</div>`:''}</div>${(j.skills&&j.skills.length)?`<div class="sks" style="margin-top:12px">${j.skills.slice(0,4).map(k=>`<span class="sk">${esc(k)}</span>`).join('')}</div>`:''}<p class="eb">${cut(j.desc,130,'لا يوجد وصف')}</p>${j.why&&j.why.length?`<div class="why">✓ يناسب مهاراتك: ${esc(j.why.join('، '))}</div>`:''}<div class="ef"><div class="jm">${j.salary?`<b>${esc(j.salary)}</b>`:''}<span class="el">${I.pin}<span>${esc(loc(j)||'—')}${j.posted?' · '+agoT(j.posted):''}</span></span></div>${P.role=='seeker'?`<button class="ab" data-ap="${esc(j.id)}" type="button">تقدّم الآن</button>`:''}</div></div>`;
 async function fav(b){const id=b.dataset.fav,emp=b.dataset.k=='emp',on=SV.has(id);b.disabled=true;
  try{await updateDoc(doc(db,emp?'All_jops':'employees',P.uid),emp?{savedEmployees:on?arrayRemove(id):arrayUnion(id)}:{bookmarkedJobs:on?arrayRemove(id):arrayUnion(id)});
   on?SV.delete(id):SV.add(id);document.querySelectorAll('[data-fav]').forEach(x=>{if(x.dataset.fav==id)x.classList.toggle('on',SV.has(id))})}
@@ -159,31 +159,77 @@ async function apply(id,btn){const j=JM[id];if(!j||!P.uid)return;btn.disabled=tr
    if(j.employerId)await addDoc(collection(db,'notifications'),{userId:j.employerId,type:'application',message:(P.dn||P.name||'متقدم جديد')+' تقدّم لوظيفة "'+(j.title||'')+'"',link:'profile.html',read:false,timestamp:serverTimestamp()})}
   btn.textContent='تم التقديم ✓';add('s','تمام، قدّمت ليك على «'+esc(j.title)+'». صاحب العمل بيوصله إشعار.','happy')}
  catch(e){btn.disabled=false;add('s','ما قدرت أقدّم: '+esc(e.code||e.message))}}
-const STOP=new Set(['عايز','عايزه','محتاج','ابحث','شغل','وظيفه','وظايف','عمل','في','من','انا','ليك','لي','عن','ممكن','اريد','مين','موظف','ابي']);
-const RP=[[/مكيف|تكييف|سبلت/,['مكيف','تكييف','تبريد','فني']],[/فرن|بوتجاز/,['فرن','فني','اجهزه']],[/حنفي|مواسير|سباك|تسريب/,['سباك','حنفيه','فني']],[/كهرب|فيوز/,['كهربائي','كهرباء','فني']]];
-const SM=[[/مرحبا|سلام|اهلا|هلا|صباح|مساء/,'أهلًا بيك! أنا شَغّول 👋 قول لي محتاج شنو: وظيفة، عمال، ولا فني لعطل؟'],[/من انت|مين انت|منو انت|شنو انت/,'أنا شَغّول، مساعد شغلني. بفتش ليك عن وظائف أو عمال أو فنيين.'],[/كيف حالك|كيفك|اخبارك|شلونك/,'الحمد لله تمام! محتاج شنو اليوم؟'],[/شكرا|يعطيك|تسلم/,'العفو يا زول، في الخدمة.']];
+const st=w=>{w=w.replace(/^(وال|بال|لل|ال)(?=.{3,})/,'');if(w.length>4)w=w.replace(/(ات|ون|ين|ان)$/,'');if(w.length>3)w=w.replace(/[هي]$/,'');return w};
+const tok=t=>norm(t).split(/[^\u0600-\u06FFa-z0-9]+/).filter(Boolean).map(st);
+const SS=a=>new Set(a.flatMap(x=>tok(x)));
+const GEN=SS(['فني','فنيين','عامل','عمال','موظف','موظفين','مهندس','مساعد','خبير','صانع','صناعي','صناعه','شغال','محترف','مستقل']);
+const STOP=SS(['عايز','عايزه','محتاج','ابحث','في','من','انا','عن','ممكن','اريد','مين','ابي','عندي','لدي','ابغي','مطلوب','دور','لي','ليا','ليك','شنو','كم','هل','يا','زول','لو','سمحت','وريني','اعطني','هات','شغل','وظيفه','وظايف','عمل','رتب','رتبهم','ترتيب','حسب','البعد','القرب','الاقرب','اقرب','السعر','الراتب','التقييم','الاحدث','احدث','اعرض','المزيد','تناسبني','اقترح','رشح','مهاراتي','ملفي','اكثر','هم','هو','هي','على','الي','الى']);
+const hit=(T,k)=>T.some(t=>t===k||(k.length>=3&&t.startsWith(k))||(t.length>=3&&k.startsWith(t)));
+const RP=[[/مكيف|تكييف|سبلت/,['مكيف','تكييف','تبريد']],[/فرن|بوتجاز/,['فرن','بوتجاز']],[/حنفي|مواسير|سباك|تسريب/,['سباك','حنفيه','مواسير']],[/كهرب|فيوز/,['كهربائي','كهرباء']]];
+const SM=[[/مرحبا|سلام|اهلا|هلا|صباح|مساء/,'أهلًا بيك! أنا شَغّول 👋 قول لي محتاج شنو: وظيفة، عمال، ولا فني لعطل؟'],[/من انت|مين انت|منو انت|شنو انت/,'أنا شَغّول، مساعد شغلني. بفتش ليك عن وظائف أو عمال أو فنيين، وأرشح ليك وظائف من مهاراتك.'],[/كيف حالك|كيفك|اخبارك|شلونك/,'الحمد لله تمام! محتاج شنو اليوم؟'],[/شكرا|يعطيك|تسلم/,'العفو يا زول، في الخدمة.']];
+const num=t=>{const m=String(t||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[,،٬]/g,'').match(/\d+(\.\d+)?/g);return m?Math.max(...m.map(Number)):0};
+const sortOf=n=>{if(!/رتب|ترتيب|حسب|اقرب|ارخص|احدث/.test(n))return null;if(/بعد|قرب|اقرب|مسافه/.test(n))return'dist';if(/سعر|اسعار|راتب|اجر|ارخص|اعلي/.test(n))return'price';if(/تقييم/.test(n))return'rate';if(/احدث|جديد/.test(n))return'new';return null};
+const SL={dist:'الأقرب',price:'الراتب',rate:'التقييم',new:'الأحدث'};
 let locTried=false;function locate(){return new Promise(res=>{if(!P||P.lat!=null||locTried||!navigator.geolocation)return res();locTried=true;navigator.geolocation.getCurrentPosition(p=>{P.lat=p.coords.latitude;P.lng=p.coords.longitude;res()},()=>res(),{timeout:8000,maximumAge:600000})})}
-async function ai(t){if(!WORKER)return null;try{const c=new AbortController();setTimeout(()=>c.abort(),9000);const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:P.role,text:t,history:H.slice(-6)}),signal:c.signal});const j=await r.json();if(j&&typeof j.reply=='string')return j;return{fail:String((j&&j.error)||'رد غير متوقع')}}catch(e){return{fail:String(e.message||e)}}}
-async function find(w,cn,pp){let a;
+async function ai(t){if(!WORKER)return null;try{const c=new AbortController();setTimeout(()=>c.abort(),9000);const pr={headline:P.headline||'',skills:(P.skills||[]).slice(0,12),experience:P.experience||'',city:P.city||''};const r=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:P.role,text:t,history:H.slice(-6),profile:P.role=='seeker'?pr:null}),signal:c.signal});const j=await r.json();if(j&&typeof j.reply=='string')return j;return{fail:String((j&&j.error)||'رد غير متوقع')}}catch(e){return{fail:String(e.message||e)}}}
+const CACHE={};
+async function loadAll(pp){const k=pp?'p':'j';if(CACHE[k]&&Date.now()-CACHE[k].t<60000)return CACHE[k].a;let a;
  if(pp){const s=await getDocs(query(collection(db,'employees'),limit(300)));a=s.docs.map(d=>{const v=d.data(),l=v.contact?.location||{};return{id:d.id,name:v.name,profession:v.headline,about:v.bio,experience:v.experience,status:v.jobStatus,phone:v.contact?.phone,city:l.city,area:l.area,state:l.state,lat:l.lat,lng:l.lng,skills:v.skills||[],photo:v.profileImageUrl,works:v.previousWorksUrls||[],rating:v.averageRating,ts:v.timestamp&&v.timestamp.seconds}}).filter(x=>!/غير|لا\s*[اأإ]?بحث/.test(x.status||''))}
- else{const s=await getDocs(query(collection(db,'jobs'),where('status','==','active'),limit(300)));a=s.docs.map(d=>{const v=d.data(),l=v.location||{};return{id:d.id,title:v.title,desc:v.description,company:v.companyName,employerId:v.employerId,city:l.city,state:l.state,lat:l.lat,lng:l.lng,posted:v.postedAt?.seconds,jobType:v.jobType,salary:v.salaryText,skills:v.skillsRequired||[],logo:v.employerLogoUrl}})}
- a=a.filter(x=>{const h=norm([x.name,x.profession,x.about,x.title,x.desc,x.company,x.city,x.area,x.state,x.experience,(x.skills||[]).join(' ')].join(' '));return w.some(k=>h.includes(k))});
- const cm=x=>cn&&norm(x.city||'').includes(cn)?0:1;return a.sort((x,y)=>(cm(x)-cm(y))||(dk(x)-dk(y))).slice(0,3)}
-async function run(t){if(!P){add('s','جاري تحميل حسابك… أعد المحاولة بعد لحظات.');return}H.push({r:'u',t});const emp=P.role=='employer';
- const d=add('s',DOTS,'think');const j=await ai(t);let w=[],ready=false,cn='',reply=null,pp=emp;
- if(j&&!j.fail){reply=j.reply;w=(j.keywords||[]).map(x=>norm(x).replace(/^ال/,'')).filter(x=>x.length>1);cn=j.city&&j.city!='null'?norm(j.city):'';pp=j.target?j.target=='people':emp;ready=j.ready!==false&&w.length>0}
+ else{const s=await getDocs(query(collection(db,'jobs'),where('status','==','active'),limit(300)));a=s.docs.map(d=>{const v=d.data(),l=v.location||{};return{id:d.id,title:v.title,desc:v.description,company:v.companyName,employerId:v.employerId,city:l.city,state:l.state,lat:l.lat,lng:l.lng,posted:v.postedAt?.seconds,jobType:v.jobType,salary:v.salaryText,salaryNum:num(v.salaryText),skills:v.skillsRequired||[],logo:v.employerLogoUrl}})}
+ CACHE[k]={t:Date.now(),a};return a}
+function scoreOf(x,K,gen){let s=0;const H1=tok([x.title,x.profession].join(' ')),S1=tok((x.skills||[]).join(' ')),B1=tok([x.desc,x.about,x.experience].join(' '));
+ for(const k of K){const w=gen?1:(GEN.has(k)?.3:1);if(hit(H1,k))s+=5*w;else if(hit(S1,k))s+=4*w;else if(hit(B1,k))s+=2*w}return s}
+async function matchAll(K,cn,pp){const items=await loadAll(pp),gen=K.every(k=>GEN.has(k));
+ const r=items.map(x=>({...x,sc:scoreOf(x,K,gen)}));let ok=r.filter(x=>x.sc>=3);if(!ok.length)ok=r.filter(x=>x.sc>=2);
+ if(cn)ok.forEach(x=>{if(norm(x.city||'').includes(cn))x.sc+=1.5});return ok}
+function ordered(list,sk,n){const L=[...list],asc=/الاقل|ارخص|الادني/.test(n||''),rel=(a,b)=>b.sc-a.sc;
+ if(sk=='dist')return L.sort((a,b)=>dk(a)-dk(b)||rel(a,b));
+ if(sk=='price')return L.sort((a,b)=>{const x=a.salaryNum||(asc?1e12:0),y=b.salaryNum||(asc?1e12:0);return(asc?x-y:y-x)||rel(a,b)});
+ if(sk=='rate')return L.sort((a,b)=>(b.rating||0)-(a.rating||0)||rel(a,b));
+ if(sk=='new')return L.sort((a,b)=>(b.posted||b.ts||0)-(a.posted||a.ts||0)||rel(a,b));
+ return L.sort((a,b)=>rel(a,b)||dk(a)-dk(b))}
+let LAST=null;
+const cardsOf=(a,pp)=>`<div class="jcs">${a.map(x=>pp?seekC(x):jobC(x)).join('')}</div>`;
+function chipsAfter(){const L=LAST;if(!L)return;setChips(['رتبهم حسب الأقرب',L.pp?'رتبهم حسب التقييم':'رتبهم حسب الراتب','رتبهم حسب الأحدث',...(L.list.length>L.shown?['اعرض المزيد']:[])])}
+async function present(sk,n,first){const L=LAST;
+ if(sk=='dist'&&P.lat==null){await locate();if(P.lat==null){add('s','ما قدرت أحدد موقعك. فعّل الموقع في المتصفح أو احفظه في ملفك وأعد المحاولة.','calm');sk=null}}
+ if(sk=='price'&&L.pp){add('s','الباحثين ما عندهم سعر مسجّل، رتبتهم ليك بالأقرب بدل كده.','calm');sk=P.lat!=null?'dist':null}
+ L.sk=sk;L.list=ordered(L.list,sk,n);L.shown=Math.min(5,L.list.length);const a=L.list.slice(0,L.shown);a.forEach(x=>JM[x.id]=x);R=a;RK=L.pp;
+ const lab=SL[sk],tot=L.list.length;let msg;
+ if(!first)msg=`رتبتهم ليك حسب ${lab||'الأنسب'} 👇`;
+ else if(L.prof)msg=`رشحت ليك ${tot} ${tot>10?'وظيفة':'وظائف'} تناسب مهاراتك (${esc((P.skills||[]).slice(0,3).join('، '))})${lab?'، مرتبة حسب '+lab:''}.<br>${tot>5?'أعرض ليك أنسب 5 👇':'شوف الخيارات 👇'}`;
+ else msg=`لقيت ليك ${tot} ${L.pp?'من الأشخاص المناسبين':'من الوظائف المناسبة'}${lab?'، مرتبين حسب '+lab:(dk(a[0])<1e9?'، وأقربهم يبعد حوالي '+dk(a[0]).toFixed(1)+' كم':'')}.<br>${tot>5?'أعرض ليك أنسب 5 👇':'شوف الخيارات 👇'}`;
+ add('s',msg,'happy');add('c',cardsOf(a,L.pp));chipsAfter();
+ if(P.lat==null&&first)add('s','لو فعّلت الموقع في المتصفح أو حفظته في ملفك الشخصي، أقول ليك كم تبعد عنك.','calm')}
+function showMore(){const L=LAST,next=L.list.slice(L.shown,L.shown+5);if(!next.length){add('s','دي كل النتائج المتاحة حاليًا.','calm');return}
+ L.shown+=next.length;next.forEach(x=>JM[x.id]=x);add('s','دي بقية الخيارات 👇','calm');add('c',cardsOf(next,L.pp));chipsAfter()}
+const SRCH='<span class="srch">شَغّول بفتش ليك'+DOTS+'</span>';
+async function doSearch(w,cn,pp,sk,n){const sr=add('s',SRCH,'search');await Promise.all([wait(1500),locate()]);const all=await matchAll(w,cn,pp);sr.remove();
+ if(!all.length){LAST=null;add('s','فتشت في شغلني وما لقيت حاجة مناسبة حاليًا. جرّب كلمات تانية أو مدينة تانية.','calm');return}
+ LAST={list:all,pp,w,prof:false,shown:0,sk:null};await present(sk,n,true)}
+async function profSearch(sk,n){const ks=[...new Set([...(P.skills||[]).flatMap(tok),...tok(P.headline||'')])].filter(k=>k.length>1&&!STOP.has(k)&&!GEN.has(k));
+ if(!ks.length){add('s','ملفك الشخصي ما فيه مهارات أو مسمى وظيفي أبني عليه. <a href="profile.html" style="color:#2563eb;font-weight:700">أضفهم من ملفك</a> وبعدين أرشح ليك وظائف على قدّك.','calm');return}
+ const sr=add('s',SRCH,'search');await Promise.all([wait(1500),locate()]);
+ const items=await loadAll(false),cn=norm(P.city||'');let all=items.map(x=>({...x,sc:scoreOf(x,ks,false)})).filter(x=>x.sc>=2);sr.remove();
+ if(!all.length){LAST=null;add('s','فتشت وما لقيت وظائف تطابق مهاراتك ('+esc((P.skills||[]).slice(0,4).join('، '))+') حاليًا. اكتب لي مهنة تانية وأبحث ليك.','calm');return}
+ all.forEach(x=>{const JT=tok([x.title,(x.skills||[]).join(' '),x.desc].join(' '));x.why=(P.skills||[]).filter(s=>tok(s).some(k=>hit(JT,k)));if(cn&&norm(x.city||'').includes(cn))x.sc+=1.5});
+ LAST={list:all,pp:false,w:ks,prof:true,shown:0,sk:null};await present(sk,n,true)}
+async function run(t){if(!P){add('s','جاري تحميل حسابك… أعد المحاولة بعد لحظات.');return}
+ H.push({r:'u',t});const emp=P.role=='employer',n=norm(t);
+ const d=add('s',DOTS,'think');const j=await ai(t);
+ let w=[],ready=false,cn='',reply=null,pp=emp,sk=sortOf(n),prof=!emp&&/تناسبني|يناسبني|اقترح|رشح|مهاراتي|من ملفي|حسب ملفي/.test(n);const more=!!LAST&&/المزيد|اكثر|زياده|غيرهم/.test(n);
+ if(j&&!j.fail){reply=j.reply;w=(j.keywords||[]).flatMap(x=>tok(String(x)));cn=j.city&&j.city!='null'?norm(j.city):'';pp=j.target?j.target=='people':emp;ready=j.ready!==false&&w.length>0;sk=sk||({distance:'dist',price:'price',rating:'rate',new:'new'}[j.sort]||null);prof=prof||(!emp&&!!j.profile)}
  else{if(j&&j.fail&&!warned){warned=1;add('s','⚠️ الذكاء الاصطناعي غير متصل حاليًا ('+esc(j.fail.slice(0,120))+')، سأرد بالبحث البسيط.')}
-  const n=norm(t),sm=SM.find(x=>x[0].test(n)),r=RP.find(x=>x[0].test(n));
-  if(sm){reply=sm[1]}else if(r){w=r[1];pp=true;ready=true}else{w=n.split(/\s+/).filter(x=>x.length>2&&!STOP.has(x)).map(x=>x.replace(/^ال/,''));ready=w.length>0}}
- await wait(500);d.remove();
+  const sm=SM.find(x=>x[0].test(n)),r=RP.find(x=>x[0].test(n));
+  if(sm&&!sk&&!prof&&!more)reply=sm[1];else if(r){w=r[1].flatMap(tok);pp=true;ready=true}else{w=tok(t).filter(x=>x.length>1&&!STOP.has(x));ready=w.length>0}}
+ w=[...new Set(w.filter(x=>x.length>1))];
+ await wait(400);d.remove();
  if(reply){add('s',esc(reply),'calm');H.push({r:'s',t:reply})}
+ if(more){showMore();return}
+ if(prof){await profSearch(sk,n);return}
+ if(!w.length&&sk&&LAST){await present(sk,n,false);return}
  if(!ready){if(!reply)add('s','وريني نوع الشغل أو العطل بالضبط، وأنا أفتش ليك.');return}
- const sr=add('s','<span class="srch">شَغّول بفتش ليك'+DOTS+'</span>','search');await Promise.all([wait(1800),locate()]);
- const a=await find(w,cn,pp);sr.remove();
- if(!a.length){add('s','فتشت في شغلني وما لقيت حاجة مناسبة حاليًا.','calm');return}
- R=a;RK=pp;a.forEach(x=>JM[x.id]=x);add('s',`لقيت ليك ${a.length} ${pp?'أشخاص مناسبين':'وظائف مناسبة'}${dk(a[0])<1e9?'، وأقربهم يبعد حوالي '+dk(a[0]).toFixed(1)+' كم منك':''}.<br>شوف أقرب الخيارات 👇`,'happy');
- add('c',`<div class="jcs">${a.map(x=>pp?seekC(x):jobC(x)).join('')}</div>`);
- if(P.lat==null)add('s','لو فعّلت الموقع في المتصفح أو حفظته في ملفك الشخصي، أقول ليك كم تبعد عنك.','calm')}
+ await doSearch(w,cn,pp,sk,n)}
 async function send(txt){txt=String(txt).trim();if(!txt)return;inp.value='';inp.focus();add('u',esc(txt));Q.push(txt);if(busy)return;busy=true;
  while(Q.length){setChips([]);try{await run(Q.shift())}catch(e){add('s','حصلت مشكلة: '+esc(e.code||e.message))}}busy=false}
 document.addEventListener('click',e=>{const fb=e.target.closest('[data-fav]');if(fb){fav(fb);return}const g=e.target.closest('[data-go]');if(g){location.href=g.dataset.go;return}
@@ -202,9 +248,9 @@ try{const V='https://www.gstatic.com/firebasejs/10.12.2/';
  app=A.initializeApp(cfg);au=Au.getAuth(app);db=Fs.getFirestore(app)}
 catch(e){add('s','⚠️ تعذّر تحميل Firebase: '+esc(e.message)+' — تحقق من الاتصال بالإنترنت.')}
 async function loadMe(u){let s=await getDoc(doc(db,'employees',u.uid));
- if(s.exists()){const d=s.data(),l=d.contact?.location||{};return{role:'seeker',name:d.name,lat:l.lat,lng:l.lng,saved:d.bookmarkedJobs||[],photo:d.profileImageUrl}}
+ if(s.exists()){const d=s.data(),l=d.contact?.location||{};return{role:'seeker',name:d.name,lat:l.lat,lng:l.lng,saved:d.bookmarkedJobs||[],photo:d.profileImageUrl,headline:d.headline||'',skills:d.skills||[],experience:d.experience||'',city:l.city||''}}
  s=await getDoc(doc(db,'All_jops',u.uid));
- if(s.exists()){const d=s.data(),l=d.companyInfo?.location||{};return{role:'employer',name:d.companyInfo?.name||d.name,lat:l.lat,lng:l.lng,saved:d.savedEmployees||[]}}
+ if(s.exists()){const d=s.data(),l=d.companyInfo?.location||{};return{role:'employer',name:d.companyInfo?.name||d.name,lat:l.lat,lng:l.lng,saved:d.savedEmployees||[],bType:d.companyInfo?.businessType||'',city:l.city||''}}
  return{role:'seeker'}}
 if(db)onAuthStateChanged(au,async u=>{if(!u){location.href='login.html';return}
  try{P=await loadMe(u)}catch(e){P={role:'seeker'}}
